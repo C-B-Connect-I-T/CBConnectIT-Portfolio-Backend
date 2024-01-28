@@ -1,6 +1,6 @@
 package com.cbconnectit.plugins
 
-import com.auth0.jwt.JWTVerifier
+import com.auth0.jwt.interfaces.JWTVerifier
 import com.cbconnectit.data.database.dao.UserDaoImpl
 import com.cbconnectit.domain.interfaces.IUserDao
 import com.cbconnectit.modules.auth.AuthController
