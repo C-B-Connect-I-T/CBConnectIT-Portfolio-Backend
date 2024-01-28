@@ -4,9 +4,10 @@ import com.cbconnectit.data.dto.requests.user.NameAble
 import com.cbconnectit.data.dto.requests.user.UserDto
 import com.cbconnectit.domain.models.interfaces.DateAble
 import io.ktor.server.auth.*
+import java.util.UUID
 
 data class User(
-    val id: Int = 0,
+    val id: UUID = UUID.randomUUID(),
     override val fullName: String = "",
     val username: String = "",
     override val createdAt: String = "",
@@ -16,7 +17,7 @@ data class User(
 ) : DateAble, NameAble, Principal
 
 fun User.toDto() = UserDto(
-    id = this.id,
+    id = this.id.toString(),
     fullName = this.fullName,
     username = this.username,
     createdAt = this.createdAt,

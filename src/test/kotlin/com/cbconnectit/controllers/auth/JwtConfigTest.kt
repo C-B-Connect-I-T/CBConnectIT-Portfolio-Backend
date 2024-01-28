@@ -30,20 +30,20 @@ class JwtConfigTest {
     fun `when verifying correct tokens, we return the associated user id`() {
         val config = JwtConfig("https://127.0.0.1:8081", "users", "some-secret-key")
 
-        val tokens = config.createTokens(User(1))
+        val tokens = config.createTokens(User(UUID.fromString("00000000-0000-0000-0000-000000000001")))
 
         val userId = config.verifyToken(tokens.access_token)
         val userIdRefresh = config.verifyToken(tokens.refresh_token)
 
-        assertThat(userId).isEqualTo(1)
-        assertThat(userIdRefresh).isEqualTo(1)
+        assertThat(userId).isEqualTo("00000000-0000-0000-0000-000000000001")
+        assertThat(userIdRefresh).isEqualTo("00000000-0000-0000-0000-000000000001")
     }
 
     @Test
     fun `when creating tokens, we return tokens with the correct expiration date`() {
         val config = JwtConfig("https://127.0.0.1:8081", "users", "some-secret-key")
 
-        val tokens = config.createTokens(User(1))
+        val tokens = config.createTokens(User(UUID.fromString("00000000-0000-0000-0000-000000000001")))
 
         val decodeToken = JWT.decode(tokens.access_token)
         val decodeRefreshToken = JWT.decode(tokens.refresh_token)
@@ -61,12 +61,12 @@ class JwtConfigTest {
 
         val config = JwtConfig(appConfig, "some-secret-key")
 
-        val tokens = config.createTokens(User(1))
+        val tokens = config.createTokens(User(UUID.fromString("00000000-0000-0000-0000-000000000001")))
 
         val userId = config.verifyToken(tokens.access_token)
         val userIdRefresh = config.verifyToken(tokens.refresh_token)
 
-        assertThat(userId).isEqualTo(1)
-        assertThat(userIdRefresh).isEqualTo(1)
+        assertThat(userId).isEqualTo("00000000-0000-0000-0000-000000000001")
+        assertThat(userIdRefresh).isEqualTo("00000000-0000-0000-0000-000000000001")
     }
 }

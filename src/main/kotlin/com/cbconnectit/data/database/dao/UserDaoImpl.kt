@@ -10,13 +10,14 @@ import com.cbconnectit.utils.toDatabaseString
 import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
 import java.time.LocalDateTime
+import java.util.*
 
 class UserDaoImpl : IUserDao {
 
-    override fun getUser(id: Int): User? =
+    override fun getUser(id: UUID): User? =
         UsersTable.select { UsersTable.id eq id }.toUser()
 
-    override fun getUserHashableById(id: Int): User? =
+    override fun getUserHashableById(id: UUID): User? =
         UsersTable.select { UsersTable.id eq id }.toUserHashable()
 
     override fun getUserHashableByUsername(username: String): User? =
@@ -36,7 +37,7 @@ class UserDaoImpl : IUserDao {
             it[updatedAt] = time
         }.resultedValues?.toUser()
 
-    override fun updateUser(id: Int, user: UpdateUser): User? {
+    override fun updateUser(id: UUID, user: UpdateUser): User? {
         UsersTable.update({ UsersTable.id eq id }) {
             user.fullName?.let { last -> it[fullName] = last }
             user.username?.let { mail -> it[username] = mail }
@@ -47,16 +48,16 @@ class UserDaoImpl : IUserDao {
         return getUser(id)
     }
 
-    override fun deleteUser(id: Int): Boolean =
+    override fun deleteUser(id: UUID): Boolean =
         UsersTable.deleteWhere { UsersTable.id eq id } > 0
 
     override fun userUnique(username: String): Boolean =
         UsersTable.select { UsersTable.username eq username }.empty()
 
-    override fun isUserRoleAdmin(userId: Int): Boolean =
+    override fun isUserRoleAdmin(userId: UUID): Boolean =
         UsersTable.select { UsersTable.id eq userId }.firstOrNull()?.get(UsersTable.role) == UserRoles.Admin
 
-    override fun updateUserPassword(userId: Int, updatePassword: String): User? {
+    override fun updateUserPassword(userId: UUID, updatePassword: String): User? {
         UsersTable.update({ UsersTable.id eq userId }) {
             it[password] = updatePassword
             it[updatedAt] = LocalDateTime.now().toDatabaseString()

@@ -40,7 +40,7 @@ class JwtConfig(
     private fun createToken(user: User, expiration: Date) = JWT.create()
         .withAudience(audience)
         .withIssuer(issuer)
-        .withClaim(TOKEN_CLAIM_USER_ID_KEY, user.id)
+        .withClaim(TOKEN_CLAIM_USER_ID_KEY, user.id.toString())
         .withClaim("username", user.username)
         .withExpiresAt(expiration)
         .sign(algorithm)
@@ -52,8 +52,8 @@ class JwtConfig(
         validityInMs
     )
 
-    override fun verifyToken(token: String): Int? {
-        return verifier.verify(token).claims[TOKEN_CLAIM_USER_ID_KEY]?.asInt()
+    override fun verifyToken(token: String): String? {
+        return verifier.verify(token).claims[TOKEN_CLAIM_USER_ID_KEY]?.asString()
     }
 
     /**
@@ -64,7 +64,7 @@ class JwtConfig(
 
 interface TokenProvider {
     fun createTokens(user: User): CredentialsResponse
-    fun verifyToken(token: String): Int?
+    fun verifyToken(token: String): String?
 
     // This should not be here, another tokenProvider might not use any JWT...
     // Need to find another fix for this

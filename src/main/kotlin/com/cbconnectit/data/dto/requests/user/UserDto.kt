@@ -5,7 +5,7 @@ import com.cbconnectit.domain.models.user.UserRoles
 import com.google.gson.annotations.SerializedName
 
 data class UserDto(
-    val id: Int = 0,
+    val id: String = "",
     @SerializedName("full_name")
     override val fullName: String = "",
     val username: String = "",

@@ -25,6 +25,7 @@ import kotlinx.coroutines.runBlocking
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.*
 import org.koin.dsl.module
+import java.util.*
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class UserControllerTest : BaseControllerTest() {
@@ -102,7 +103,7 @@ class UserControllerTest : BaseControllerTest() {
         runBlocking {
             val responseUser = controller.postUser(postUser)
 
-            assertThat(responseUser.id).isEqualTo(createdUser.id)
+            assertThat(responseUser.id).isEqualTo(createdUser.id.toString())
             assertThat(responseUser.fullName).isEqualTo(createdUser.fullName)
             assertThat(responseUser.username).isEqualTo(createdUser.username)
             assertThat(responseUser.createdAt).isEqualTo(createdUser.createdAt)
@@ -118,9 +119,9 @@ class UserControllerTest : BaseControllerTest() {
         coEvery { userDao.getUser(any()) } returns user
 
         runBlocking {
-            val responseUser = controller.getUserById(1)
+            val responseUser = controller.getUserById(UUID.randomUUID())
 
-            assertThat(responseUser.id).isEqualTo(user.id)
+            assertThat(responseUser.id).isEqualTo(user.id.toString())
             assertThat(responseUser.fullName).isEqualTo(user.fullName)
             assertThat(responseUser.username).isEqualTo(user.username)
             assertThat(responseUser.createdAt).isEqualTo(user.createdAt)
@@ -134,7 +135,7 @@ class UserControllerTest : BaseControllerTest() {
         coEvery { userDao.getUser(any()) } returns null
 
         assertThrows<ErrorNotFound> {
-            runBlocking { controller.getUserById(1) }
+            runBlocking { controller.getUserById(UUID.randomUUID()) }
         }
     }
 
@@ -146,9 +147,9 @@ class UserControllerTest : BaseControllerTest() {
         coEvery { userDao.updateUser(any(), any()) } returns user
 
         runBlocking {
-            val responseUser = controller.updateUserById(1, updateUser)
+            val responseUser = controller.updateUserById(UUID.randomUUID(), updateUser)
 
-            assertThat(responseUser.id).isEqualTo(user.id)
+            assertThat(responseUser.id).isEqualTo(user.id.toString())
             assertThat(responseUser.fullName).isEqualTo(user.fullName)
             assertThat(responseUser.username).isEqualTo(user.username)
             assertThat(responseUser.createdAt).isEqualTo(user.createdAt)
@@ -160,7 +161,7 @@ class UserControllerTest : BaseControllerTest() {
     @Test
     fun `when updating user by id, where request object is not valid, we throw error`() {
         assertThrows<ErrorInvalidParameters> {
-            runBlocking { controller.updateUserById(1, UpdateUser("", "")) }
+            runBlocking { controller.updateUserById(UUID.randomUUID(), UpdateUser("", "")) }
         }
     }
 
@@ -171,7 +172,7 @@ class UserControllerTest : BaseControllerTest() {
         coEvery { userDao.updateUser(any(), any()) } returns null
 
         assertThrows<ErrorFailedUpdate> {
-            runBlocking { controller.updateUserById(1, updateUser) }
+            runBlocking { controller.updateUserById(UUID.randomUUID(), updateUser) }
         }
     }
 
@@ -181,7 +182,7 @@ class UserControllerTest : BaseControllerTest() {
         coEvery { userDao.getUserHashableById(any()) } throws ErrorNotFound
 
         assertThrows<ErrorNotFound> {
-            runBlocking { controller.updateUserPasswordById(1, givenValidUpdatePassword()) }
+            runBlocking { controller.updateUserPasswordById(UUID.randomUUID(), givenValidUpdatePassword()) }
         }
     }
 
@@ -193,7 +194,7 @@ class UserControllerTest : BaseControllerTest() {
         coEvery { userDao.getUserHashableById(any()) } returns user
 
         assertThrows<ErrorSameAsOldPassword> {
-            runBlocking { controller.updateUserPasswordById(1, postUpdatePassword) }
+            runBlocking { controller.updateUserPasswordById(UUID.randomUUID(), postUpdatePassword) }
         }
     }
 
@@ -206,7 +207,7 @@ class UserControllerTest : BaseControllerTest() {
         coEvery { passwordEncryption.validatePassword(any(), any()) } returns false
 
         assertThrows<ErrorInvalidCredentials> {
-            runBlocking { controller.updateUserPasswordById(1, postUpdatePassword) }
+            runBlocking { controller.updateUserPasswordById(UUID.randomUUID(), postUpdatePassword) }
         }
     }
 
@@ -219,7 +220,7 @@ class UserControllerTest : BaseControllerTest() {
         coEvery { passwordEncryption.validatePassword(any(), any()) } returns true
 
         assertThrows<ErrorPasswordsDoNotMatch> {
-            runBlocking { controller.updateUserPasswordById(1, postUpdatePassword) }
+            runBlocking { controller.updateUserPasswordById(UUID.randomUUID(), postUpdatePassword) }
         }
     }
 
@@ -232,7 +233,7 @@ class UserControllerTest : BaseControllerTest() {
         coEvery { passwordEncryption.validatePassword(any(), any()) } returns true
 
         assertThrows<ErrorWeakPassword> {
-            runBlocking { controller.updateUserPasswordById(1, postUpdatePassword) }
+            runBlocking { controller.updateUserPasswordById(UUID.randomUUID(), postUpdatePassword) }
         }
     }
 
@@ -247,9 +248,9 @@ class UserControllerTest : BaseControllerTest() {
         coEvery { userDao.updateUserPassword(any(), any()) } returns user
 
         runBlocking {
-            val responseUser = controller.updateUserPasswordById(1, postUpdatePassword)
+            val responseUser = controller.updateUserPasswordById(UUID.randomUUID(), postUpdatePassword)
 
-            assertThat(responseUser.id).isEqualTo(user.id)
+            assertThat(responseUser.id).isEqualTo(user.id.toString())
             assertThat(responseUser.fullName).isEqualTo(user.fullName)
             assertThat(responseUser.username).isEqualTo(user.username)
             assertThat(responseUser.createdAt).isEqualTo(user.createdAt)
@@ -265,7 +266,7 @@ class UserControllerTest : BaseControllerTest() {
 
         assertDoesNotThrow {
             runBlocking {
-                controller.deleteUserById(1)
+                controller.deleteUserById(UUID.randomUUID())
             }
         }
     }
@@ -276,7 +277,7 @@ class UserControllerTest : BaseControllerTest() {
         coEvery { userDao.deleteUser(any()) } returns false
 
         assertThrows<ErrorFailedDelete> {
-            runBlocking { controller.deleteUserById(1) }
+            runBlocking { controller.deleteUserById(UUID.randomUUID()) }
         }
     }
 }

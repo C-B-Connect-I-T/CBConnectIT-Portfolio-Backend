@@ -3,11 +3,11 @@ package com.cbconnectit.data.database.tables
 import com.cbconnectit.domain.models.user.User
 import com.cbconnectit.domain.models.user.UserRoles
 import com.cbconnectit.utils.toDatabaseString
-import org.jetbrains.exposed.dao.id.IntIdTable
+import org.jetbrains.exposed.dao.id.UUIDTable
 import org.jetbrains.exposed.sql.ResultRow
 import java.time.LocalDateTime
 
-object UsersTable : IntIdTable() {
+object UsersTable : UUIDTable() {
     val fullName = varchar("full_name", 255).default("")
     val username = varchar("username", 255).uniqueIndex()
     val password = varchar("password", 255)

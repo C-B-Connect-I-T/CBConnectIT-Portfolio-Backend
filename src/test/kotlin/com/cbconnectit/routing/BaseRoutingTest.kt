@@ -18,6 +18,7 @@ import org.koin.core.context.stopKoin
 import org.koin.core.module.Module
 import org.koin.ktor.plugin.Koin
 import java.time.LocalDateTime
+import java.util.*
 
 abstract class BaseRoutingTest {
 
@@ -71,11 +72,11 @@ abstract class BaseRoutingTest {
                 adminOnly -> {
                     if (authenticationTest.userRole != UserRoles.Admin) return@validate null
 
-                    User(1, "Chris Bol", "chris.bol@example.com", time, time, authenticationTest.userRole)
+                    User(UUID.fromString("00000000-0000-0000-0000-000000000001"), "Chris Bol", "chris.bol@example.com", time, time, authenticationTest.userRole)
                 }
 
                 "error" -> null // Will be used whenever we want to force an invalid user during the tests!
-                else -> User(1, "Chris Bol", "chris.bol@example.com", time, time, authenticationTest.userRole)
+                else -> User(UUID.fromString("00000000-0000-0000-0000-000000000001"), "Chris Bol", "chris.bol@example.com", time, time, authenticationTest.userRole)
             }
         }
     }

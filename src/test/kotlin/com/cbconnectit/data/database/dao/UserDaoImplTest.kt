@@ -10,6 +10,7 @@ import org.assertj.core.api.Assertions.assertThat
 import org.jetbrains.exposed.exceptions.ExposedSQLException
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
+import java.util.*
 import kotlin.test.assertFalse
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
@@ -36,7 +37,7 @@ internal class UserDaoImplTest : BaseDaoTest() {
     @Test
     fun `getUser where item does not exist, return 'null'`() {
         withTables(UsersTable) {
-            val user = dao.getUser(803)
+            val user = dao.getUser(UUID.randomUUID())
 
             assertNull(user)
         }
@@ -52,7 +53,6 @@ internal class UserDaoImplTest : BaseDaoTest() {
                 it?.username == validUser.username &&
                         it.fullName == validUser.fullName &&
                         it.role == UserRoles.User &&
-                        it.id == 1 &&
                         it.createdAt == it.updatedAt
             }
         }
@@ -86,7 +86,6 @@ internal class UserDaoImplTest : BaseDaoTest() {
                 it?.username == validUpdateUser.username &&
                         it?.fullName == validUpdateUser.fullName &&
                         it?.role == UserRoles.User &&
-                        it.id == 1 &&
                         it.createdAt != it.updatedAt
             }
         }
@@ -96,7 +95,7 @@ internal class UserDaoImplTest : BaseDaoTest() {
     fun `updateUser where information is correct but user with id does not exist, database does nothing and returns 'null'`() {
         withTables(UsersTable) {
             val validUser = givenAValidUpdateUserBody()
-            val user = dao.updateUser(203, validUser)
+            val user = dao.updateUser(UUID.randomUUID(), validUser)
 
             assertNull(user)
         }
@@ -153,7 +152,7 @@ internal class UserDaoImplTest : BaseDaoTest() {
     @Test
     fun `deleteUser for id that does not exists, return false`() {
         withTables(UsersTable) {
-            val deleted = dao.deleteUser(203)
+            val deleted = dao.deleteUser(UUID.randomUUID())
             assertFalse(deleted)
         }
     }
@@ -178,7 +177,7 @@ internal class UserDaoImplTest : BaseDaoTest() {
     @Test
     fun `isUserRoleAdmin where user does not exist, return false`() {
         withTables(UsersTable) {
-            val isUserAdmin = dao.isUserRoleAdmin(839)
+            val isUserAdmin = dao.isUserRoleAdmin(UUID.randomUUID())
             assertFalse(isUserAdmin)
         }
     }
@@ -186,8 +185,8 @@ internal class UserDaoImplTest : BaseDaoTest() {
     @Test
     fun `isUserRoleAdmin where user does exist but is not admin, return false`() {
         withTables(UsersTable) {
-            dao.insertUser(givenAValidInsertUserBody())
-            val isUserAdmin = dao.isUserRoleAdmin(1)
+            val uuid = dao.insertUser(givenAValidInsertUserBody())?.id
+            val isUserAdmin = dao.isUserRoleAdmin(uuid!!)
             assertFalse(isUserAdmin)
         }
     }

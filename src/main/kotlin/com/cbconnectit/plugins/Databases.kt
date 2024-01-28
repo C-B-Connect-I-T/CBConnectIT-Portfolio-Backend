@@ -13,6 +13,7 @@ import org.jetbrains.exposed.sql.insertIgnore
 import org.jetbrains.exposed.sql.transactions.transaction
 import org.koin.ktor.ext.inject
 import java.time.LocalDateTime
+import java.util.UUID
 
 fun Application.configureDatabase() {
     val passwordEncryption by inject<PasswordManagerContract>()
@@ -34,7 +35,7 @@ private fun seedDatabase(passwordEncryption: PasswordManagerContract) {
     val time = LocalDateTime.now().toDatabaseString()
 
     UsersTable.insertIgnore {
-        it[id] = 1
+        it[id] = UUID.randomUUID()
         it[fullName] = "Bolla"
         it[username] = "bollachristiano@gmail.com"
         it[password] = passwordEncryption.encryptPassword(System.getenv("ADMIN_SEED_PASSWORD"))

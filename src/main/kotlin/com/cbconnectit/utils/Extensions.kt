@@ -10,6 +10,7 @@ import io.ktor.server.auth.*
 import io.ktor.server.request.*
 import io.ktor.server.response.*
 import io.ktor.util.pipeline.*
+import java.util.*
 
 val ApplicationCall.authenticatedUser get() = authentication.principal<User>()!!
 
@@ -25,8 +26,8 @@ suspend inline fun <reified T> ApplicationCall.receiveOrRespondWithError(): T {
     }
 }
 
-fun ApplicationCall.getUserId(): Int = parameters[ParamConstants.USER_ID_KEY]?.toIntOrNull() ?: throw ErrorInvalidUUID
-fun ApplicationCall.getProjectId(): Int = parameters[ParamConstants.PROJECT_ID_KEY]?.toIntOrNull() ?: throw ErrorInvalidUUID
+fun ApplicationCall.getUserId(): UUID = parameters[ParamConstants.USER_ID_KEY]?.let { UUID.fromString(it) } ?: throw ErrorInvalidUUID
+//fun ApplicationCall.getProjectId(): UUID = parameters[ParamConstants.PROJECT_ID_KEY]?.toIntOrNull() ?: throw ErrorInvalidUUID
 
 
 suspend fun PipelineContext<Unit, ApplicationCall>.sendOk() {

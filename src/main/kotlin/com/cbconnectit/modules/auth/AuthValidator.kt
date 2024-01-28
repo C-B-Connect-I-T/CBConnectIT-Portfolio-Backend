@@ -5,6 +5,7 @@ import com.cbconnectit.domain.interfaces.IUserDao
 import com.cbconnectit.plugins.dbQuery
 import io.ktor.server.auth.*
 import io.ktor.server.auth.jwt.*
+import java.util.UUID
 
 const val adminOnly = "admin"
 
@@ -21,10 +22,10 @@ fun JWTAuthenticationProvider.Config.setupAuthentication(
 }
 
 suspend fun JWTCredential.validateUser(userDao: IUserDao): Principal? {
-    val userId = payload.claims[JwtConfig.TOKEN_CLAIM_USER_ID_KEY]?.asInt() ?: return null
+    val userId = payload.claims[JwtConfig.TOKEN_CLAIM_USER_ID_KEY]?.asString() ?: return null
 
     val user = dbQuery {
-        userDao.getUser(userId)
+        userDao.getUser(UUID.fromString(userId))
     }
 
     return if (payload.audience.contains(JwtConfig.USERS_AUDIENCE))
@@ -34,11 +35,11 @@ suspend fun JWTCredential.validateUser(userDao: IUserDao): Principal? {
 }
 
 suspend fun JWTCredential.validateUserIsAdmin(userDao: IUserDao): Principal? {
-    val userId = payload.claims[JwtConfig.TOKEN_CLAIM_USER_ID_KEY]?.asInt() ?: return null
-
+    val userId = payload.claims[JwtConfig.TOKEN_CLAIM_USER_ID_KEY]?.asString() ?: return null
+    val userUUID = UUID.fromString(userId)
     val (isUserRoleAdmin, user) = dbQuery {
-        val isUserRoleAdmin = userDao.isUserRoleAdmin(userId)
-        val user = userDao.getUser(userId)
+        val isUserRoleAdmin = userDao.isUserRoleAdmin(userUUID)
+        val user = userDao.getUser(userUUID)
 
         isUserRoleAdmin to user
     }

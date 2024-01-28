@@ -8,6 +8,7 @@ import com.cbconnectit.plugins.dbQuery
 import com.cbconnectit.statuspages.*
 import com.cbconnectit.utils.PasswordManagerContract
 import org.koin.core.component.inject
+import java.util.*
 
 class UserControllerImpl : BaseController(), UserController {
 
@@ -29,11 +30,11 @@ class UserControllerImpl : BaseController(), UserController {
         userDao.insertUser(insertNewUser.copy(password = encryptedPassword, repeatPassword = null))?.toDto() ?: throw ErrorFailedCreate
     }
 
-    override suspend fun getUserById(userId: Int): UserDto = dbQuery {
+    override suspend fun getUserById(userId: UUID): UserDto = dbQuery {
         userDao.getUser(userId)?.toDto() ?: throw ErrorNotFound
     }
 
-    override suspend fun updateUserById(userId: Int, updateUser: UpdateUser): UserDto = dbQuery {
+    override suspend fun updateUserById(userId: UUID, updateUser: UpdateUser): UserDto = dbQuery {
         //TODO: should we check for Admin or logged in user here as well?
 
         if (!updateUser.isValid) throw ErrorInvalidParameters
@@ -41,7 +42,7 @@ class UserControllerImpl : BaseController(), UserController {
         userDao.updateUser(userId, updateUser)?.toDto() ?: throw ErrorFailedUpdate
     }
 
-    override suspend fun updateUserPasswordById(userId: Int, updatePassword: UpdatePassword): UserDto = dbQuery {
+    override suspend fun updateUserPasswordById(userId: UUID, updatePassword: UpdatePassword): UserDto = dbQuery {
         //TODO: should we check for Admin or logged in user here as well?
 
         val userHashable = userDao.getUserHashableById(userId) ?: throw ErrorNotFound
@@ -60,7 +61,7 @@ class UserControllerImpl : BaseController(), UserController {
         userDao.updateUserPassword(userId, encryptedPassword)?.toDto() ?: throw ErrorFailedUpdate
     }
 
-    override suspend fun deleteUserById(userId: Int) {
+    override suspend fun deleteUserById(userId: UUID) {
         //TODO: should we check for Admin or logged in user here as well?
 
         return dbQuery {
@@ -72,8 +73,8 @@ class UserControllerImpl : BaseController(), UserController {
 
 interface UserController {
     suspend fun postUser(insertNewUser: InsertNewUser): UserDto
-    suspend fun getUserById(userId: Int): UserDto
-    suspend fun updateUserById(userId: Int, updateUser: UpdateUser): UserDto
-    suspend fun updateUserPasswordById(userId: Int, updatePassword: UpdatePassword): UserDto
-    suspend fun deleteUserById(userId: Int)
+    suspend fun getUserById(userId: UUID): UserDto
+    suspend fun updateUserById(userId: UUID, updateUser: UpdateUser): UserDto
+    suspend fun updateUserPasswordById(userId: UUID, updatePassword: UpdatePassword): UserDto
+    suspend fun deleteUserById(userId: UUID)
 }
