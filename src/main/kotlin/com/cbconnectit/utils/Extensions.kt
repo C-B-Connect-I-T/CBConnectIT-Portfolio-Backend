@@ -1,5 +1,6 @@
 package com.cbconnectit.utils
 
+import com.cbconnectit.domain.models.user.User
 import com.cbconnectit.statuspages.ApiException
 import com.cbconnectit.statuspages.ErrorInvalidUUID
 import com.cbconnectit.statuspages.ErrorMissingBody
@@ -10,7 +11,7 @@ import io.ktor.server.request.*
 import io.ktor.server.response.*
 import io.ktor.util.pipeline.*
 
-//val ApplicationCall.authenticatedUser get() = authentication.principal<User>()!!
+val ApplicationCall.authenticatedUser get() = authentication.principal<User>()!!
 
 suspend inline fun <reified T> ApplicationCall.receiveOrRespondWithError(): T {
     return try {
