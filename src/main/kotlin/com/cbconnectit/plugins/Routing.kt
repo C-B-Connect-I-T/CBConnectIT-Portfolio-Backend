@@ -1,20 +1,45 @@
 package com.cbconnectit.plugins
 
-import io.ktor.http.*
+import com.cbconnectit.modules.auth.authRouting
+import com.cbconnectit.modules.users.userRouting
+import com.cbconnectit.statuspages.ErrorMissingParameters
+import com.cbconnectit.statuspages.InternalServerException
+import com.cbconnectit.statuspages.generalStatusPages
+import com.cbconnectit.statuspages.toErrorResponse
 import io.ktor.server.application.*
+import io.ktor.server.http.content.*
 import io.ktor.server.plugins.statuspages.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
 
 fun Application.configureRouting() {
+    // "example/" should resolve to "example/index.html" if present, but default ktor behavior rejects trailing slashes.
+    this.install(IgnoreTrailingSlash)
+
     install(StatusPages) {
-        exception<Throwable> { call, cause ->
-            call.respondText(text = "500: $cause" , status = HttpStatusCode.InternalServerError)
+        generalStatusPages()
+
+        exception<NullPointerException> { call, _ ->
+            val some = ErrorMissingParameters
+            call.respond(some.statusCode, some.toErrorResponse())
+        }
+
+        exception<Throwable> { call, _ ->
+            val cause = InternalServerException()
+            call.respond(cause.statusCode, cause.toErrorResponse())
         }
     }
     routing {
-        get("/") {
-            call.respondText("Hello World!")
+        staticResources("/", "/static/site")
+
+        authRouting()
+
+        route("api/v1") {
+            userRouting()
+//            contributorRouting()
+//            categoryRouting()
+//            techstackRouting()
+//            projectRouting()
         }
     }
 }
