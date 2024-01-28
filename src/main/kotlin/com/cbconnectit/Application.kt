@@ -11,10 +11,11 @@ fun main() {
 }
 
 fun Application.module() {
-    configureSerialization()
-    configureDatabases()
-    configureMonitoring()
     configureHTTP()
+    configureKoin()
+    configureDatabase()
+    configureMonitoring() // callLogging
+    configureSerialization() // contentNegotiation
     configureSecurity()
-    configureRouting()
+    configureRouting() // routing + statusPages
 }

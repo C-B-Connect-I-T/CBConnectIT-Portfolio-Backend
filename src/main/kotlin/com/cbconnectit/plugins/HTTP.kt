@@ -8,8 +8,11 @@ import io.ktor.server.routing.*
 
 fun Application.configureHTTP() {
     routing {
-        swaggerUI(path = "openapi")
+        swaggerUI(path = "swagger")
     }
+//    install(DefaultHeaders) {
+//        header("X-Engine", "Ktor") // will send this header with each response
+//    }
     install(CORS) {
         allowMethod(HttpMethod.Options)
         allowMethod(HttpMethod.Put)
