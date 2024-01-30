@@ -14,14 +14,16 @@ import org.jetbrains.exposed.sql.javatime.CurrentDateTime
 import java.util.*
 
 class TagDaoImpl : ITagDao {
-    override fun getTag(id: UUID): Tag? =
+    override fun getTagById(id: UUID): Tag? =
         TagsTable.select { TagsTable.id eq id }.toTag()
 
-    override fun getTag(slug: String): Tag? =
+    override fun getTagBySlug(slug: String): Tag? =
         TagsTable.select { TagsTable.slug eq slug }.toTag()
 
     override fun getTags(query: String): List<Tag> =
-        TagsTable.selectAll().toTags()
+        TagsTable.select {
+            TagsTable.name.lowerCase() like "%${query.lowercase()}%"
+        }.toTags()
 
     override fun insertTag(insertNewTag: InsertNewTag): Tag? {
         val tagId = TagsTable.insertAndGetId {
@@ -29,7 +31,7 @@ class TagDaoImpl : ITagDao {
             it[slug] = Slugify.builder().build().slugify(insertNewTag.name)
         }.value
 
-        return getTag(tagId)
+        return getTagById(tagId)
     }
 
     override fun updateTag(id: UUID, updateTag: UpdateTag): Tag? {
@@ -39,7 +41,7 @@ class TagDaoImpl : ITagDao {
             it[updatedAt] = CurrentDateTime
         }
 
-        return getTag(id)
+        return getTagById(id)
     }
 
     override fun deleteTag(id: UUID): Boolean =

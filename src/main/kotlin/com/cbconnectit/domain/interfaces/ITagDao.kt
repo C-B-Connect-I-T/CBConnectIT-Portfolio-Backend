@@ -7,8 +7,8 @@ import java.util.*
 
 interface ITagDao {
 
-    fun getTag(id: UUID): Tag?
-    fun getTag(slug: String): Tag?
+    fun getTagById(id: UUID): Tag?
+    fun getTagBySlug(slug: String): Tag?
     fun getTags(query: String): List<Tag>
     fun insertTag(insertNewTag: InsertNewTag): Tag?
     fun updateTag(id: UUID, updateTag: UpdateTag): Tag?

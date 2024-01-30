@@ -9,10 +9,10 @@ import com.cbconnectit.modules.BaseController
 import com.cbconnectit.plugins.dbQuery
 import com.cbconnectit.statuspages.*
 import org.koin.core.component.inject
-import java.util.UUID
+import java.util.*
 
 
-class TagControllerImpl: BaseController(), TagController {
+class TagControllerImpl : BaseController(), TagController {
 
     private val tagDao by inject<ITagDao>()
 
@@ -20,15 +20,24 @@ class TagControllerImpl: BaseController(), TagController {
         tagDao.getTags(query).map { it.toDto() }
     }
 
-    override suspend fun getTagById(tagId: UUID): TagDto = dbQuery{
-        tagDao.getTag(tagId)?.toDto() ?: throw ErrorNotFound
+    override suspend fun getTagByIdentifier(tagIdentifier: String): TagDto = dbQuery {
+
+        val tagUUID = try {
+            UUID.fromString(tagIdentifier)
+        } catch (e: IllegalArgumentException) {
+            null
+        }
+
+        val tag = if (tagUUID != null) {
+            tagDao.getTagById(tagUUID)
+        } else {
+            tagDao.getTagBySlug(tagIdentifier)
+        }
+
+        tag?.toDto() ?: throw ErrorNotFound
     }
 
-    override suspend fun getTagBySlug(slug: String): TagDto = dbQuery {
-        tagDao.getTag(slug)?.toDto() ?: throw ErrorNotFound
-    }
-
-    override suspend fun postTag(insertNewTag: InsertNewTag): TagDto = dbQuery{
+    override suspend fun postTag(insertNewTag: InsertNewTag): TagDto = dbQuery {
         if (!insertNewTag.isValid) throw ErrorInvalidParameters
 
         val tagUnique = tagDao.tagUnique(insertNewTag.name)
@@ -46,17 +55,16 @@ class TagControllerImpl: BaseController(), TagController {
         tagDao.updateTag(tagId, updateTag)?.toDto() ?: throw ErrorFailedUpdate
     }
 
-    override suspend fun deleteTagById(tagId: UUID) = dbQuery{
+    override suspend fun deleteTagById(tagId: UUID) = dbQuery {
         val deleted = tagDao.deleteTag(tagId)
         if (!deleted) throw ErrorFailedDelete
     }
-
 }
 
-interface TagController  {
+interface TagController {
     suspend fun getTags(query: String): List<TagDto>
-    suspend fun getTagById(tagId: UUID): TagDto
-    suspend fun getTagBySlug(slug: String): TagDto
+    suspend fun getTagByIdentifier(tagIdentifier: String): TagDto
+//    suspend fun getTagBySlug(slug: String): TagDto
     suspend fun postTag(insertNewTag: InsertNewTag): TagDto
     suspend fun updateTagById(tagId: UUID, updateTag: UpdateTag): TagDto
     suspend fun deleteTagById(tagId: UUID)
