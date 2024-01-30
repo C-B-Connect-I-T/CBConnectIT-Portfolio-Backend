@@ -1,12 +1,16 @@
 package com.cbconnectit.plugins
 
 import com.auth0.jwt.interfaces.JWTVerifier
+import com.cbconnectit.data.database.dao.TagDaoImpl
 import com.cbconnectit.data.database.dao.UserDaoImpl
+import com.cbconnectit.domain.interfaces.ITagDao
 import com.cbconnectit.domain.interfaces.IUserDao
 import com.cbconnectit.modules.auth.AuthController
 import com.cbconnectit.modules.auth.AuthControllerImpl
 import com.cbconnectit.modules.auth.JwtConfig
 import com.cbconnectit.modules.auth.TokenProvider
+import com.cbconnectit.modules.tags.TagController
+import com.cbconnectit.modules.tags.TagControllerImpl
 import com.cbconnectit.modules.users.UserController
 import com.cbconnectit.modules.users.UserControllerImpl
 import com.cbconnectit.utils.PasswordManager
@@ -41,8 +45,10 @@ fun Application.configureKoin() {
 fun routeModule() = module {
     singleOf(::AuthControllerImpl) { bind<AuthController>() }
     singleOf(::UserControllerImpl) { bind<UserController>() }
+    singleOf(::TagControllerImpl) { bind<TagController>() }
 }
 
 fun daoModule() = module {
     singleOf(::UserDaoImpl) { bind<IUserDao>() }
+    singleOf(::TagDaoImpl) { bind<ITagDao>() }
 }

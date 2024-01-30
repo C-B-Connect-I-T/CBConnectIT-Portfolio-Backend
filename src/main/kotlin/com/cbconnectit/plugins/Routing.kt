@@ -1,6 +1,7 @@
 package com.cbconnectit.plugins
 
 import com.cbconnectit.modules.auth.authRouting
+import com.cbconnectit.modules.tags.tagRouting
 import com.cbconnectit.modules.users.userRouting
 import com.cbconnectit.statuspages.ErrorMissingParameters
 import com.cbconnectit.statuspages.InternalServerException
@@ -36,10 +37,7 @@ fun Application.configureRouting() {
 
         route("api/v1") {
             userRouting()
-//            contributorRouting()
-//            categoryRouting()
-//            techstackRouting()
-//            projectRouting()
+            tagRouting()
         }
     }
 }

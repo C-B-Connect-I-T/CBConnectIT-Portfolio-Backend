@@ -1,5 +1,6 @@
 package com.cbconnectit.plugins
 
+import com.cbconnectit.data.database.tables.TagsTable
 import com.cbconnectit.data.database.tables.UsersTable
 import com.cbconnectit.domain.models.user.UserRoles
 import com.cbconnectit.utils.PasswordManagerContract
@@ -25,7 +26,7 @@ fun Application.configureDatabase() {
     )
 
     transaction {
-        SchemaUtils.createMissingTablesAndColumns(UsersTable)
+        SchemaUtils.createMissingTablesAndColumns(UsersTable, TagsTable)
 
         seedDatabase(passwordEncryption)
     }
@@ -35,13 +36,17 @@ private fun seedDatabase(passwordEncryption: PasswordManagerContract) {
     val time = LocalDateTime.now().toDatabaseString()
 
     UsersTable.insertIgnore {
-        it[id] = UUID.randomUUID()
         it[fullName] = "Bolla"
         it[username] = "bollachristiano@gmail.com"
         it[password] = passwordEncryption.encryptPassword(System.getenv("ADMIN_SEED_PASSWORD"))
         it[createdAt] = time
         it[updatedAt] = time
         it[role] = UserRoles.Admin
+    }
+
+    TagsTable.insertIgnore {
+        it[name] = "Android"
+        it[slug] = "android"
     }
 }
 

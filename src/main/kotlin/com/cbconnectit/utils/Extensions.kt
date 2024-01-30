@@ -2,6 +2,7 @@ package com.cbconnectit.utils
 
 import com.cbconnectit.domain.models.user.User
 import com.cbconnectit.statuspages.ApiException
+import com.cbconnectit.statuspages.ErrorInvalidParameters
 import com.cbconnectit.statuspages.ErrorInvalidUUID
 import com.cbconnectit.statuspages.ErrorMissingBody
 import io.ktor.http.*
@@ -27,6 +28,7 @@ suspend inline fun <reified T> ApplicationCall.receiveOrRespondWithError(): T {
 }
 
 fun ApplicationCall.getUserId(): UUID = parameters[ParamConstants.USER_ID_KEY]?.let { UUID.fromString(it) } ?: throw ErrorInvalidUUID
+fun ApplicationCall.getTagIdentifier(): String = parameters[ParamConstants.TAG_IDENTIFIER_KEY] ?: throw ErrorInvalidParameters
 //fun ApplicationCall.getProjectId(): UUID = parameters[ParamConstants.PROJECT_ID_KEY]?.toIntOrNull() ?: throw ErrorInvalidUUID
 
 
