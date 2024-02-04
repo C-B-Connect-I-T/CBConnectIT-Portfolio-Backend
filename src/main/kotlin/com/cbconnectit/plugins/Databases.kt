@@ -35,14 +35,11 @@ fun Application.configureDatabase() {
 }
 
 private fun seedDatabase(passwordEncryption: PasswordManagerContract) {
-    val time = LocalDateTime.now().toDatabaseString()
 
     UsersTable.insertIgnore {
         it[fullName] = "Bolla"
         it[username] = "bollachristiano@gmail.com"
         it[password] = passwordEncryption.encryptPassword(System.getenv("ADMIN_SEED_PASSWORD"))
-        it[createdAt] = time
-        it[updatedAt] = time
         it[role] = UserRoles.Admin
     }
 

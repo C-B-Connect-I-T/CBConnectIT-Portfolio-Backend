@@ -107,7 +107,7 @@ class UserRoutingTest : BaseRoutingTest() {
         AuthenticationInstrumentation(adminOnly),
         AuthenticationInstrumentation()
     ) {
-        val time = LocalDateTime.now().toDatabaseString()
+        val time = LocalDateTime.now()
         val userResponse = User(UUID.fromString("00000000-0000-0000-0000-000000000001"), "Chris Bol", "chris.bol@example.com", time, time).toDto()
 
         val call = doCall(HttpMethod.Get, "/users/me")

@@ -9,6 +9,7 @@ import com.cbconnectit.domain.models.user.UserRoles
 import com.cbconnectit.utils.toDatabaseString
 import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
+import org.jetbrains.exposed.sql.javatime.CurrentDateTime
 import java.time.LocalDateTime
 import java.util.*
 
@@ -26,23 +27,22 @@ class UserDaoImpl : IUserDao {
     override fun getUsers(): List<User> =
         UsersTable.selectAll().toUsers()
 
-    override fun insertUser(user: InsertNewUser): User? =
-        UsersTable.insert {
-            val time = LocalDateTime.now().toDatabaseString()
-
+    override fun insertUser(user: InsertNewUser): User? {
+        val userId = UsersTable.insertAndGetId {
             it[fullName] = user.fullName
             it[username] = user.username
             it[password] = user.password
-            it[createdAt] = time
-            it[updatedAt] = time
-        }.resultedValues?.toUser()
+        }.value
+
+        return getUser(userId)
+    }
 
     override fun updateUser(id: UUID, user: UpdateUser): User? {
         UsersTable.update({ UsersTable.id eq id }) {
             user.fullName?.let { last -> it[fullName] = last }
             user.username?.let { mail -> it[username] = mail }
 
-            it[updatedAt] = LocalDateTime.now().toDatabaseString()
+            it[updatedAt] = CurrentDateTime
         }
 
         return getUser(id)
@@ -60,7 +60,7 @@ class UserDaoImpl : IUserDao {
     override fun updateUserPassword(userId: UUID, updatePassword: String): User? {
         UsersTable.update({ UsersTable.id eq userId }) {
             it[password] = updatePassword
-            it[updatedAt] = LocalDateTime.now().toDatabaseString()
+            it[updatedAt] = CurrentDateTime
         }
 
         return getUser(userId)

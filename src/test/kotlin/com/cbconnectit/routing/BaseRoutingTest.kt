@@ -72,11 +72,11 @@ abstract class BaseRoutingTest {
                 adminOnly -> {
                     if (authenticationTest.userRole != UserRoles.Admin) return@validate null
 
-                    User(UUID.fromString("00000000-0000-0000-0000-000000000001"), "Chris Bol", "chris.bol@example.com", time, time, authenticationTest.userRole)
+                    User(UUID.fromString("00000000-0000-0000-0000-000000000001"), "Chris Bol", "chris.bol@example.com", LocalDateTime.now(), LocalDateTime.now(), authenticationTest.userRole)
                 }
 
                 "error" -> null // Will be used whenever we want to force an invalid user during the tests!
-                else -> User(UUID.fromString("00000000-0000-0000-0000-000000000001"), "Chris Bol", "chris.bol@example.com", time, time, authenticationTest.userRole)
+                else -> User(UUID.fromString("00000000-0000-0000-0000-000000000001"), "Chris Bol", "chris.bol@example.com", LocalDateTime.now(), LocalDateTime.now(), authenticationTest.userRole)
             }
         }
     }

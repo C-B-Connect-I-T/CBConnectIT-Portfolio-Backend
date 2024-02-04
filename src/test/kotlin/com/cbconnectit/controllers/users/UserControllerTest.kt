@@ -18,6 +18,7 @@ import com.cbconnectit.modules.users.UserController
 import com.cbconnectit.modules.users.UserControllerImpl
 import com.cbconnectit.statuspages.*
 import com.cbconnectit.utils.PasswordManagerContract
+import com.cbconnectit.utils.toDatabaseString
 import io.mockk.clearMocks
 import io.mockk.coEvery
 import io.mockk.mockk
@@ -106,8 +107,8 @@ class UserControllerTest : BaseControllerTest() {
             assertThat(responseUser.id).isEqualTo(createdUser.id.toString())
             assertThat(responseUser.fullName).isEqualTo(createdUser.fullName)
             assertThat(responseUser.username).isEqualTo(createdUser.username)
-            assertThat(responseUser.createdAt).isEqualTo(createdUser.createdAt)
-            assertThat(responseUser.updatedAt).isEqualTo(createdUser.updatedAt)
+            assertThat(responseUser.createdAt).isEqualTo(createdUser.createdAt.toDatabaseString())
+            assertThat(responseUser.updatedAt).isEqualTo(createdUser.updatedAt.toDatabaseString())
             assertThat(responseUser.role).isEqualTo(createdUser.role)
         }
     }
@@ -124,8 +125,8 @@ class UserControllerTest : BaseControllerTest() {
             assertThat(responseUser.id).isEqualTo(user.id.toString())
             assertThat(responseUser.fullName).isEqualTo(user.fullName)
             assertThat(responseUser.username).isEqualTo(user.username)
-            assertThat(responseUser.createdAt).isEqualTo(user.createdAt)
-            assertThat(responseUser.updatedAt).isEqualTo(user.updatedAt)
+            assertThat(responseUser.createdAt).isEqualTo(user.createdAt.toDatabaseString())
+            assertThat(responseUser.updatedAt).isEqualTo(user.updatedAt.toDatabaseString())
             assertThat(responseUser.role).isEqualTo(user.role)
         }
     }
@@ -152,8 +153,8 @@ class UserControllerTest : BaseControllerTest() {
             assertThat(responseUser.id).isEqualTo(user.id.toString())
             assertThat(responseUser.fullName).isEqualTo(user.fullName)
             assertThat(responseUser.username).isEqualTo(user.username)
-            assertThat(responseUser.createdAt).isEqualTo(user.createdAt)
-            assertThat(responseUser.updatedAt).isEqualTo(user.updatedAt)
+            assertThat(responseUser.createdAt).isEqualTo(user.createdAt.toDatabaseString())
+            assertThat(responseUser.updatedAt).isEqualTo(user.updatedAt.toDatabaseString())
             assertThat(responseUser.role).isEqualTo(user.role)
         }
     }
@@ -253,8 +254,8 @@ class UserControllerTest : BaseControllerTest() {
             assertThat(responseUser.id).isEqualTo(user.id.toString())
             assertThat(responseUser.fullName).isEqualTo(user.fullName)
             assertThat(responseUser.username).isEqualTo(user.username)
-            assertThat(responseUser.createdAt).isEqualTo(user.createdAt)
-            assertThat(responseUser.updatedAt).isEqualTo(user.updatedAt)
+            assertThat(responseUser.createdAt).isEqualTo(user.createdAt.toDatabaseString())
+            assertThat(responseUser.updatedAt).isEqualTo(user.updatedAt.toDatabaseString())
             assertThat(responseUser.role).isEqualTo(user.role)
         }
     }
