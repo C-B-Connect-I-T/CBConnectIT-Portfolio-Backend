@@ -11,6 +11,7 @@ import io.ktor.server.auth.*
 import io.ktor.server.request.*
 import io.ktor.server.response.*
 import io.ktor.util.pipeline.*
+import java.net.URL
 import java.util.*
 
 val ApplicationCall.authenticatedUser get() = authentication.principal<User>()!!
@@ -28,6 +29,7 @@ suspend inline fun <reified T> ApplicationCall.receiveOrRespondWithError(): T {
 }
 
 fun ApplicationCall.getUserId(): UUID = parameters[ParamConstants.USER_ID_KEY]?.let { UUID.fromString(it) } ?: throw ErrorInvalidUUID
+fun ApplicationCall.getLinkId(): UUID = parameters[ParamConstants.LINK_ID_KEY]?.let { UUID.fromString(it) } ?: throw ErrorInvalidUUID
 fun ApplicationCall.getTagIdentifier(): String = parameters[ParamConstants.TAG_IDENTIFIER_KEY] ?: throw ErrorInvalidParameters
 //fun ApplicationCall.getProjectId(): UUID = parameters[ParamConstants.PROJECT_ID_KEY]?.toIntOrNull() ?: throw ErrorInvalidUUID
 
@@ -37,3 +39,15 @@ suspend fun PipelineContext<Unit, ApplicationCall>.sendOk() {
 }
 
 object TBDException : ApiException("TBD_error", "An error, but still under development", HttpStatusCode.InternalServerError)
+
+val String.isValidUrl: Boolean
+    get() = try {
+        // Attempt to create a URL object from the given string
+        URL(this)
+
+        // If no exception is thrown, the URL is valid
+        true
+    } catch (e: Exception) {
+        // If an exception is thrown, the URL is invalid
+        false
+    }

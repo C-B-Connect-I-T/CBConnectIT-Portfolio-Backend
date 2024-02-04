@@ -1,5 +1,7 @@
 package com.cbconnectit.plugins
 
+import com.cbconnectit.data.database.tables.LinksTable
+import com.cbconnectit.data.database.tables.ProjectsTable
 import com.cbconnectit.data.database.tables.TagsTable
 import com.cbconnectit.data.database.tables.UsersTable
 import com.cbconnectit.domain.models.user.UserRoles
@@ -26,7 +28,7 @@ fun Application.configureDatabase() {
     )
 
     transaction {
-        SchemaUtils.createMissingTablesAndColumns(UsersTable, TagsTable)
+        SchemaUtils.createMissingTablesAndColumns(UsersTable, TagsTable, LinksTable, ProjectsTable)
 
         seedDatabase(passwordEncryption)
     }
