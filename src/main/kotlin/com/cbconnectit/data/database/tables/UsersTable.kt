@@ -8,8 +8,8 @@ import org.jetbrains.exposed.sql.ResultRow
 import java.time.LocalDateTime
 
 object UsersTable : UUIDTable() {
-    val fullName = varchar("full_name", 255).default("")
-    val username = varchar("username", 255).uniqueIndex()
+    val fullName = varchar("full_name", 100).nullable().default(null)
+    val username = varchar("username", 100).uniqueIndex()
     val password = varchar("password", 255)
     val createdAt = varchar("created_at", 255).default(LocalDateTime.now().toDatabaseString())
     val updatedAt = varchar("updated_at", 255).default(LocalDateTime.now().toDatabaseString())

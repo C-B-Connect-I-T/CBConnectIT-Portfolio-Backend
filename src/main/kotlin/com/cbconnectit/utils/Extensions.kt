@@ -37,3 +37,15 @@ suspend fun PipelineContext<Unit, ApplicationCall>.sendOk() {
 }
 
 object TBDException : ApiException("TBD_error", "An error, but still under development", HttpStatusCode.InternalServerError)
+
+val String.isValidUrl: Boolean
+    get() = try {
+        // Attempt to create a URL object from the given string
+        Url(this)
+
+        // If no exception is thrown, the URL is valid
+        true
+    } catch (e: Exception) {
+        // If an exception is thrown, the URL is invalid
+        false
+    }

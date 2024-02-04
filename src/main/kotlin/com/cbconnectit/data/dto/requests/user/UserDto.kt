@@ -7,7 +7,7 @@ import com.google.gson.annotations.SerializedName
 data class UserDto(
     val id: String = "",
     @SerializedName("full_name")
-    override val fullName: String = "",
+    override val fullName: String? = null,
     val username: String = "",
     @SerializedName("created_at")
     override val createdAt: String = "",

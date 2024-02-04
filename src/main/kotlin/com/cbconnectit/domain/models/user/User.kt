@@ -8,7 +8,7 @@ import java.util.UUID
 
 data class User(
     val id: UUID = UUID.randomUUID(),
-    override val fullName: String = "",
+    override val fullName: String? = null,
     val username: String = "",
     override val createdAt: String = "",
     override val updatedAt: String = "",
