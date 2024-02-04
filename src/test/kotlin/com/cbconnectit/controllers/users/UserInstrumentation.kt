@@ -4,6 +4,8 @@ import com.cbconnectit.data.dto.requests.user.InsertNewUser
 import com.cbconnectit.data.dto.requests.user.UpdatePassword
 import com.cbconnectit.data.dto.requests.user.UpdateUser
 import com.cbconnectit.domain.models.user.User
+import org.jetbrains.exposed.sql.javatime.CurrentDateTime
+import java.time.LocalDateTime
 import java.util.*
 
 object UserInstrumentation {
@@ -18,7 +20,7 @@ object UserInstrumentation {
 
     fun givenAValidInsertUser() = InsertNewUser("John Doe", "John.Doe@example.be", "Test1234", "Test1234")
 
-    fun givenAValidUser() = User(UUID.randomUUID(), "John Doe", "john.doe@example.be", "", "")
+    fun givenAValidUser() = User(UUID.randomUUID(), "John Doe", "john.doe@example.be", LocalDateTime.now(), LocalDateTime.now())
 
     fun givenAValidUpdateUser() = UpdateUser("John Doe", "john.doe@example.be")
 

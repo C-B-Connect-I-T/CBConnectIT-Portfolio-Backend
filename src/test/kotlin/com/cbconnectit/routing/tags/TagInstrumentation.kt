@@ -23,6 +23,11 @@ object TagInstrumentation {
 
     fun givenATag(name: String = "First tag") = run {
         val time = LocalDateTime.now().toDatabaseString()
-        TagDto(UUID.randomUUID().toString(), name, time, time)
+        TagDto(
+            id = UUID.randomUUID().toString(),
+            name = name,
+            createdAt = time,
+            updatedAt = time
+        )
     }
 }

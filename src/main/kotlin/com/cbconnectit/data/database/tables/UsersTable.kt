@@ -2,17 +2,17 @@ package com.cbconnectit.data.database.tables
 
 import com.cbconnectit.domain.models.user.User
 import com.cbconnectit.domain.models.user.UserRoles
-import com.cbconnectit.utils.toDatabaseString
 import org.jetbrains.exposed.dao.id.UUIDTable
 import org.jetbrains.exposed.sql.ResultRow
-import java.time.LocalDateTime
+import org.jetbrains.exposed.sql.javatime.CurrentDateTime
+import org.jetbrains.exposed.sql.javatime.datetime
 
 object UsersTable : UUIDTable() {
     val fullName = varchar("full_name", 100).nullable().default(null)
     val username = varchar("username", 100).uniqueIndex()
     val password = varchar("password", 255)
-    val createdAt = varchar("created_at", 255).default(LocalDateTime.now().toDatabaseString())
-    val updatedAt = varchar("updated_at", 255).default(LocalDateTime.now().toDatabaseString())
+    val createdAt = datetime("created_at").defaultExpression(CurrentDateTime)
+    val updatedAt = datetime("updated_at").defaultExpression(CurrentDateTime)
     val role = enumeration<UserRoles>("role").default(UserRoles.User)
 }
 

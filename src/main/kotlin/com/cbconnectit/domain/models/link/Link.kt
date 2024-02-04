@@ -16,10 +16,10 @@ data class Link(
 
 fun Link.toDto() = LinkDto(
     id = this.id.toString(),
-    url = url,
-    type = type,
-    createdAt = createdAt.toDatabaseString(),
-    updatedAt = updatedAt.toDatabaseString()
+    url = this.url,
+    type = this.type,
+    createdAt = this.createdAt.toDatabaseString(),
+    updatedAt = this.updatedAt.toDatabaseString()
 )
 
 enum class LinkType(val host: String? = null) {

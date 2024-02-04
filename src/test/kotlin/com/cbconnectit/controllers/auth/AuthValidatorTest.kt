@@ -4,6 +4,7 @@ import com.auth0.jwt.interfaces.Payload
 import com.cbconnectit.controllers.BaseControllerTest
 import com.cbconnectit.domain.interfaces.IUserDao
 import com.cbconnectit.domain.models.user.User
+import com.cbconnectit.domain.models.user.UserRoles
 import com.cbconnectit.modules.auth.validateUser
 import com.cbconnectit.modules.auth.validateUserIsAdmin
 import io.ktor.server.auth.jwt.*
@@ -73,7 +74,11 @@ class AuthValidatorTest : BaseControllerTest() {
 
         runBlocking {
             val response = jwt.validateUser(userDao)
-            assertThat(response).isEqualTo(User(UUID.fromString("00000000-0000-0000-0000-000000000001")))
+            assertThat(response).matches {
+                it is User &&
+                        it.id == UUID.fromString("00000000-0000-0000-0000-000000000001") &&
+                        it.role == UserRoles.User
+            }
         }
     }
 
@@ -131,7 +136,11 @@ class AuthValidatorTest : BaseControllerTest() {
 
         runBlocking {
             val response = jwt.validateUserIsAdmin(userDao)
-            assertThat(response).isEqualTo(User(UUID.fromString("00000000-0000-0000-0000-000000000001")))
+            assertThat(response).matches {
+                it is User &&
+                        it.id == UUID.fromString("00000000-0000-0000-0000-000000000001") &&
+                        it.role == UserRoles.User
+            }
         }
     }
 }
