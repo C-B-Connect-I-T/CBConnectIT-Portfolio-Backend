@@ -2,6 +2,7 @@ package com.cbconnectit.domain.models.link
 
 import com.cbconnectit.data.dto.requests.link.LinkDto
 import com.cbconnectit.utils.toDatabaseString
+import io.ktor.http.*
 import java.time.LocalDateTime
 import java.util.*
 
@@ -21,9 +22,18 @@ fun Link.toDto() = LinkDto(
     updatedAt = updatedAt.toDatabaseString()
 )
 
-enum class LinkType {
-    Unknown,
-    Github,
-    LinkedIn,
-    PlayStore
+enum class LinkType(val host: String? = null) {
+    Github("github.com"),
+    LinkedIn("linkedin"),
+    PlayStore("play.google"),
+    AppStore("apps.apple"),
+    Unknown; // This should be the last entry!!
+
+    companion object {
+        fun getTypeByUrl(url: Url): LinkType {
+            return LinkType.entries.firstOrNull {
+                url.host.contains(it.host ?: "", ignoreCase = true)
+            } ?: Unknown
+        }
+    }
 }
