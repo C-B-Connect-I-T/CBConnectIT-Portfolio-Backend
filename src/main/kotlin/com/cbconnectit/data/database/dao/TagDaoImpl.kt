@@ -49,4 +49,7 @@ class TagDaoImpl : ITagDao {
 
     override fun tagUnique(name: String): Boolean =
         TagsTable.select { TagsTable.name eq name }.empty()
+
+    override fun getListOfExistingTagIds(tagIds: List<UUID>): List<UUID> =
+        TagsTable.select { TagsTable.id inList tagIds }.map { it[TagsTable.id].value }
 }

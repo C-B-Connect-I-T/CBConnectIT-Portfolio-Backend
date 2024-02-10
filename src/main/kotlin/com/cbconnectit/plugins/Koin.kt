@@ -2,9 +2,11 @@ package com.cbconnectit.plugins
 
 import com.auth0.jwt.interfaces.JWTVerifier
 import com.cbconnectit.data.database.dao.LinkDaoImpl
+import com.cbconnectit.data.database.dao.ServiceDaoImpl
 import com.cbconnectit.data.database.dao.TagDaoImpl
 import com.cbconnectit.data.database.dao.UserDaoImpl
 import com.cbconnectit.domain.interfaces.ILinkDao
+import com.cbconnectit.domain.interfaces.IServiceDao
 import com.cbconnectit.domain.interfaces.ITagDao
 import com.cbconnectit.domain.interfaces.IUserDao
 import com.cbconnectit.modules.auth.AuthController
@@ -56,5 +58,6 @@ fun routeModule() = module {
 fun daoModule() = module {
     singleOf(::UserDaoImpl) { bind<IUserDao>() }
     singleOf(::TagDaoImpl) { bind<ITagDao>() }
+    singleOf(::ServiceDaoImpl) { bind<IServiceDao>() }
     singleOf(::LinkDaoImpl) { bind<ILinkDao>() }
 }
