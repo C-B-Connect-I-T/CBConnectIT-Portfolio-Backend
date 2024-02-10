@@ -14,4 +14,5 @@ interface ITagDao {
     fun updateTag(id: UUID, updateTag: UpdateTag): Tag?
     fun deleteTag(id: UUID): Boolean
     fun tagUnique(name: String): Boolean
+    fun getListOfExistingTagIds(tagIds: List<UUID>): List<UUID>
 }

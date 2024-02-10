@@ -195,4 +195,23 @@ internal class TagDaoImplTest : BaseDaoTest() {
         }
     }
     // </editor-fold>
+
+    // <editor-fold desc="List of Existing Tag IDs">
+    @Test
+    fun `getListOfExistingTagIds where ids do not exist, should return empty list`() {
+        withTables(TagsTable) {
+            val list = dao.getListOfExistingTagIds(listOf(UUID.fromString("10000000-0000-0000-0000-000000000000"), UUID.fromString("20000000-0000-0000-0000-000000000000")))
+            assertThat(list).isEmpty()
+        }
+    }
+
+    @Test
+    fun `getListOfExistingTagIds where some ids exist, should return empty list`() {
+        withTables(TagsTable) {
+            val id = dao.insertTag(givenAValidInsertTagBody())?.id
+            val list = dao.getListOfExistingTagIds(listOf(id!!, UUID.fromString("20000000-0000-0000-0000-000000000000")))
+            assertThat(list).hasSize(1)
+        }
+    }
+    // </editor-fold>
 }
