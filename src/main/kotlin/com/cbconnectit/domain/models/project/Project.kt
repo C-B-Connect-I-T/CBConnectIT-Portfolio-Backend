@@ -1,6 +1,8 @@
 package com.cbconnectit.domain.models.project
 
 import com.cbconnectit.data.dto.requests.project.ProjectDto
+import com.cbconnectit.domain.models.link.Link
+import com.cbconnectit.domain.models.tag.Tag
 import com.cbconnectit.utils.toDatabaseString
 import java.time.LocalDateTime
 import java.util.*
@@ -12,6 +14,8 @@ data class Project(
     val title: String = "",
     val shortDescription: String = "",
     val description: String = "",
+    val tags: List<Tag> = emptyList(),
+    val links: List<Link> = emptyList(),
     val createdAt: LocalDateTime = LocalDateTime.now(),
     val updatedAt: LocalDateTime = LocalDateTime.now()
 )

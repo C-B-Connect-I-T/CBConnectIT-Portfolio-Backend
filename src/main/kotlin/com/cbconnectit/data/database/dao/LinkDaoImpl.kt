@@ -1,7 +1,6 @@
 package com.cbconnectit.data.database.dao
 
 import com.cbconnectit.data.database.tables.LinksTable
-import com.cbconnectit.data.database.tables.TagsTable
 import com.cbconnectit.data.database.tables.toLink
 import com.cbconnectit.data.database.tables.toLinks
 import com.cbconnectit.data.dto.requests.link.InsertNewLink
@@ -34,11 +33,15 @@ class LinkDaoImpl : ILinkDao {
         LinksTable.update({ LinksTable.id eq id }) {
             it[url] = updateLink.url
             it[type] = linkType
-            it[TagsTable.updatedAt] = CurrentDateTime
+
+            it[updatedAt] = CurrentDateTime
         }
 
         return getLinkById(id)
     }
 
     override fun deleteLink(id: UUID): Boolean = LinksTable.deleteWhere { LinksTable.id eq id } > 0
+
+    override fun getListOfExistingLinkIds(linkIds: List<UUID>): List<UUID> =
+        LinksTable.select { LinksTable.id inList linkIds }.map { it[LinksTable.id].value }
 }

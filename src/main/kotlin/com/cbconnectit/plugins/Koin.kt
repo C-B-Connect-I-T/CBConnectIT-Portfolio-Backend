@@ -1,20 +1,16 @@
 package com.cbconnectit.plugins
 
 import com.auth0.jwt.interfaces.JWTVerifier
-import com.cbconnectit.data.database.dao.LinkDaoImpl
-import com.cbconnectit.data.database.dao.ServiceDaoImpl
-import com.cbconnectit.data.database.dao.TagDaoImpl
-import com.cbconnectit.data.database.dao.UserDaoImpl
-import com.cbconnectit.domain.interfaces.ILinkDao
-import com.cbconnectit.domain.interfaces.IServiceDao
-import com.cbconnectit.domain.interfaces.ITagDao
-import com.cbconnectit.domain.interfaces.IUserDao
+import com.cbconnectit.data.database.dao.*
+import com.cbconnectit.domain.interfaces.*
 import com.cbconnectit.modules.auth.AuthController
 import com.cbconnectit.modules.auth.AuthControllerImpl
 import com.cbconnectit.modules.auth.JwtConfig
 import com.cbconnectit.modules.auth.TokenProvider
 import com.cbconnectit.modules.links.LinkController
 import com.cbconnectit.modules.links.LinkControllerImpl
+import com.cbconnectit.modules.projects.ProjectController
+import com.cbconnectit.modules.projects.ProjectControllerImpl
 import com.cbconnectit.modules.services.ServiceController
 import com.cbconnectit.modules.services.ServiceControllerImpl
 import com.cbconnectit.modules.tags.TagController
@@ -43,19 +39,20 @@ fun Application.configureKoin() {
                         tokenProvider.verifier
                     }
                 },
-                routeModule(),
+                controllerModule(),
                 daoModule()
             )
         }
     }
 }
 
-fun routeModule() = module {
+fun controllerModule() = module {
     singleOf(::AuthControllerImpl) { bind<AuthController>() }
     singleOf(::UserControllerImpl) { bind<UserController>() }
     singleOf(::TagControllerImpl) { bind<TagController>() }
     singleOf(::LinkControllerImpl) { bind<LinkController>() }
     singleOf(::ServiceControllerImpl) { bind<ServiceController>() }
+    singleOf(::ProjectControllerImpl) { bind<ProjectController>() }
 }
 
 fun daoModule() = module {
@@ -63,4 +60,5 @@ fun daoModule() = module {
     singleOf(::TagDaoImpl) { bind<ITagDao>() }
     singleOf(::ServiceDaoImpl) { bind<IServiceDao>() }
     singleOf(::LinkDaoImpl) { bind<ILinkDao>() }
+    singleOf(::ProjectDaoImpl) { bind<IProjectDao>() }
 }

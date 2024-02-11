@@ -1,0 +1,90 @@
+package com.cbconnectit.modules.projects
+
+import com.cbconnectit.data.dto.requests.project.InsertNewProject
+import com.cbconnectit.data.dto.requests.project.ProjectDto
+import com.cbconnectit.data.dto.requests.project.UpdateProject
+import com.cbconnectit.domain.interfaces.ILinkDao
+import com.cbconnectit.domain.interfaces.IProjectDao
+import com.cbconnectit.domain.interfaces.ITagDao
+import com.cbconnectit.domain.models.project.toDto
+import com.cbconnectit.modules.BaseController
+import com.cbconnectit.plugins.dbQuery
+import com.cbconnectit.statuspages.*
+import org.koin.core.component.inject
+import java.util.*
+
+class ProjectControllerImpl : BaseController(), ProjectController {
+
+    private val projectDao by inject<IProjectDao>()
+    private val tagDao by inject<ITagDao>()
+    private val linkDao by inject<ILinkDao>()
+
+    override suspend fun getProjects(): List<ProjectDto> = dbQuery {
+        projectDao.getProjects().map { it.toDto() }
+    }
+
+    override suspend fun getProjectById(projectId: UUID): ProjectDto = dbQuery {
+        projectDao.getProjectById(projectId)?.toDto() ?: throw ErrorNotFound
+    }
+
+    override suspend fun postProject(insertNewProject: InsertNewProject): ProjectDto = dbQuery {
+        if (!insertNewProject.isValid) throw ErrorInvalidParameters
+
+        val tagUUIDs = insertNewProject.tags.map { UUID.fromString(it) }
+        val existingTagUUIDs = tagDao.getListOfExistingTagIds(tagUUIDs)
+
+        val linkUUIDS = insertNewProject.links.map { UUID.fromString(it) }
+        val existingLinkUUIDs = linkDao.getListOfExistingLinkIds(linkUUIDS)
+
+        // A project can only be added when all the added tags exist
+        if (existingTagUUIDs.count() != insertNewProject.tags.count()) {
+            val nonExistingIds = tagUUIDs.filterNot { existingTagUUIDs.contains(it) }
+            throw ErrorUnknownTagIdsForCreateProject(nonExistingIds)
+        }
+
+        // A project can only be added when all the added tags exist
+        if (existingLinkUUIDs.count() != insertNewProject.links.count()) {
+            val nonExistingIds = linkUUIDS.filterNot { existingLinkUUIDs.contains(it) }
+            throw ErrorUnknownLinkIdsForCreateProject(nonExistingIds)
+        }
+
+        projectDao.insertProject(insertNewProject)?.toDto() ?: throw ErrorFailedCreate
+    }
+
+    override suspend fun updateProjectById(projectId: UUID, updateProject: UpdateProject): ProjectDto = dbQuery {
+        if (!updateProject.isValid) throw ErrorInvalidParameters
+
+        val tagUUIDs = updateProject.tags.map { UUID.fromString(it) }
+        val existingTagUUIDs = tagDao.getListOfExistingTagIds(tagUUIDs)
+
+        val linkUUIDS = updateProject.links.map { UUID.fromString(it) }
+        val existingLinkUUIDs = linkDao.getListOfExistingLinkIds(linkUUIDS)
+
+        // A project can only be added when all the added tags exist
+        if (existingTagUUIDs.count() != updateProject.tags.count()) {
+            val nonExistingIds = tagUUIDs.filterNot { existingTagUUIDs.contains(it) }
+            throw ErrorUnknownTagIdsForUpdateProject(nonExistingIds)
+        }
+
+        // A project can only be added when all the added tags exist
+        if (existingLinkUUIDs.count() != updateProject.links.count()) {
+            val nonExistingIds = linkUUIDS.filterNot { existingLinkUUIDs.contains(it) }
+            throw ErrorUnknownLinkIdsForUpdateProject(nonExistingIds)
+        }
+
+        projectDao.updateProject(projectId, updateProject)?.toDto() ?: throw ErrorFailedUpdate
+    }
+
+    override suspend fun deleteProjectById(projectId: UUID) = dbQuery {
+        val deleted = projectDao.deleteProject(projectId)
+        if (!deleted) throw ErrorFailedDelete
+    }
+}
+
+interface ProjectController {
+    suspend fun getProjects(): List<ProjectDto>
+    suspend fun getProjectById(projectId: UUID): ProjectDto
+    suspend fun postProject(insertNewProject: InsertNewProject): ProjectDto
+    suspend fun updateProjectById(projectId: UUID, updateProject: UpdateProject): ProjectDto
+    suspend fun deleteProjectById(projectId: UUID)
+}
