@@ -128,4 +128,23 @@ internal class LinkDaoImplTest : BaseDaoTest() {
         }
     }
     // </editor-fold>
+
+    // <editor-fold desc="List of Existing Tag IDs">
+    @Test
+    fun `getListOfExistingLinkIds where ids do not exist, should return empty list`() {
+        withTables(LinksTable) {
+            val list = dao.getListOfExistingLinkIds(listOf(UUID.fromString("10000000-0000-0000-0000-000000000000"), UUID.fromString("20000000-0000-0000-0000-000000000000")))
+            assertThat(list).isEmpty()
+        }
+    }
+
+    @Test
+    fun `getListOfExistingLinkIds where some ids exist, should return list of existing items`() {
+        withTables(LinksTable) {
+            val id = dao.insertLink(givenAValidInsertLinkBody(), LinkType.Unknown)?.id
+            val list = dao.getListOfExistingLinkIds(listOf(id!!, UUID.fromString("20000000-0000-0000-0000-000000000000")))
+            assertThat(list).hasSize(1)
+        }
+    }
+    // </editor-fold>
 }

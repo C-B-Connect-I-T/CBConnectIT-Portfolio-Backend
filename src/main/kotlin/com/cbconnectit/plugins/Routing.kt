@@ -2,6 +2,7 @@ package com.cbconnectit.plugins
 
 import com.cbconnectit.modules.auth.authRouting
 import com.cbconnectit.modules.links.linkRouting
+import com.cbconnectit.modules.projects.projectRouting
 import com.cbconnectit.modules.services.serviceRouting
 import com.cbconnectit.modules.tags.tagRouting
 import com.cbconnectit.modules.users.userRouting
@@ -42,6 +43,7 @@ fun Application.configureRouting() {
             tagRouting()
             linkRouting()
             serviceRouting()
+            projectRouting()
         }
     }
 }

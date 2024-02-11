@@ -42,6 +42,18 @@ data class ErrorUnknownTagIdsForCreate(private val ids: List<UUID>) :
 data class ErrorUnknownTagIdsForUpdate(private val ids: List<UUID>) :
     ApiException("unknown_ids_for_update", "Can't update service with unknown tag ${ids.joinToString(", ")}", HttpStatusCode.BadRequest)
 
+data class ErrorUnknownLinkIdsForCreateProject(private val ids: List<UUID>) :
+    ApiException("unknown_ids_for_create", "Can't create project with unknown links ${ids.joinToString(", ")}", HttpStatusCode.BadRequest)
+
+data class ErrorUnknownLinkIdsForUpdateProject(private val ids: List<UUID>) :
+    ApiException("unknown_ids_for_update", "Can't update project with unknown links ${ids.joinToString(", ")}", HttpStatusCode.BadRequest)
+
+data class ErrorUnknownTagIdsForCreateProject(private val ids: List<UUID>) :
+    ApiException("unknown_ids_for_create", "Can't create project with unknown tags ${ids.joinToString(", ")}", HttpStatusCode.BadRequest)
+
+data class ErrorUnknownTagIdsForUpdateProject(private val ids: List<UUID>) :
+    ApiException("unknown_ids_for_update", "Can't update project with unknown tags ${ids.joinToString(", ")}", HttpStatusCode.BadRequest)
+
 fun StatusPagesConfig.generalStatusPages() {
     exception<ApiException> { call, cause ->
         call.respond(cause.statusCode, cause.toErrorResponse())
