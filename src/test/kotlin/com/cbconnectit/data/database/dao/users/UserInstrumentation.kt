@@ -1,4 +1,4 @@
-package com.cbconnectit.data.database.instrumentation
+package com.cbconnectit.data.database.dao.users
 
 import com.cbconnectit.data.dto.requests.user.InsertNewUser
 import com.cbconnectit.data.dto.requests.user.UpdateUser

@@ -1,8 +1,9 @@
-package com.cbconnectit.data.database.dao
+package com.cbconnectit.data.database.dao.users
 
+import com.cbconnectit.data.database.dao.BaseDaoTest
 import com.cbconnectit.data.database.dao.UserDaoImpl
-import com.cbconnectit.data.database.instrumentation.UserInstrumentation.givenAValidInsertUserBody
-import com.cbconnectit.data.database.instrumentation.UserInstrumentation.givenAValidUpdateUserBody
+import com.cbconnectit.data.database.dao.users.UserInstrumentation.givenAValidInsertUserBody
+import com.cbconnectit.data.database.dao.users.UserInstrumentation.givenAValidUpdateUserBody
 import com.cbconnectit.data.database.tables.UsersTable
 import com.cbconnectit.domain.models.user.UserRoles
 import kotlinx.coroutines.delay

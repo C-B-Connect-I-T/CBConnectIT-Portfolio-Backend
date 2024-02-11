@@ -1,7 +1,9 @@
-package com.cbconnectit.data.database.dao
+package com.cbconnectit.data.database.dao.services
 
-import com.cbconnectit.data.database.instrumentation.ServiceInstrumentation.givenAValidInsertServiceBody
-import com.cbconnectit.data.database.instrumentation.ServiceInstrumentation.givenAValidUpdateServiceBody
+import com.cbconnectit.data.database.dao.BaseDaoTest
+import com.cbconnectit.data.database.dao.ServiceDaoImpl
+import com.cbconnectit.data.database.dao.services.ServiceInstrumentation.givenAValidInsertServiceBody
+import com.cbconnectit.data.database.dao.services.ServiceInstrumentation.givenAValidUpdateServiceBody
 import com.cbconnectit.data.database.tables.ServicesTable
 import com.cbconnectit.data.database.tables.TagsTable
 import com.cbconnectit.domain.models.service.Service

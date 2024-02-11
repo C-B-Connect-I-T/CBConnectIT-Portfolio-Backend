@@ -1,4 +1,4 @@
-package com.cbconnectit.data.database.instrumentation
+package com.cbconnectit.data.database.dao.services
 
 import com.cbconnectit.data.dto.requests.service.InsertNewService
 import com.cbconnectit.data.dto.requests.service.UpdateService
