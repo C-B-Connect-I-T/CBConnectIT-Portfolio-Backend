@@ -15,6 +15,8 @@ import com.cbconnectit.modules.auth.JwtConfig
 import com.cbconnectit.modules.auth.TokenProvider
 import com.cbconnectit.modules.links.LinkController
 import com.cbconnectit.modules.links.LinkControllerImpl
+import com.cbconnectit.modules.services.ServiceController
+import com.cbconnectit.modules.services.ServiceControllerImpl
 import com.cbconnectit.modules.tags.TagController
 import com.cbconnectit.modules.tags.TagControllerImpl
 import com.cbconnectit.modules.users.UserController
@@ -53,6 +55,7 @@ fun routeModule() = module {
     singleOf(::UserControllerImpl) { bind<UserController>() }
     singleOf(::TagControllerImpl) { bind<TagController>() }
     singleOf(::LinkControllerImpl) { bind<LinkController>() }
+    singleOf(::ServiceControllerImpl) { bind<ServiceController>() }
 }
 
 fun daoModule() = module {

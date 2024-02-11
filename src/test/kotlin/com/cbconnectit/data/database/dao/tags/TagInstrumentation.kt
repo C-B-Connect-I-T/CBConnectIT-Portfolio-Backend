@@ -1,4 +1,4 @@
-package com.cbconnectit.data.database.instrumentation
+package com.cbconnectit.data.database.dao.tags
 
 import com.cbconnectit.data.dto.requests.tag.InsertNewTag
 import com.cbconnectit.data.dto.requests.tag.UpdateTag

@@ -1,4 +1,4 @@
-package com.cbconnectit.data.database.instrumentation
+package com.cbconnectit.data.database.dao.links
 
 import com.cbconnectit.data.dto.requests.link.InsertNewLink
 import com.cbconnectit.data.dto.requests.link.UpdateLink

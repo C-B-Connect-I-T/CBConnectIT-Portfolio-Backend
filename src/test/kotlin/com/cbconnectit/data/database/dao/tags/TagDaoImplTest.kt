@@ -1,9 +1,11 @@
-package com.cbconnectit.data.database.dao
+package com.cbconnectit.data.database.dao.tags
 
-import com.cbconnectit.data.database.instrumentation.TagInstrumentation.givenAValidInsertTagBody
-import com.cbconnectit.data.database.instrumentation.TagInstrumentation.givenAValidSecondInsertTagBody
-import com.cbconnectit.data.database.instrumentation.TagInstrumentation.givenAValidUpdateTagBody
-import com.cbconnectit.data.database.instrumentation.TagInstrumentation.givenAnUnknownTag
+import com.cbconnectit.data.database.dao.BaseDaoTest
+import com.cbconnectit.data.database.dao.TagDaoImpl
+import com.cbconnectit.data.database.dao.tags.TagInstrumentation.givenAValidInsertTagBody
+import com.cbconnectit.data.database.dao.tags.TagInstrumentation.givenAValidSecondInsertTagBody
+import com.cbconnectit.data.database.dao.tags.TagInstrumentation.givenAValidUpdateTagBody
+import com.cbconnectit.data.database.dao.tags.TagInstrumentation.givenAnUnknownTag
 import com.cbconnectit.data.database.tables.TagsTable
 import kotlinx.coroutines.delay
 import org.assertj.core.api.Assertions.assertThat

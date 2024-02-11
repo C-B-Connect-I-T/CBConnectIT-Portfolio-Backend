@@ -4,6 +4,7 @@ import io.ktor.http.*
 import io.ktor.server.plugins.statuspages.*
 import io.ktor.server.response.*
 import org.jetbrains.exposed.exceptions.ExposedSQLException
+import java.util.UUID
 
 data class InternalServerException(val body: String? = null) : ApiException("internal_error", "Internal error " + body.orEmpty(), HttpStatusCode.InternalServerError)
 
@@ -29,17 +30,17 @@ object ErrorMissingParameters : ApiException("missing_parameters", "Missing para
 object ErrorNotFound : ApiException("not_found", "The resource could not be found", HttpStatusCode.NotFound)
 object ErrorUnauthorized : ApiException("unauthorized", "The user is not authorized to perform this action", HttpStatusCode.Forbidden)
 
-data class ErrorUnknownCategoryIdsForCreate(private val ids: List<Int>) :
-    ApiException("unknown_ids_for_create", "Can't create project with unknown categories ${ids.joinToString(", ")}", HttpStatusCode.BadRequest)
+data class ErrorUnknownServiceIdsForCreate(private val ids: List<UUID>) :
+    ApiException("unknown_ids_for_create", "Can't create service with unknown parent service ${ids.joinToString(", ")}", HttpStatusCode.BadRequest)
 
-data class ErrorUnknownCategoryIdsForUpdate(private val ids: List<Int>) :
-    ApiException("unknown_ids_for_update", "Can't update project with unknown categories ${ids.joinToString(", ")}", HttpStatusCode.BadRequest)
+data class ErrorUnknownServiceIdsForUpdate(private val ids: List<UUID>) :
+    ApiException("unknown_ids_for_update", "Can't update service with unknown parent service ${ids.joinToString(", ")}", HttpStatusCode.BadRequest)
 
-data class ErrorUnknownTechstackIdsForCreate(private val ids: List<Int>) :
-    ApiException("unknown_ids_for_create", "Can't create project with unknown techstacks ${ids.joinToString(", ")}", HttpStatusCode.BadRequest)
+data class ErrorUnknownTagIdsForCreate(private val ids: List<UUID>) :
+    ApiException("unknown_ids_for_create", "Can't create service with unknown tag ${ids.joinToString(", ")}", HttpStatusCode.BadRequest)
 
-data class ErrorUnknownTechstackIdsForUpdate(private val ids: List<Int>) :
-    ApiException("unknown_ids_for_update", "Can't update project with unknown techstacks ${ids.joinToString(", ")}", HttpStatusCode.BadRequest)
+data class ErrorUnknownTagIdsForUpdate(private val ids: List<UUID>) :
+    ApiException("unknown_ids_for_update", "Can't update service with unknown tag ${ids.joinToString(", ")}", HttpStatusCode.BadRequest)
 
 fun StatusPagesConfig.generalStatusPages() {
     exception<ApiException> { call, cause ->

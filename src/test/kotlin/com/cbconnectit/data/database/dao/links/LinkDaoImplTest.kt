@@ -1,8 +1,10 @@
-package com.cbconnectit.data.database.dao
+package com.cbconnectit.data.database.dao.links
 
-import com.cbconnectit.data.database.instrumentation.LinkInstrumentation.givenAValidInsertLinkBody
-import com.cbconnectit.data.database.instrumentation.LinkInstrumentation.givenAValidSecondInsertLinkBody
-import com.cbconnectit.data.database.instrumentation.LinkInstrumentation.givenAValidUpdateLinkBody
+import com.cbconnectit.data.database.dao.BaseDaoTest
+import com.cbconnectit.data.database.dao.LinkDaoImpl
+import com.cbconnectit.data.database.dao.links.LinkInstrumentation.givenAValidInsertLinkBody
+import com.cbconnectit.data.database.dao.links.LinkInstrumentation.givenAValidSecondInsertLinkBody
+import com.cbconnectit.data.database.dao.links.LinkInstrumentation.givenAValidUpdateLinkBody
 import com.cbconnectit.data.database.tables.LinksTable
 import com.cbconnectit.domain.models.link.LinkType
 import kotlinx.coroutines.delay
