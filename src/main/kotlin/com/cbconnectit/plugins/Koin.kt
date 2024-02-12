@@ -61,4 +61,5 @@ fun daoModule() = module {
     singleOf(::ServiceDaoImpl) { bind<IServiceDao>() }
     singleOf(::LinkDaoImpl) { bind<ILinkDao>() }
     singleOf(::ProjectDaoImpl) { bind<IProjectDao>() }
+    singleOf(::JobPositionDaoImpl) { bind<IJobPositionDao>() }
 }
