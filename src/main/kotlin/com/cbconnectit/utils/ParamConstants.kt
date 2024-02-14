@@ -7,6 +7,7 @@ object ParamConstants {
     const val SERVICE_ID_KEY = "service_id"
     const val PROJECT_ID_KEY = "project_id"
     const val TAG_IDENTIFIER_KEY = "tag_identifier"
+    const val JOB_POSITION_ID_KEY = "job_position_identifier"
 
     const val LIMIT_KEY = "limit"
 }

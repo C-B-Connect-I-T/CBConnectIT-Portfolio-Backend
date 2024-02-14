@@ -10,7 +10,6 @@ import com.cbconnectit.routing.tags.TagInstrumentation.givenAValidInsertTag
 import com.cbconnectit.routing.tags.TagInstrumentation.givenAValidUpdateTagBody
 import com.cbconnectit.routing.tags.TagInstrumentation.givenTagList
 import com.cbconnectit.statuspages.ErrorDuplicateEntity
-import com.cbconnectit.utils.toDatabaseString
 import io.ktor.http.*
 import io.ktor.server.application.*
 import io.ktor.server.routing.*
@@ -19,11 +18,9 @@ import io.mockk.mockk
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.*
 import org.koin.dsl.module
-import java.time.LocalDateTime
-import java.util.UUID
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-class TagRoutingTest: BaseRoutingTest() {
+class TagRoutingTest : BaseRoutingTest() {
 
     private val tagController: TagController = mockk()
 
@@ -101,7 +98,7 @@ class TagRoutingTest: BaseRoutingTest() {
     ) {
         coEvery { tagController.getTagByIdentifier(any()) } throws Exception()
 
-        val exception = assertThrows<Exception>{
+        val exception = assertThrows<Exception> {
             doCall(HttpMethod.Get, "/tags/a63a20c4-14dd-4e11-9e87-5ab361a51f65")
         }
 
@@ -130,7 +127,7 @@ class TagRoutingTest: BaseRoutingTest() {
     ) {
         coEvery { tagController.getTagByIdentifier(any()) } throws Exception()
 
-        val exception = assertThrows<Exception>{
+        val exception = assertThrows<Exception> {
             doCall(HttpMethod.Get, "/tags/this-is-a-slug")
         }
 
