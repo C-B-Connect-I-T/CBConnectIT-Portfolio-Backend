@@ -29,7 +29,7 @@ class JobPositionDaoImpl : IJobPositionDao {
     }
 
     override fun updateJobPosition(id: UUID, updateJobPosition: UpdateJobPosition): JobPosition? {
-        JobPositionsTable.update({ JobPositionsTable.id eq id}) {
+        JobPositionsTable.update({ JobPositionsTable.id eq id }) {
             it[name] = updateJobPosition.name
 
             it[LinksTable.updatedAt] = CurrentDateTime
@@ -39,6 +39,9 @@ class JobPositionDaoImpl : IJobPositionDao {
     }
 
     override fun deleteJobPosition(id: UUID): Boolean = JobPositionsTable.deleteWhere { JobPositionsTable.id eq id } > 0
+
+    override fun jobPositionUnique(name: String): Boolean =
+        JobPositionsTable.select { JobPositionsTable.name eq name }.empty()
 
     override fun getListOfExistingJobPositionIds(jobPositionIds: List<UUID>): List<UUID> =
         JobPositionsTable.select { JobPositionsTable.id inList jobPositionIds }.map { it[JobPositionsTable.id].value }

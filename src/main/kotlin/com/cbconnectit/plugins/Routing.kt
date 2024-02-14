@@ -1,6 +1,7 @@
 package com.cbconnectit.plugins
 
 import com.cbconnectit.modules.auth.authRouting
+import com.cbconnectit.modules.jobPositions.jobPositionRouting
 import com.cbconnectit.modules.links.linkRouting
 import com.cbconnectit.modules.projects.projectRouting
 import com.cbconnectit.modules.services.serviceRouting
@@ -44,6 +45,7 @@ fun Application.configureRouting() {
             linkRouting()
             serviceRouting()
             projectRouting()
+            jobPositionRouting()
         }
     }
 }

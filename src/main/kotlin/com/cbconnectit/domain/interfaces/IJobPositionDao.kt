@@ -12,5 +12,6 @@ interface IJobPositionDao {
     fun insertJobPosition(insertNewJobPosition: InsertNewJobPosition): JobPosition?
     fun updateJobPosition(id: UUID, updateJobPosition: UpdateJobPosition): JobPosition?
     fun deleteJobPosition(id: UUID): Boolean
+    fun jobPositionUnique(name: String): Boolean
     fun getListOfExistingJobPositionIds(jobPositionIds: List<UUID>): List<UUID>
 }

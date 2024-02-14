@@ -195,7 +195,7 @@ class TagControllerTest : BaseControllerTest() {
     }
 
     @Test
-    fun `when updating specific tag where new data is not unique, we return valid tagDto`() {
+    fun `when updating specific tag where new data is not unique, we throw exception`() {
         val updateTag = givenAValidUpdateTag()
 
         coEvery { tagDao.tagUnique(any()) } returns false

@@ -7,6 +7,8 @@ import com.cbconnectit.modules.auth.AuthController
 import com.cbconnectit.modules.auth.AuthControllerImpl
 import com.cbconnectit.modules.auth.JwtConfig
 import com.cbconnectit.modules.auth.TokenProvider
+import com.cbconnectit.modules.jobPositions.JobPositionController
+import com.cbconnectit.modules.jobPositions.JobPositionControllerImpl
 import com.cbconnectit.modules.links.LinkController
 import com.cbconnectit.modules.links.LinkControllerImpl
 import com.cbconnectit.modules.projects.ProjectController
@@ -53,6 +55,7 @@ fun controllerModule() = module {
     singleOf(::LinkControllerImpl) { bind<LinkController>() }
     singleOf(::ServiceControllerImpl) { bind<ServiceController>() }
     singleOf(::ProjectControllerImpl) { bind<ProjectController>() }
+    singleOf(::JobPositionControllerImpl) { bind<JobPositionController>() }
 }
 
 fun daoModule() = module {
