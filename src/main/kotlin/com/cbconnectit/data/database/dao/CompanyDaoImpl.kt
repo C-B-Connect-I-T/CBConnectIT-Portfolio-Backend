@@ -1,29 +1,79 @@
 package com.cbconnectit.data.database.dao
 
-import com.cbconnectit.data.database.tables.CompaniesTable
-import com.cbconnectit.data.database.tables.LinksTable
-import com.cbconnectit.data.database.tables.toCompany
-import com.cbconnectit.data.database.tables.toCompanies
+import com.cbconnectit.data.database.tables.*
 import com.cbconnectit.data.dto.requests.company.InsertNewCompany
 import com.cbconnectit.data.dto.requests.company.UpdateCompany
 import com.cbconnectit.domain.interfaces.ICompanyDao
 import com.cbconnectit.domain.models.company.Company
+import com.cbconnectit.domain.models.link.Link
 import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
+import org.jetbrains.exposed.sql.SqlExpressionBuilder.notInList
 import org.jetbrains.exposed.sql.javatime.CurrentDateTime
 import java.util.*
 
 class CompanyDaoImpl : ICompanyDao {
-    override fun getCompanyById(id: UUID): Company? =
-        CompaniesTable.select { CompaniesTable.id eq id }.toCompany()
+    override fun getCompanyById(id: UUID): Company? {
+        val companyWithRelations = (CompaniesTable innerJoin CompaniesLinksPivotTable innerJoin LinksTable)
 
-    override fun getCompanies(): List<Company> =
-        CompaniesTable.selectAll().toCompanies()
+        val results = companyWithRelations.select { CompaniesTable.id eq id }
+        val links = parseLinks(results)
+
+        return results
+            .distinctBy { it[CompaniesTable.id].value }
+            .map { row ->
+                row.toCompany().copy(
+                    links = links[id]?.distinctBy { it.id } ?: emptyList()
+                )
+            }
+            .firstOrNull()
+    }
+
+    override fun getCompanies(): List<Company> {
+        val companyWithRelations = (CompaniesTable innerJoin CompaniesLinksPivotTable innerJoin LinksTable)
+
+        val results = companyWithRelations.selectAll()
+        val links = parseLinks(results)
+
+        return results
+            .distinctBy { it[CompaniesTable.id].value }
+            .map { row ->
+                val id = row[CompaniesTable.id].value
+                row.toCompany().copy(
+                    links = links[id]?.distinctBy { it.id } ?: emptyList()
+                )
+            }
+    }
+
+    private fun parseLinks(results: Query): MutableMap<UUID, List<Link>> {
+        val newMap = results
+            .distinctBy { it.getOrNull(LinksTable.id)?.value }
+            .fold(mutableMapOf<UUID, List<Link>>()) { map, resultRow ->
+                val projectId = resultRow[ProjectsTable.id].value
+
+                val link = if (resultRow.getOrNull(LinksTable.id) != null) {
+                    resultRow.toLink()
+                } else null
+
+                val current = map.getOrDefault(projectId, emptyList())
+                map[projectId] = current.toMutableList() + listOfNotNull(link)
+                map
+            }
+
+        return newMap
+    }
 
     override fun insertCompany(insertNewCompany: InsertNewCompany): Company? {
         val id = CompaniesTable.insertAndGetId {
             it[name] = insertNewCompany.name
         }.value
+
+        insertNewCompany.links?.forEach { linkId ->
+            CompaniesLinksPivotTable.insert {
+                it[this.linkId] = UUID.fromString(linkId)
+                it[companyId] = id
+            }
+        }
 
         return getCompanyById(id)
     }
@@ -35,10 +85,26 @@ class CompanyDaoImpl : ICompanyDao {
             it[LinksTable.updatedAt] = CurrentDateTime
         }
 
+        CompaniesLinksPivotTable.deleteWhere {
+            companyId eq id and (linkId notInList (updateCompany.links ?: emptyList()).map { linkId -> UUID.fromString(linkId) })
+        }
+
+        updateCompany.links?.forEach { linkId ->
+            CompaniesLinksPivotTable.insert {
+                it[this.linkId] = UUID.fromString(linkId)
+                it[companyId] = id
+            }
+        }
+
         return getCompanyById(id)
     }
 
-    override fun deleteCompany(id: UUID): Boolean = CompaniesTable.deleteWhere { CompaniesTable.id eq id } > 0
+    override fun deleteCompany(id: UUID): Boolean {
+        val result = CompaniesTable.deleteWhere { CompaniesTable.id eq id } > 0
+        val result2 = CompaniesLinksPivotTable.deleteWhere { companyId eq id } > 0
+
+        return result && result2
+    }
 
     override fun companyUnique(name: String): Boolean =
         CompaniesTable.select { CompaniesTable.name eq name }.empty()

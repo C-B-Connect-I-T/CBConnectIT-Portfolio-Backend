@@ -4,6 +4,7 @@ import com.cbconnectit.data.dto.requests.company.InsertNewCompany
 import com.cbconnectit.data.dto.requests.company.CompanyDto
 import com.cbconnectit.data.dto.requests.company.UpdateCompany
 import com.cbconnectit.domain.interfaces.ICompanyDao
+import com.cbconnectit.domain.interfaces.ILinkDao
 import com.cbconnectit.domain.models.company.toDto
 import com.cbconnectit.modules.BaseController
 import com.cbconnectit.modules.companies.CompanyController
@@ -15,6 +16,7 @@ import java.util.*
 class CompanyControllerImpl : BaseController(), CompanyController {
 
     private val companyDao by inject<ICompanyDao>()
+    private val linkDao by inject<ILinkDao>()
 
     override suspend fun getCompanies(): List<CompanyDto> = dbQuery {
         companyDao.getCompanies().map { it.toDto() }
@@ -30,6 +32,16 @@ class CompanyControllerImpl : BaseController(), CompanyController {
         val positionUnique = companyDao.companyUnique(insertNewCompany.name)
         if (!positionUnique) throw ErrorDuplicateEntity
 
+        val links = insertNewCompany.links ?: emptyList()
+        val linkUUIDS = links.map { UUID.fromString(it) }
+        val existingLinkUUIDs = linkDao.getListOfExistingLinkIds(linkUUIDS)
+
+        // A project can only be added when all the added tags exist
+        if (existingLinkUUIDs.count() != links.count()) {
+            val nonExistingIds = linkUUIDS.filterNot { existingLinkUUIDs.contains(it) }
+            throw ErrorUnknownLinkIdsForCreateCompany(nonExistingIds)
+        }
+
         companyDao.insertCompany(insertNewCompany)?.toDto() ?: throw ErrorFailedCreate
     }
 
@@ -38,6 +50,16 @@ class CompanyControllerImpl : BaseController(), CompanyController {
 
         val positionUnique = companyDao.companyUnique(updateCompany.name)
         if (!positionUnique) throw ErrorDuplicateEntity
+
+        val links = updateCompany.links ?: emptyList()
+        val linkUUIDS = links.map { UUID.fromString(it) }
+        val existingLinkUUIDs = linkDao.getListOfExistingLinkIds(linkUUIDS)
+
+        // A project can only be added when all the added tags exist
+        if (existingLinkUUIDs.count() != links.count()) {
+            val nonExistingIds = linkUUIDS.filterNot { existingLinkUUIDs.contains(it) }
+            throw ErrorUnknownLinkIdsForCreateCompany(nonExistingIds)
+        }
 
         companyDao.updateCompany(companyId, updateCompany)?.toDto() ?: throw ErrorFailedUpdate
     }
