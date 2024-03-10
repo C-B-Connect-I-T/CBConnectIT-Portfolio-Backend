@@ -2,6 +2,7 @@ package com.cbconnectit.domain.models.company
 
 import com.cbconnectit.data.dto.requests.company.CompanyDto
 import com.cbconnectit.domain.models.link.Link
+import com.cbconnectit.domain.models.link.toDto
 import com.cbconnectit.utils.toDatabaseString
 import java.time.LocalDateTime
 import java.util.*
@@ -17,6 +18,7 @@ data class Company(
 fun Company.toDto() = CompanyDto(
     id = this.id.toString(),
     name = this.name,
+    links = this.links.map { it.toDto() },
     createdAt = this.createdAt.toDatabaseString(),
     updatedAt = this.updatedAt.toDatabaseString()
 )

@@ -14,7 +14,7 @@ import java.util.*
 
 class CompanyDaoImpl : ICompanyDao {
     override fun getCompanyById(id: UUID): Company? {
-        val companyWithRelations = (CompaniesTable innerJoin CompaniesLinksPivotTable innerJoin LinksTable)
+        val companyWithRelations = (CompaniesTable leftJoin CompaniesLinksPivotTable leftJoin LinksTable)
 
         val results = companyWithRelations.select { CompaniesTable.id eq id }
         val links = parseLinks(results)
@@ -30,7 +30,7 @@ class CompanyDaoImpl : ICompanyDao {
     }
 
     override fun getCompanies(): List<Company> {
-        val companyWithRelations = (CompaniesTable innerJoin CompaniesLinksPivotTable innerJoin LinksTable)
+        val companyWithRelations = (CompaniesTable leftJoin CompaniesLinksPivotTable leftJoin LinksTable)
 
         val results = companyWithRelations.selectAll()
         val links = parseLinks(results)
@@ -49,14 +49,14 @@ class CompanyDaoImpl : ICompanyDao {
         val newMap = results
             .distinctBy { it.getOrNull(LinksTable.id)?.value }
             .fold(mutableMapOf<UUID, List<Link>>()) { map, resultRow ->
-                val projectId = resultRow[ProjectsTable.id].value
+                val companyId = resultRow[CompaniesTable.id].value
 
                 val link = if (resultRow.getOrNull(LinksTable.id) != null) {
                     resultRow.toLink()
                 } else null
 
-                val current = map.getOrDefault(projectId, emptyList())
-                map[projectId] = current.toMutableList() + listOfNotNull(link)
+                val current = map.getOrDefault(companyId, emptyList())
+                map[companyId] = current.toMutableList() + listOfNotNull(link)
                 map
             }
 
