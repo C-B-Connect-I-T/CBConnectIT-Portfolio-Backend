@@ -130,7 +130,7 @@ internal class JobPositionDaoImplTest : BaseDaoTest() {
 
     // <editor-fold desc="Check if position is unique">
     @Test
-    fun `obPositionUnique() for id that exists, return false`() {
+    fun `jobPositionUnique() for id that exists, return false`() {
         withTables(JobPositionsTable) {
             dao.insertJobPosition(givenAValidInsertJobPositionBody())
             val unique = dao.jobPositionUnique(givenAValidInsertJobPositionBody().name)
@@ -139,7 +139,7 @@ internal class JobPositionDaoImplTest : BaseDaoTest() {
     }
 
     @Test
-    fun `obPositionUnique() for id that does not exist, return true`() {
+    fun `jobPositionUnique() for id that does not exist, return true`() {
         withTables(JobPositionsTable) {
             dao.insertJobPosition(givenAValidInsertJobPositionBody())
             val unique = dao.jobPositionUnique(givenAValidSecondInsertJobPositionBody().name)
