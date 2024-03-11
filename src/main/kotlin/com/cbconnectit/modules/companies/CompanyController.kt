@@ -58,7 +58,7 @@ class CompanyControllerImpl : BaseController(), CompanyController {
         // A project can only be added when all the added tags exist
         if (existingLinkUUIDs.count() != links.count()) {
             val nonExistingIds = linkUUIDS.filterNot { existingLinkUUIDs.contains(it) }
-            throw ErrorUnknownLinkIdsForCreateCompany(nonExistingIds)
+            throw ErrorUnknownLinkIdsForUpdateCompany(nonExistingIds)
         }
 
         companyDao.updateCompany(companyId, updateCompany)?.toDto() ?: throw ErrorFailedUpdate
