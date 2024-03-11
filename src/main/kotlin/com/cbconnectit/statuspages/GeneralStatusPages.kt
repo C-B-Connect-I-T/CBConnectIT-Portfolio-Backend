@@ -7,8 +7,8 @@ import org.jetbrains.exposed.exceptions.ExposedSQLException
 import java.util.UUID
 
 data class InternalServerException(val body: String? = null) : ApiException("internal_error", "Internal error " + body.orEmpty(), HttpStatusCode.InternalServerError)
-
-object InvalidContributorException : ApiException("invalid_contributor", "Invalid contributor", HttpStatusCode.BadRequest)
+//
+//object InvalidContributorException : ApiException("invalid_contributor", "Invalid contributor", HttpStatusCode.BadRequest)
 
 object ErrorMissingBody : ApiException("missing_body", "A body should be provided for this call to work, please check what is going wrong", HttpStatusCode.BadRequest)
 object ErrorDuplicateEntity : ApiException("duplicate_entity", "The entity already exists", HttpStatusCode.Conflict)
@@ -22,13 +22,13 @@ object ErrorFailedUpdate : ApiException("update_failed", "The resource could not
 object ErrorInvalidCredentials : ApiException("invalid_credentials", "The credentials provided are invalid", HttpStatusCode.Unauthorized)
 object ErrorInvalidParameters : ApiException("invalid_parameters", "The parameters provided are invalid", HttpStatusCode.BadRequest)
 
-object ErrorInvalidRequest : ApiException("invalid_request", "Invalid request malformed authorization header", HttpStatusCode.BadRequest)
-object ErrorInvalidScope : ApiException("invalid_scope", "Invalid scope Requested scope is invalid", HttpStatusCode.BadRequest)
-object ErrorInvalidToken : ApiException("invalid_scope", "The token provided is not valid", HttpStatusCode.BadRequest)
+//object ErrorInvalidRequest : ApiException("invalid_request", "Invalid request malformed authorization header", HttpStatusCode.BadRequest)
+//object ErrorInvalidScope : ApiException("invalid_scope", "Invalid scope Requested scope is invalid", HttpStatusCode.BadRequest)
+//object ErrorInvalidToken : ApiException("invalid_scope", "The token provided is not valid", HttpStatusCode.BadRequest)
 object ErrorInvalidUUID : ApiException("invalid_uuid", "The uuid provided is not a valid uuid", HttpStatusCode.BadRequest)
 object ErrorMissingParameters : ApiException("missing_parameters", "Missing parameters for required field", HttpStatusCode.BadRequest)
 object ErrorNotFound : ApiException("not_found", "The resource could not be found", HttpStatusCode.NotFound)
-object ErrorUnauthorized : ApiException("unauthorized", "The user is not authorized to perform this action", HttpStatusCode.Forbidden)
+//object ErrorUnauthorized : ApiException("unauthorized", "The user is not authorized to perform this action", HttpStatusCode.Forbidden)
 
 data class ErrorUnknownServiceIdsForCreate(private val ids: List<UUID>) : ApiException("unknown_ids_for_create", "Can't create service with unknown parent service ${ids.joinToString(", ")}", HttpStatusCode.BadRequest)
 
@@ -50,13 +50,26 @@ data class ErrorUnknownLinkIdsForCreateCompany(private val ids: List<UUID>) : Ap
 
 data class ErrorUnknownLinkIdsForUpdateCompany(private val ids: List<UUID>) : ApiException("unknown_ids_for_update", "Can't update company with unknown links ${ids.joinToString(", ")}", HttpStatusCode.BadRequest)
 
-data class ErrorUnknownCompanyIdsForCreate(private val ids: List<UUID>) : ApiException("unknown_ids_for_create", "Can't create testimonial with unknown company ${ids.joinToString(", ")}", HttpStatusCode.BadRequest)
+data class ErrorUnknownCompanyIdsForCreateTestimonial(private val ids: List<UUID>) : ApiException("unknown_ids_for_create", "Can't create testimonial with unknown company ${ids.joinToString(", ")}", HttpStatusCode.BadRequest)
 
-data class ErrorUnknownCompanyIdsForUpdate(private val ids: List<UUID>) : ApiException("unknown_ids_for_update", "Can't update testimonial with unknown company ${ids.joinToString(", ")}", HttpStatusCode.BadRequest)
+data class ErrorUnknownCompanyIdsForUpdateTestimonial(private val ids: List<UUID>) : ApiException("unknown_ids_for_update", "Can't update testimonial with unknown company ${ids.joinToString(", ")}", HttpStatusCode.BadRequest)
 
-data class ErrorUnknownJobPositionIdsForCreate(private val ids: List<UUID>) : ApiException("unknown_ids_for_create", "Can't create testimonial with unknown job position ${ids.joinToString(", ")}", HttpStatusCode.BadRequest)
+data class ErrorUnknownJobPositionIdsForCreateTestimonial(private val ids: List<UUID>) : ApiException("unknown_ids_for_create", "Can't create testimonial with unknown job position ${ids.joinToString(", ")}", HttpStatusCode.BadRequest)
 
-data class ErrorUnknownJobPositionIdsForUpdate(private val ids: List<UUID>) : ApiException("unknown_ids_for_update", "Can't update testimonial with unknown job position ${ids.joinToString(", ")}", HttpStatusCode.BadRequest)
+data class ErrorUnknownJobPositionIdsForUpdateTestimonial(private val ids: List<UUID>) : ApiException("unknown_ids_for_update", "Can't update testimonial with unknown job position ${ids.joinToString(", ")}", HttpStatusCode.BadRequest)
+
+data class ErrorUnknownCompanyIdsForCreateExperience(private val ids: List<UUID>) : ApiException("unknown_ids_for_create", "Can't create experience with unknown company ${ids.joinToString(", ")}", HttpStatusCode.BadRequest)
+
+data class ErrorUnknownCompanyIdsForUpdateExperience(private val ids: List<UUID>) : ApiException("unknown_ids_for_update", "Can't update experience with unknown company ${ids.joinToString(", ")}", HttpStatusCode.BadRequest)
+
+data class ErrorUnknownJobPositionIdsForCreateExperience(private val ids: List<UUID>) : ApiException("unknown_ids_for_create", "Can't create experience with unknown job position ${ids.joinToString(", ")}", HttpStatusCode.BadRequest)
+
+data class ErrorUnknownJobPositionIdsForUpdateExperience(private val ids: List<UUID>) : ApiException("unknown_ids_for_update", "Can't update experience with unknown job position ${ids.joinToString(", ")}", HttpStatusCode.BadRequest)
+
+data class ErrorUnknownTagIdsForCreateExperience(private val ids: List<UUID>) : ApiException("unknown_ids_for_create", "Can't create experience with unknown tags ${ids.joinToString(", ")}", HttpStatusCode.BadRequest)
+
+data class ErrorUnknownTagIdsForUpdateExperience(private val ids: List<UUID>) : ApiException("unknown_ids_for_update", "Can't update experience with unknown tags ${ids.joinToString(", ")}", HttpStatusCode.BadRequest)
+
 
 fun StatusPagesConfig.generalStatusPages() {
     exception<ApiException> { call, cause ->

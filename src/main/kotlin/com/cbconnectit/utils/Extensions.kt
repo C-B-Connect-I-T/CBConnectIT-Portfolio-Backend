@@ -34,6 +34,7 @@ fun ApplicationCall.getJobPositionId(): UUID = parameters[ParamConstants.JOB_POS
 fun ApplicationCall.getCompanyId(): UUID = parameters[ParamConstants.COMPANY_ID_KEY]?.let { UUID.fromString(it) } ?: throw ErrorInvalidUUID
 fun ApplicationCall.getServiceId(): UUID = parameters[ParamConstants.SERVICE_ID_KEY]?.let { UUID.fromString(it) } ?: throw ErrorInvalidUUID
 fun ApplicationCall.getTestimonialId(): UUID = parameters[ParamConstants.TESTIMONIAL_ID_KEY]?.let { UUID.fromString(it) } ?: throw ErrorInvalidUUID
+fun ApplicationCall.getExperienceId(): UUID = parameters[ParamConstants.EXPERIENCE_ID_KEY]?.let { UUID.fromString(it) } ?: throw ErrorInvalidUUID
 fun ApplicationCall.getProjectId(): UUID = parameters[ParamConstants.PROJECT_ID_KEY]?.let { UUID.fromString(it) } ?: throw ErrorInvalidUUID
 fun ApplicationCall.getTagIdentifier(): String = parameters[ParamConstants.TAG_IDENTIFIER_KEY] ?: throw ErrorInvalidParameters
 //fun ApplicationCall.getProjectId(): UUID = parameters[ParamConstants.PROJECT_ID_KEY]?.toIntOrNull() ?: throw ErrorInvalidUUID

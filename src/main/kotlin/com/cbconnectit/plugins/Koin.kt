@@ -19,6 +19,8 @@ import com.cbconnectit.modules.services.ServiceController
 import com.cbconnectit.modules.services.ServiceControllerImpl
 import com.cbconnectit.modules.testimonials.TestimonialController
 import com.cbconnectit.modules.testimonials.TestimonialControllerImpl
+import com.cbconnectit.modules.experiences.ExperienceController
+import com.cbconnectit.modules.experiences.ExperienceControllerImpl
 import com.cbconnectit.modules.tags.TagController
 import com.cbconnectit.modules.tags.TagControllerImpl
 import com.cbconnectit.modules.users.UserController
@@ -62,6 +64,7 @@ fun controllerModule() = module {
     singleOf(::JobPositionControllerImpl) { bind<JobPositionController>() }
     singleOf(::CompanyControllerImpl) { bind<CompanyController>() }
     singleOf(::TestimonialControllerImpl) { bind<TestimonialController>() }
+    singleOf(::ExperienceControllerImpl) { bind<ExperienceController>() }
 }
 
 fun daoModule() = module {
@@ -72,5 +75,6 @@ fun daoModule() = module {
     singleOf(::ProjectDaoImpl) { bind<IProjectDao>() }
     singleOf(::JobPositionDaoImpl) { bind<IJobPositionDao>() }
     singleOf(::CompanyDaoImpl) { bind<ICompanyDao>() }
+    singleOf(::ExperienceDaoImpl) { bind<IExperienceDao>() }
     singleOf(::TestimonialDaoImpl) { bind<ITestimonialDao>() }
 }

@@ -124,7 +124,7 @@ class TestimonialControllerTest : BaseControllerTest() {
         coEvery { jobPositionDao.getListOfExistingJobPositionIds(any()) } returns listOf(UUID.fromString("00000000-0000-0000-0000-000000000001"))
         coEvery { testimonialDao.insertTestimonial(any()) } returns createdTestimonial
 
-        assertThrows<ErrorUnknownCompanyIdsForCreate> {
+        assertThrows<ErrorUnknownCompanyIdsForCreateTestimonial> {
             runBlocking { controller.postTestimonial(postTestimonial) }
         }
     }
@@ -138,7 +138,7 @@ class TestimonialControllerTest : BaseControllerTest() {
         coEvery { jobPositionDao.getListOfExistingJobPositionIds(any()) } returns listOf()
         coEvery { testimonialDao.insertTestimonial(any()) } returns createdTestimonial
 
-        assertThrows<ErrorUnknownJobPositionIdsForCreate> {
+        assertThrows<ErrorUnknownJobPositionIdsForCreateTestimonial> {
             runBlocking { controller.postTestimonial(postTestimonial) }
         }
     }
@@ -184,7 +184,7 @@ class TestimonialControllerTest : BaseControllerTest() {
         coEvery { jobPositionDao.getListOfExistingJobPositionIds(any()) } returns listOf(UUID.fromString("00000000-0000-0000-0000-000000000001"))
         coEvery { testimonialDao.updateTestimonial(any(), any()) } returns createdTestimonial
 
-        assertThrows<ErrorUnknownCompanyIdsForUpdate> {
+        assertThrows<ErrorUnknownCompanyIdsForUpdateTestimonial> {
             runBlocking { controller.updateTestimonialById(UUID.randomUUID(), updateTestimonial) }
         }
     }
@@ -198,7 +198,7 @@ class TestimonialControllerTest : BaseControllerTest() {
         coEvery { jobPositionDao.getListOfExistingJobPositionIds(any()) } returns listOf()
         coEvery { testimonialDao.updateTestimonial(any(), any()) } returns createdTestimonial
 
-        assertThrows<ErrorUnknownJobPositionIdsForUpdate> {
+        assertThrows<ErrorUnknownJobPositionIdsForUpdateTestimonial> {
             runBlocking { controller.updateTestimonialById(UUID.randomUUID(), updateTestimonial) }
         }
     }
