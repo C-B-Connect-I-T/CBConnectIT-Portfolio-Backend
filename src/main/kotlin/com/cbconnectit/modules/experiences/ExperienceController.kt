@@ -6,6 +6,7 @@ import com.cbconnectit.data.dto.requests.experience.UpdateExperience
 import com.cbconnectit.domain.interfaces.ICompanyDao
 import com.cbconnectit.domain.interfaces.IJobPositionDao
 import com.cbconnectit.domain.interfaces.IExperienceDao
+import com.cbconnectit.domain.interfaces.ITagDao
 import com.cbconnectit.domain.models.experience.toDto
 import com.cbconnectit.modules.BaseController
 import com.cbconnectit.plugins.dbQuery
@@ -18,6 +19,7 @@ class ExperienceControllerImpl: BaseController(), ExperienceController {
     private val experienceDao by inject<IExperienceDao>()
     private val companyDao by inject<ICompanyDao>()
     private val jobPositionDao by inject<IJobPositionDao>()
+    private val tagDao by inject<ITagDao>()
 
     override suspend fun getExperiences(): List<ExperienceDto> = dbQuery{
         experienceDao.getExperiences().map { it.toDto() }
@@ -33,13 +35,23 @@ class ExperienceControllerImpl: BaseController(), ExperienceController {
         val companyIds = insertNewExperience.companyUuid.let {  companyDao.getListOfExistingCompanyIds(listOf(it)) }
 
         if (companyIds.count() != 1) {
-            throw ErrorUnknownCompanyIdsForCreate(listOf(insertNewExperience.companyUuid))
+            throw ErrorUnknownCompanyIdsForCreateExperience(listOf(insertNewExperience.companyUuid))
         }
 
         val jobPositionIds = insertNewExperience.jobPositionUuid.let {  jobPositionDao.getListOfExistingJobPositionIds(listOf(it)) }
 
         if (jobPositionIds.count() != 1) {
-            throw ErrorUnknownJobPositionIdsForCreate(listOf(insertNewExperience.jobPositionUuid))
+            throw ErrorUnknownJobPositionIdsForCreateExperience(listOf(insertNewExperience.jobPositionUuid))
+        }
+
+        val tags = insertNewExperience.tags
+        val tagUUIDS = tags.map { UUID.fromString(it) }
+        val existingLinkUUIDs = tagDao.getListOfExistingTagIds(tagUUIDS)
+
+        // A project can only be added when all the added tags exist
+        if (existingLinkUUIDs.count() != tags.count()) {
+            val nonExistingIds = tagUUIDS.filterNot { existingLinkUUIDs.contains(it) }
+            throw ErrorUnknownTagIdsForCreateExperience(nonExistingIds)
         }
 
         experienceDao.insertExperience(insertNewExperience)?.toDto() ?: throw  ErrorFailedCreate
@@ -51,13 +63,23 @@ class ExperienceControllerImpl: BaseController(), ExperienceController {
         val companyIds = updateExperience.companyUuid.let {  companyDao.getListOfExistingCompanyIds(listOf(it)) }
 
         if (companyIds.count() != 1) {
-            throw ErrorUnknownCompanyIdsForUpdate(listOf(updateExperience.companyUuid))
+            throw ErrorUnknownCompanyIdsForUpdateExperience(listOf(updateExperience.companyUuid))
         }
 
         val jobPositionIds = updateExperience.jobPositionUuid.let {  jobPositionDao.getListOfExistingJobPositionIds(listOf(it)) }
 
         if (jobPositionIds.count() != 1) {
-            throw ErrorUnknownJobPositionIdsForUpdate(listOf(updateExperience.jobPositionUuid))
+            throw ErrorUnknownJobPositionIdsForUpdateExperience(listOf(updateExperience.jobPositionUuid))
+        }
+
+        val tags = updateExperience.tags
+        val tagUUIDS = tags.map { UUID.fromString(it) }
+        val existingLinkUUIDs = tagDao.getListOfExistingTagIds(tagUUIDS)
+
+        // A project can only be added when all the added tags exist
+        if (existingLinkUUIDs.count() != tags.count()) {
+            val nonExistingIds = tagUUIDS.filterNot { existingLinkUUIDs.contains(it) }
+            throw ErrorUnknownTagIdsForUpdateExperience(nonExistingIds)
         }
 
         experienceDao.updateExperience(experienceId, updateExperience)?.toDto() ?: throw ErrorFailedUpdate
