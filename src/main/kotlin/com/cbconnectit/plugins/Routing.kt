@@ -2,6 +2,7 @@ package com.cbconnectit.plugins
 
 import com.cbconnectit.modules.auth.authRouting
 import com.cbconnectit.modules.companies.companyRouting
+import com.cbconnectit.modules.experiences.experienceRouting
 import com.cbconnectit.modules.jobPositions.jobPositionRouting
 import com.cbconnectit.modules.links.linkRouting
 import com.cbconnectit.modules.projects.projectRouting
@@ -50,6 +51,7 @@ fun Application.configureRouting() {
             jobPositionRouting()
             companyRouting()
             testimonialRouting()
+            experienceRouting()
         }
     }
 }

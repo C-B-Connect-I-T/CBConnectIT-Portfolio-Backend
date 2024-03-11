@@ -50,13 +50,26 @@ data class ErrorUnknownLinkIdsForCreateCompany(private val ids: List<UUID>) : Ap
 
 data class ErrorUnknownLinkIdsForUpdateCompany(private val ids: List<UUID>) : ApiException("unknown_ids_for_update", "Can't update company with unknown links ${ids.joinToString(", ")}", HttpStatusCode.BadRequest)
 
-data class ErrorUnknownCompanyIdsForCreate(private val ids: List<UUID>) : ApiException("unknown_ids_for_create", "Can't create testimonial with unknown company ${ids.joinToString(", ")}", HttpStatusCode.BadRequest)
+data class ErrorUnknownCompanyIdsForCreateTestimonial(private val ids: List<UUID>) : ApiException("unknown_ids_for_create", "Can't create testimonial with unknown company ${ids.joinToString(", ")}", HttpStatusCode.BadRequest)
 
-data class ErrorUnknownCompanyIdsForUpdate(private val ids: List<UUID>) : ApiException("unknown_ids_for_update", "Can't update testimonial with unknown company ${ids.joinToString(", ")}", HttpStatusCode.BadRequest)
+data class ErrorUnknownCompanyIdsForUpdateTestimonial(private val ids: List<UUID>) : ApiException("unknown_ids_for_update", "Can't update testimonial with unknown company ${ids.joinToString(", ")}", HttpStatusCode.BadRequest)
 
-data class ErrorUnknownJobPositionIdsForCreate(private val ids: List<UUID>) : ApiException("unknown_ids_for_create", "Can't create testimonial with unknown job position ${ids.joinToString(", ")}", HttpStatusCode.BadRequest)
+data class ErrorUnknownJobPositionIdsForCreateTestimonial(private val ids: List<UUID>) : ApiException("unknown_ids_for_create", "Can't create testimonial with unknown job position ${ids.joinToString(", ")}", HttpStatusCode.BadRequest)
 
-data class ErrorUnknownJobPositionIdsForUpdate(private val ids: List<UUID>) : ApiException("unknown_ids_for_update", "Can't update testimonial with unknown job position ${ids.joinToString(", ")}", HttpStatusCode.BadRequest)
+data class ErrorUnknownJobPositionIdsForUpdateTestimonial(private val ids: List<UUID>) : ApiException("unknown_ids_for_update", "Can't update testimonial with unknown job position ${ids.joinToString(", ")}", HttpStatusCode.BadRequest)
+
+data class ErrorUnknownCompanyIdsForCreateExperience(private val ids: List<UUID>) : ApiException("unknown_ids_for_create", "Can't create experience with unknown company ${ids.joinToString(", ")}", HttpStatusCode.BadRequest)
+
+data class ErrorUnknownCompanyIdsForUpdateExperience(private val ids: List<UUID>) : ApiException("unknown_ids_for_update", "Can't update experience with unknown company ${ids.joinToString(", ")}", HttpStatusCode.BadRequest)
+
+data class ErrorUnknownJobPositionIdsForCreateExperience(private val ids: List<UUID>) : ApiException("unknown_ids_for_create", "Can't create experience with unknown job position ${ids.joinToString(", ")}", HttpStatusCode.BadRequest)
+
+data class ErrorUnknownJobPositionIdsForUpdateExperience(private val ids: List<UUID>) : ApiException("unknown_ids_for_update", "Can't update experience with unknown job position ${ids.joinToString(", ")}", HttpStatusCode.BadRequest)
+
+data class ErrorUnknownTagIdsForCreateExperience(private val ids: List<UUID>) : ApiException("unknown_ids_for_create", "Can't create experience with unknown tags ${ids.joinToString(", ")}", HttpStatusCode.BadRequest)
+
+data class ErrorUnknownTagIdsForUpdateExperience(private val ids: List<UUID>) : ApiException("unknown_ids_for_update", "Can't update experience with unknown tags ${ids.joinToString(", ")}", HttpStatusCode.BadRequest)
+
 
 fun StatusPagesConfig.generalStatusPages() {
     exception<ApiException> { call, cause ->

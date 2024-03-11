@@ -33,13 +33,13 @@ class TestimonialControllerImpl: BaseController(), TestimonialController {
         val companyIds = insertNewTestimonial.companyUuid.let {  companyDao.getListOfExistingCompanyIds(listOf(it)) }
 
         if (companyIds.count() != 1) {
-            throw ErrorUnknownCompanyIdsForCreate(listOf(insertNewTestimonial.companyUuid))
+            throw ErrorUnknownCompanyIdsForCreateTestimonial(listOf(insertNewTestimonial.companyUuid))
         }
 
         val jobPositionIds = insertNewTestimonial.jobPositionUuid.let {  jobPositionDao.getListOfExistingJobPositionIds(listOf(it)) }
 
         if (jobPositionIds.count() != 1) {
-            throw ErrorUnknownJobPositionIdsForCreate(listOf(insertNewTestimonial.jobPositionUuid))
+            throw ErrorUnknownJobPositionIdsForCreateTestimonial(listOf(insertNewTestimonial.jobPositionUuid))
         }
 
         testimonialDao.insertTestimonial(insertNewTestimonial)?.toDto() ?: throw  ErrorFailedCreate
@@ -51,13 +51,13 @@ class TestimonialControllerImpl: BaseController(), TestimonialController {
         val companyIds = updateTestimonial.companyUuid.let {  companyDao.getListOfExistingCompanyIds(listOf(it)) }
 
         if (companyIds.count() != 1) {
-            throw ErrorUnknownCompanyIdsForUpdate(listOf(updateTestimonial.companyUuid))
+            throw ErrorUnknownCompanyIdsForUpdateTestimonial(listOf(updateTestimonial.companyUuid))
         }
 
         val jobPositionIds = updateTestimonial.jobPositionUuid.let {  jobPositionDao.getListOfExistingJobPositionIds(listOf(it)) }
 
         if (jobPositionIds.count() != 1) {
-            throw ErrorUnknownJobPositionIdsForUpdate(listOf(updateTestimonial.jobPositionUuid))
+            throw ErrorUnknownJobPositionIdsForUpdateTestimonial(listOf(updateTestimonial.jobPositionUuid))
         }
 
         testimonialDao.updateTestimonial(testimonialId, updateTestimonial)?.toDto() ?: throw ErrorFailedUpdate
