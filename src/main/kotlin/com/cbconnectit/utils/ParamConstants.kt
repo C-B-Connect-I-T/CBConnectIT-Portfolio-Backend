@@ -9,6 +9,7 @@ object ParamConstants {
     const val TAG_IDENTIFIER_KEY = "tag_identifier"
     const val JOB_POSITION_ID_KEY = "job_position_id"
     const val COMPANY_ID_KEY = "company_id"
+    const val TESTIMONIAL_ID_KEY = "testimonial_id"
 
     const val LIMIT_KEY = "limit"
 }
