@@ -9,7 +9,7 @@ data class InsertNewExperience(
     val description: String,
     val from: String,
     val to: String,
-    val tags: List<String> = emptyList(),
+    val tags: List<String>? = emptyList(), // TODO: determine if this really should be a required field!!
     @SerializedName("company_id")
     val companyId: String,
     @SerializedName("job_position_id")
@@ -26,7 +26,7 @@ data class UpdateExperience(
     val description: String,
     val from: String,
     val to: String,
-    val tags: List<String> = emptyList(),
+    val tags: List<String>? = emptyList(), // TODO: determine if this really should be a required field!!
     @SerializedName("company_id")
     val companyId: String,
     @SerializedName("job_position_id")

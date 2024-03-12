@@ -76,7 +76,7 @@ class ExperienceDaoImpl : IExperienceDao {
             it[companyId] = UUID.fromString(insertNewExperience.companyId)
         }.value
 
-        insertNewExperience.tags.forEach { tagId ->
+        insertNewExperience.tags?.forEach { tagId ->
             TagsExperiencesPivotTable.insert {
                 it[this.tagId] = UUID.fromString(tagId)
                 it[experienceId] = id
@@ -99,10 +99,10 @@ class ExperienceDaoImpl : IExperienceDao {
         }
 
         TagsExperiencesPivotTable.deleteWhere {
-            experienceId eq id and (tagId notInList updateExperience.tags.map { tagId -> UUID.fromString(tagId) })
+            experienceId eq id and (tagId notInList (updateExperience.tags?.map { tagId -> UUID.fromString(tagId) }?: emptyList()))
         }
 
-        updateExperience.tags.forEach { tagId ->
+        updateExperience.tags?.forEach { tagId ->
             TagsExperiencesPivotTable.insert {
                 it[this.tagId] = UUID.fromString(tagId)
                 it[experienceId] = id

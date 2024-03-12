@@ -21,6 +21,6 @@ object ServiceInstrumentation {
         givenAService(id = UUID.fromString("00000000-0000-0000-0000-000000000001"), name = "Fourth Parent Service"),
     )
 
-    fun givenAService(id: UUID = UUID.randomUUID(), name: String = "Parent Service") = Service(id = id, name = name)
-    fun givenAService(id: UUID = UUID.randomUUID(), name: String = "Parent Service", subService: Service) = Service(id = id, name = name, subServices = listOf(subService))
+    fun givenAService(id: UUID = UUID.randomUUID(), name: String = "Parent Service") = Service(id = id, title = name)
+    fun givenAService(id: UUID = UUID.randomUUID(), name: String = "Parent Service", subService: Service) = Service(id = id, title = name, subServices = listOf(subService))
 }

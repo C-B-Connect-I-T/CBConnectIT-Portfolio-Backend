@@ -45,11 +45,11 @@ class ExperienceControllerImpl: BaseController(), ExperienceController {
         }
 
         val tags = insertNewExperience.tags
-        val tagUUIDS = tags.map { UUID.fromString(it) }
+        val tagUUIDS = tags?.map { UUID.fromString(it) } ?: emptyList()
         val existingLinkUUIDs = tagDao.getListOfExistingTagIds(tagUUIDS)
 
         // A project can only be added when all the added tags exist
-        if (existingLinkUUIDs.count() != tags.count()) {
+        if (existingLinkUUIDs.count() != tagUUIDS.count()) {
             val nonExistingIds = tagUUIDS.filterNot { existingLinkUUIDs.contains(it) }
             throw ErrorUnknownTagIdsForCreateExperience(nonExistingIds)
         }
@@ -73,11 +73,11 @@ class ExperienceControllerImpl: BaseController(), ExperienceController {
         }
 
         val tags = updateExperience.tags
-        val tagUUIDS = tags.map { UUID.fromString(it) }
+        val tagUUIDS = tags?.map { UUID.fromString(it) } ?: emptyList()
         val existingLinkUUIDs = tagDao.getListOfExistingTagIds(tagUUIDS)
 
         // A project can only be added when all the added tags exist
-        if (existingLinkUUIDs.count() != tags.count()) {
+        if (existingLinkUUIDs.count() != tagUUIDS.count()) {
             val nonExistingIds = tagUUIDS.filterNot { existingLinkUUIDs.contains(it) }
             throw ErrorUnknownTagIdsForUpdateExperience(nonExistingIds)
         }

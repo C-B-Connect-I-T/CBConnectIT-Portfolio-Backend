@@ -29,13 +29,13 @@ class ServiceControllerImpl: BaseController(), ServiceController {
         if (!insertNewService.isValid) throw ErrorInvalidParameters
 
         val parentServiceIds = insertNewService.parentServiceUuid?.let { serviceDao.getListOfExistingServiceIds(listOf(it)) }
-        val tagIds = insertNewService.tagUuid.let {  tagDao.getListOfExistingTagIds(listOf(it)) }
-
         if (insertNewService.parentServiceUuid != null && parentServiceIds?.count() != 1) {
             throw ErrorUnknownServiceIdsForCreate(listOfNotNull(insertNewService.parentServiceUuid))
         }
-        if (tagIds.count() != 1) {
-            throw ErrorUnknownTagIdsForCreate(listOf(insertNewService.tagUuid))
+
+        val tagIds = insertNewService.tagUuid?.let {  tagDao.getListOfExistingTagIds(listOf(it)) }
+        if (tagIds != null && tagIds.count() != 1) {
+            throw ErrorUnknownTagIdsForCreate(listOfNotNull(insertNewService.tagUuid))
         }
 
         serviceDao.insertService(insertNewService)?.toDto() ?: throw  ErrorFailedCreate
@@ -45,13 +45,13 @@ class ServiceControllerImpl: BaseController(), ServiceController {
         if (!updateService.isValid) throw ErrorInvalidParameters
 
         val parentServiceIds = updateService.parentServiceUuid?.let { serviceDao.getListOfExistingServiceIds(listOf(it)) }
-        val tagIds = updateService.tagUuid.let {  tagDao.getListOfExistingTagIds(listOf(it)) }
-
         if (updateService.parentServiceUuid != null && parentServiceIds?.count() != 1) {
             throw ErrorUnknownServiceIdsForUpdate(listOfNotNull(updateService.parentServiceUuid))
         }
-        if (tagIds.count() != 1) {
-            throw ErrorUnknownTagIdsForUpdate(listOf(updateService.tagUuid))
+
+        val tagIds = updateService.tagUuid?.let {  tagDao.getListOfExistingTagIds(listOf(it)) }
+        if (tagIds != null && tagIds.count() != 1) {
+            throw ErrorUnknownTagIdsForCreate(listOfNotNull(updateService.tagUuid))
         }
 
         serviceDao.updateService(serviceId, updateService)?.toDto() ?: throw ErrorFailedUpdate

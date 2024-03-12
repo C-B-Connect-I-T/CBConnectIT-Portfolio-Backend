@@ -7,8 +7,8 @@ import org.jetbrains.exposed.sql.javatime.CurrentDateTime
 import org.jetbrains.exposed.sql.javatime.datetime
 
 object ProjectsTable : UUIDTable() {
-    val bannerImage = varchar("banner_image", 255).nullable().default(null)
-    val image = varchar("image", 255).nullable().default(null)
+    val bannerImageUrl = varchar("banner_image_url", 255).nullable().default(null)
+    val imageUrl = varchar("image_url", 255).nullable().default(null)
     val title = varchar("title", 255)
     val shortDescription = varchar("short_description", 1000)
     val description = text("description")
@@ -18,8 +18,8 @@ object ProjectsTable : UUIDTable() {
 
 fun ResultRow.toProject() = Project(
     id = this[ProjectsTable.id].value,
-    bannerImage = this[ProjectsTable.bannerImage],
-    image = this[ProjectsTable.image],
+    bannerImageUrl = this[ProjectsTable.bannerImageUrl],
+    imageUrl = this[ProjectsTable.imageUrl],
     title = this[ProjectsTable.title],
     shortDescription = this[ProjectsTable.shortDescription],
     description = this[ProjectsTable.description],

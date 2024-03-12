@@ -72,7 +72,7 @@ class ServiceControllerTest : BaseControllerTest() {
         runBlocking {
             val responseService = controller.getServiceById(UUID.randomUUID())
 
-            assertThat(responseService.name).isEqualTo(createdService.name)
+            assertThat(responseService.title).isEqualTo(createdService.title)
             assertNotNull(responseService.createdAt)
             assertNotNull(responseService.updatedAt)
         }
@@ -109,7 +109,7 @@ class ServiceControllerTest : BaseControllerTest() {
         runBlocking {
             val responseService = controller.postService(postService)
 
-            assertThat(responseService.name).isEqualTo(createdService.name)
+            assertThat(responseService.title).isEqualTo(createdService.title)
         }
     }
 
@@ -152,7 +152,7 @@ class ServiceControllerTest : BaseControllerTest() {
         runBlocking {
             val responseService = controller.postService(insertService)
 
-            assertThat(responseService.name).isEqualTo(createdService.name)
+            assertThat(responseService.title).isEqualTo(createdService.title)
             assertThat(responseService.subServices).hasSize(1)
         }
     }
@@ -183,7 +183,7 @@ class ServiceControllerTest : BaseControllerTest() {
             val responseService = controller.updateServiceById(UUID.randomUUID(), updateService)
 
             // Assertion
-            assertThat(responseService.name).isEqualTo(createdService.name)
+            assertThat(responseService.title).isEqualTo(createdService.title)
         }
     }
 
@@ -226,7 +226,7 @@ class ServiceControllerTest : BaseControllerTest() {
         runBlocking {
             val responseService = controller.updateServiceById(UUID.randomUUID(), updateService)
 
-            assertThat(responseService.name).isEqualTo(createdService.name)
+            assertThat(responseService.title).isEqualTo(createdService.title)
             assertThat(responseService.subServices).hasSize(1)
         }
     }

@@ -15,7 +15,7 @@ import java.util.*
 
 class ProjectDaoImpl : IProjectDao {
     override fun getProjectById(id: UUID): Project? {
-        val projectWithRelations = (ProjectsTable innerJoin TagsProjectsPivotTable innerJoin TagsTable innerJoin LinksProjectsPivotTable innerJoin LinksTable)
+        val projectWithRelations = (ProjectsTable leftJoin TagsProjectsPivotTable leftJoin TagsTable leftJoin LinksProjectsPivotTable leftJoin LinksTable)
 
         val results = projectWithRelations.select { ProjectsTable.id eq id }
             .orderBy(ProjectsTable.createdAt to SortOrder.DESC)
@@ -35,7 +35,7 @@ class ProjectDaoImpl : IProjectDao {
     }
 
     override fun getProjects(): List<Project> {
-        val projectWithRelations = (ProjectsTable innerJoin TagsProjectsPivotTable innerJoin TagsTable innerJoin LinksProjectsPivotTable innerJoin LinksTable)
+        val projectWithRelations = (ProjectsTable leftJoin TagsProjectsPivotTable leftJoin TagsTable leftJoin LinksProjectsPivotTable leftJoin LinksTable)
 
         val results = projectWithRelations.selectAll()
             .orderBy(ProjectsTable.createdAt to SortOrder.DESC)
@@ -93,18 +93,18 @@ class ProjectDaoImpl : IProjectDao {
             body[title] = insertNewProject.title
             body[shortDescription] = insertNewProject.shortDescription
             body[description] = insertNewProject.description
-            insertNewProject.bannerImage?.let { body[bannerImage] = it }
-            insertNewProject.image?.let { body[image] = it }
+            insertNewProject.bannerImageUrl?.let { body[bannerImageUrl] = it }
+            insertNewProject.imageUrl?.let { body[imageUrl] = it }
         }.value
 
-        insertNewProject.tags.forEach { tagId ->
+        insertNewProject.tags?.forEach { tagId ->
             TagsProjectsPivotTable.insert {
                 it[projectId] = id
                 it[this.tagId] = UUID.fromString(tagId)
             }
         }
 
-        insertNewProject.links.forEach { linkId ->
+        insertNewProject.links?.forEach { linkId ->
             LinksProjectsPivotTable.insert {
                 it[projectId] = id
                 it[this.linkId] = UUID.fromString(linkId)
@@ -119,16 +119,16 @@ class ProjectDaoImpl : IProjectDao {
             body[title] = updateProject.title
             body[shortDescription] = updateProject.shortDescription
             body[description] = updateProject.description
-            updateProject.bannerImage?.let { body[bannerImage] = it }
-            updateProject.image?.let { body[image] = it }
+            updateProject.bannerImageUrl?.let { body[bannerImageUrl] = it }
+            updateProject.imageUrl?.let { body[imageUrl] = it }
 
             body[updatedAt] = LocalDateTime.now()
         }
 
         TagsProjectsPivotTable.deleteWhere {
-            projectId eq id and (tagId notInList updateProject.tags.map { stringId -> UUID.fromString(stringId) })
+            projectId eq id and (tagId notInList (updateProject.tags?.map { stringId -> UUID.fromString(stringId) } ?: emptyList()))
         }
-        updateProject.tags.forEach { tagId ->
+        updateProject.tags?.forEach { tagId ->
             TagsProjectsPivotTable.insert {
                 it[projectId] = id
                 it[this.tagId] = UUID.fromString(tagId)
@@ -136,9 +136,9 @@ class ProjectDaoImpl : IProjectDao {
         }
 
         LinksProjectsPivotTable.deleteWhere {
-            projectId eq id and (linkId notInList updateProject.links.map { stringId -> UUID.fromString(stringId) })
+            projectId eq id and (linkId notInList (updateProject.links?.map { stringId -> UUID.fromString(stringId) } ?: emptyList()))
         }
-        updateProject.links.forEach { linkId ->
+        updateProject.links?.forEach { linkId ->
             LinksProjectsPivotTable.insert {
                 it[projectId] = id
                 it[this.linkId] = UUID.fromString(linkId)

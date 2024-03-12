@@ -3,7 +3,6 @@ package com.cbconnectit.data.database.dao
 import com.cbconnectit.data.database.tables.ServicesTable
 import com.cbconnectit.data.database.tables.TagsTable
 import com.cbconnectit.data.database.tables.toService
-import com.cbconnectit.data.database.tables.toServices
 import com.cbconnectit.data.dto.requests.service.InsertNewService
 import com.cbconnectit.data.dto.requests.service.UpdateService
 import com.cbconnectit.domain.interfaces.IServiceDao
@@ -54,9 +53,9 @@ class ServiceDaoImpl: IServiceDao {
 
     override fun insertService(insertNewService: InsertNewService): Service? {
         val id = ServicesTable.insertAndGetId {
-            it[name] = insertNewService.name
+            it[title] = insertNewService.title
             it[parentServiceId] = insertNewService.parentServiceId?.let { id -> UUID.fromString(id) }
-            it[tagId] = UUID.fromString(insertNewService.tagId)
+            it[tagId] = insertNewService.tagId?.let { id -> UUID.fromString(id) }
         }.value
 
         return getServiceById(id)
@@ -64,9 +63,9 @@ class ServiceDaoImpl: IServiceDao {
 
     override fun updateService(id: UUID, updateService: UpdateService): Service? {
         ServicesTable.update({ ServicesTable.id eq id}) {
-            it[name] = updateService.name
+            it[title] = updateService.title
             it[parentServiceId] = updateService.parentServiceId?.let { parentId -> UUID.fromString(parentId) }
-            it[tagId] = UUID.fromString(updateService.tagId)
+            it[tagId] = updateService.tagId?.let { id -> UUID.fromString(id) }
 
             it[updatedAt] = LocalDateTime.now()
         }

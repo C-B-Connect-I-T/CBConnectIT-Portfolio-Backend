@@ -24,7 +24,7 @@ object ServiceInstrumentation {
         val time = LocalDateTime.now().toDatabaseString()
         ServiceDto(
             id = UUID.randomUUID().toString(),
-            name = name,
+            title = name,
             createdAt = time,
             updatedAt = time
         )

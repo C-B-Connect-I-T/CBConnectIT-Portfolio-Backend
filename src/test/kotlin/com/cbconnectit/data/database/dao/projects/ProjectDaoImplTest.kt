@@ -177,8 +177,8 @@ internal class ProjectDaoImplTest : BaseDaoTest() {
                     it[title] = data.title
                     it[description] = data.description
                     it[shortDescription] = data.shortDescription
-                    it[image] = data.image
-                    it[bannerImage] = data.bannerImage
+                    it[imageUrl] = data.imageUrl
+                    it[bannerImageUrl] = data.bannerImageUrl
                 }
             }
 

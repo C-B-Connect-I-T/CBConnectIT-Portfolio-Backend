@@ -8,8 +8,8 @@ import org.jetbrains.exposed.sql.javatime.CurrentDateTime
 import org.jetbrains.exposed.sql.javatime.datetime
 
 object ServicesTable : UUIDTable() {
-    val name = varchar("name", 255).uniqueIndex()
-    val tagId = reference("tag_id", TagsTable, ReferenceOption.NO_ACTION)
+    val title = varchar("name", 255).uniqueIndex()
+    val tagId = optReference("tag_id", TagsTable, ReferenceOption.NO_ACTION).default(null)
     val parentServiceId = optReference("parent_service_id", ServicesTable, ReferenceOption.CASCADE).default(null)
     val createdAt = datetime("created_at").defaultExpression(CurrentDateTime)
     val updatedAt = datetime("updated_at").defaultExpression(CurrentDateTime)
@@ -17,8 +17,8 @@ object ServicesTable : UUIDTable() {
 
 fun ResultRow.toService() = Service(
     id = this[ServicesTable.id].value,
-    name = this[ServicesTable.name],
-    tag = this.toTag(),
+    title = this[ServicesTable.title],
+    tag = this[ServicesTable.tagId]?.value?.let { this.toTag() },
     createdAt = this[ServicesTable.createdAt],
     updatedAt = this[ServicesTable.updatedAt]
 )

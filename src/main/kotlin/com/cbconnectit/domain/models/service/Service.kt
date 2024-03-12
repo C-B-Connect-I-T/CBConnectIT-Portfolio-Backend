@@ -9,18 +9,18 @@ import java.util.*
 
 data class Service(
     val id: UUID = UUID.randomUUID(),
-    val name: String = "",
+    val title: String = "",
     val subServices: List<Service>? = null,
-    val tag: Tag = Tag(),
+    val tag: Tag? = null,
     val createdAt: LocalDateTime = LocalDateTime.now(),
     val updatedAt: LocalDateTime = LocalDateTime.now()
 )
 
 fun Service.toDto(): ServiceDto = ServiceDto(
     id = this.id.toString(),
-    name = this.name,
+    title = this.title,
     subServices = subServices?.map { it.toDto() },
-    tag = this.tag.toDto(),
+    tag = this.tag?.toDto(),
     createdAt = this.createdAt.toDatabaseString(),
     updatedAt = this.updatedAt.toDatabaseString()
 )

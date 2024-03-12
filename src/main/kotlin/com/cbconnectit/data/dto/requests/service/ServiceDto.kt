@@ -6,9 +6,9 @@ import com.google.gson.annotations.SerializedName
 
 data class ServiceDto(
     val id: String = "",
-    val name: String = "",
+    val title: String = "",
     val subServices: List<ServiceDto>? = null,
-    val tag: TagDto = TagDto(),
+    val tag: TagDto? = null,
     @SerializedName("created_at")
     override val createdAt: String = "",
     @SerializedName("updated_at")
