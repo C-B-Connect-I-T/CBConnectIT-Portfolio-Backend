@@ -8,10 +8,10 @@ import java.time.LocalDateTime
 import java.util.*
 
 object ServiceInstrumentation {
-    fun givenAValidInsertService() = InsertNewService("New Parent Service", tagId = "00000000-0000-0000-0000-000000000001")
-    fun givenAValidUpdateServiceBody() = UpdateService("Updated Parent service", tagId = "00000000-0000-0000-0000-000000000001")
+    fun givenAValidInsertService() = InsertNewService("New Parent Service", imageUrl = "https://www.google.be/image", description = "Description", tagId = "00000000-0000-0000-0000-000000000001")
+    fun givenAValidUpdateServiceBody() = UpdateService("Updated Parent service", imageUrl = "https://www.google.be/image", description = "Description", tagId = "00000000-0000-0000-0000-000000000001")
 
-    fun givenAnEmptyInsertServiceBody() = InsertNewService("    ", tagId = "00000000-0000-0000-0000-000000000001")
+    fun givenAnEmptyInsertServiceBody() = InsertNewService("    ", imageUrl = "https://www.google.be/image", description = "Description", tagId = "00000000-0000-0000-0000-000000000001")
 
     fun givenServiceList() = listOf(
         givenAService("First parent service"),

@@ -9,7 +9,12 @@ import java.util.*
 
 data class Service(
     val id: UUID = UUID.randomUUID(),
+    val imageUrl: String = "",
     val title: String = "",
+    val shortDescription: String? = null,
+    val description: String = "",
+    val bannerDescription: String? = null,
+    val extraInfo: String? = null,
     val subServices: List<Service>? = null,
     val tag: Tag? = null,
     val createdAt: LocalDateTime = LocalDateTime.now(),
@@ -18,7 +23,12 @@ data class Service(
 
 fun Service.toDto(): ServiceDto = ServiceDto(
     id = this.id.toString(),
+    imageUrl = this.imageUrl,
     title = this.title,
+    shortDescription = this.shortDescription,
+    description = this.description,
+    bannerDescription = this.bannerDescription,
+    extraInfo = this.extraInfo,
     subServices = subServices?.map { it.toDto() },
     tag = this.tag?.toDto(),
     createdAt = this.createdAt.toDatabaseString(),

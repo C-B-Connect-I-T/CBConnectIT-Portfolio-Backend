@@ -176,15 +176,17 @@ internal class ServiceDaoImplTest : BaseDaoTest() {
             }
 
             listOf(
-                Service(id = UUID.fromString("00000000-0000-0000-0000-000000000001"), title = "First parent service", tag = Tag(UUID.fromString("00000000-0000-0000-0000-000000000001"))) to null,
-                Service(id = UUID.fromString("00000000-0000-0000-0000-000000000002"), title = "Sub service of First parent service", tag = Tag(UUID.fromString("00000000-0000-0000-0000-000000000001"))) to UUID.fromString("00000000-0000-0000-0000-000000000001"),
-                Service(id = UUID.fromString("00000000-0000-0000-0000-000000000003"), title = "Second parent service", tag = Tag(UUID.fromString("00000000-0000-0000-0000-000000000001"))) to null,
-                Service(id = UUID.fromString("00000000-0000-0000-0000-000000000004"), title = "Sub service of Sub service of First parent service", tag = Tag(UUID.fromString("00000000-0000-0000-0000-000000000001"))) to UUID.fromString("00000000-0000-0000-0000-000000000002")
+                Service(id = UUID.fromString("00000000-0000-0000-0000-000000000001"), title = "First parent service", imageUrl = "https://www.google.be/image", description = "Description", tag = Tag(UUID.fromString("00000000-0000-0000-0000-000000000001"))) to null,
+                Service(id = UUID.fromString("00000000-0000-0000-0000-000000000002"), title = "Sub service of First parent service", imageUrl = "https://www.google.be/image", description = "Description", tag = Tag(UUID.fromString("00000000-0000-0000-0000-000000000001"))) to UUID.fromString("00000000-0000-0000-0000-000000000001"),
+                Service(id = UUID.fromString("00000000-0000-0000-0000-000000000003"), title = "Second parent service", imageUrl = "https://www.google.be/image", description = "Description", tag = Tag(UUID.fromString("00000000-0000-0000-0000-000000000001"))) to null,
+                Service(id = UUID.fromString("00000000-0000-0000-0000-000000000004"), title = "Sub service of Sub service of First parent service", imageUrl = "https://www.google.be/image", description = "Description", tag = Tag(UUID.fromString("00000000-0000-0000-0000-000000000001"))) to UUID.fromString("00000000-0000-0000-0000-000000000002")
             ).forEach { data ->
                 ServicesTable.insert {
                     it[id] = data.first.id
                     it[title] = data.first.title
-                    it[tagId] = data.first.tag.id
+                    it[imageUrl] = data.first.imageUrl
+                    it[description] = data.first.description
+                    it[tagId] = data.first.tag?.id
                     it[parentServiceId] = data.second
                 }
             }

@@ -51,7 +51,7 @@ class ServiceControllerImpl: BaseController(), ServiceController {
 
         val tagIds = updateService.tagUuid?.let {  tagDao.getListOfExistingTagIds(listOf(it)) }
         if (tagIds != null && tagIds.count() != 1) {
-            throw ErrorUnknownTagIdsForCreate(listOfNotNull(updateService.tagUuid))
+            throw ErrorUnknownTagIdsForUpdate(listOfNotNull(updateService.tagUuid))
         }
 
         serviceDao.updateService(serviceId, updateService)?.toDto() ?: throw ErrorFailedUpdate
