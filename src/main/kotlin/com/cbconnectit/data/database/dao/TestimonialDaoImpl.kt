@@ -4,6 +4,7 @@ import com.cbconnectit.data.database.tables.*
 import com.cbconnectit.data.dto.requests.testimonial.InsertNewTestimonial
 import com.cbconnectit.data.dto.requests.testimonial.UpdateTestimonial
 import com.cbconnectit.domain.interfaces.ITestimonialDao
+import com.cbconnectit.domain.models.link.Link
 import com.cbconnectit.domain.models.testimonial.Testimonial
 import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
@@ -14,19 +15,59 @@ class TestimonialDaoImpl : ITestimonialDao {
 
     override fun getTestimonialById(id: UUID): Testimonial? {
 
-        val testimonialWithRelations = TestimonialsTable leftJoin JobPositionsTable leftJoin CompaniesTable
+        val testimonialWithRelations = TestimonialsTable leftJoin JobPositionsTable leftJoin CompaniesTable leftJoin CompaniesLinksPivotTable leftJoin LinksTable
 
         val results = testimonialWithRelations.select { TestimonialsTable.id eq id }
+        val links = parseLinks(results)
 
-        return results.toTestimonial()
+        return results
+            .distinctBy { it[CompaniesTable.id].value }
+            .map { row ->
+                val temp = row.toTestimonial()
+                temp.copy(
+                    company = temp.company.copy(
+                        links = links[id]?.distinctBy { it.id } ?: emptyList()
+                    )
+                )
+            }
+            .firstOrNull()
     }
 
     override fun getTestimonials(): List<Testimonial> {
-        val testimonialWithRelations = TestimonialsTable leftJoin JobPositionsTable leftJoin CompaniesTable
+        val testimonialWithRelations = TestimonialsTable leftJoin JobPositionsTable leftJoin CompaniesTable leftJoin CompaniesLinksPivotTable leftJoin LinksTable
 
         val results = testimonialWithRelations.selectAll()
+        val links = parseLinks(results)
 
-        return results.toTestimonials()
+        return results
+            .distinctBy { it[CompaniesTable.id].value }
+            .map { row ->
+                val id = row[CompaniesTable.id].value
+                val temp = row.toTestimonial()
+                temp.copy(
+                    company = temp.company.copy(
+                        links = links[id]?.distinctBy { it.id } ?: emptyList()
+                    )
+                )
+            }
+    }
+
+    private fun parseLinks(results: Query): MutableMap<UUID, List<Link>> {
+        val newMap = results
+            .distinctBy { it.getOrNull(LinksTable.id)?.value }
+            .fold(mutableMapOf<UUID, List<Link>>()) { map, resultRow ->
+                val companyId = resultRow[CompaniesTable.id].value
+
+                val link = if (resultRow.getOrNull(LinksTable.id) != null) {
+                    resultRow.toLink()
+                } else null
+
+                val current = map.getOrDefault(companyId, emptyList())
+                map[companyId] = current.toMutableList() + listOfNotNull(link)
+                map
+            }
+
+        return newMap
     }
 
     override fun insertTestimonial(insertNewTestimonial: InsertNewTestimonial): Testimonial? {
