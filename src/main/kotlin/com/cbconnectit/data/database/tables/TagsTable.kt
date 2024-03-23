@@ -29,7 +29,6 @@ fun Iterable<ResultRow>.toTag() = this.firstOrNull()?.toTag()
 
 fun parseTags(results: Query, getParentId: (ResultRow) -> UUID): MutableMap<UUID, List<Tag>> {
     val newMap = results
-        .distinctBy { it.getOrNull(LinksTable.id)?.value }
         .fold(mutableMapOf<UUID, List<Tag>>()) { map, resultRow ->
             val parentId = getParentId(resultRow)
 

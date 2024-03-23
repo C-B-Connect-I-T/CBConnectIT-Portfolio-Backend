@@ -98,10 +98,11 @@ private fun seedDatabase(passwordEncryption: PasswordManagerContract) {
         Link(id = UUID.fromString("00000000-0000-0000-0000-000000000007"), url = "https://play.google.com/store/apps/details?id=be.christiano.demoPokedex", type = LinkType.PlayStore),
         Link(id = UUID.fromString("00000000-0000-0000-0000-000000000008"), url = "https://github.com/ShaHar91/FoodWatcher-Android", type = LinkType.Github),
         Link(id = UUID.fromString("00000000-0000-0000-0000-000000000009"), url = "https://github.com/ShaHar91/PoemCollection-backend-ktor", type = LinkType.Github)
-    ).forEach { company ->
+    ).forEach { link ->
         LinksTable.insertIgnore {
-            it[id] = company.id
-            it[url] = company.url
+            it[id] = link.id
+            it[url] = link.url
+            it[type] = link.type
         }
     }
 
@@ -158,7 +159,7 @@ private fun seedDatabase(passwordEncryption: PasswordManagerContract) {
             description = "Developed and maintained white labelled Android and Android TV applications with well over 300k downloads spread over the different labels. Worked in a Scrum environment to deliver incremental updates with new features and bug fixes",
             from = LocalDateTime.of(2018, 1, 1, 0, 0),
             to = LocalDateTime.of(2020, 12, 31, 0, 0),
-            company = Company(id = UUID.fromString("00000000-0000-0000-0000-000000000001")),
+            company = Company(id = UUID.fromString("00000000-0000-0000-0000-000000000003")),
             jobPosition = JobPosition(id = UUID.fromString("00000000-0000-0000-0000-000000000003")),
             tags = listOf(
                 Tag(id = UUID.fromString("00000000-0000-0000-0000-000000000009")),

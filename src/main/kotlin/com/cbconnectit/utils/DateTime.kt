@@ -7,5 +7,5 @@ import java.time.temporal.Temporal
 
 private const val DATE_FORMAT = "yyyy-MM-dd HH:mm:ss z"
 
-fun Temporal.toDatabaseString(): String = DateTimeFormatter.ofPattern(DATE_FORMAT).withZone(ZoneId.of("UTC")).format(this)
-fun String.toLocalDateTime(): LocalDateTime = LocalDateTime.parse(this, DateTimeFormatter.ofPattern(DATE_FORMAT).withZone(ZoneId.of("UTC")))
+fun Temporal.toDatabaseString(): String = DateTimeFormatter.ISO_DATE_TIME.withZone(ZoneId.of("UTC")).format(this)
+fun String.toLocalDateTime(): LocalDateTime = LocalDateTime.parse(this, DateTimeFormatter.ISO_DATE_TIME.withZone(ZoneId.of("UTC")))
