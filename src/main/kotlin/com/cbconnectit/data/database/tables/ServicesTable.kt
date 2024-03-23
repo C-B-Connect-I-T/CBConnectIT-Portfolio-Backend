@@ -9,7 +9,7 @@ import org.jetbrains.exposed.sql.javatime.datetime
 
 object ServicesTable : UUIDTable() {
     val imageUrl = varchar("image_url", 255)
-    val title = varchar("name", 255).uniqueIndex()
+    val title = varchar("title", 255).uniqueIndex()
     val shortDescription = varchar("short_description", 1000).nullable().default(null)
     val description = text("description")
     val bannerDescription = text("banner_description").nullable().default(null)

@@ -53,21 +53,9 @@ class TestimonialDaoImpl : ITestimonialDao {
     }
 
     private fun parseLinks(results: Query): MutableMap<UUID, List<Link>> {
-        val newMap = results
-            .distinctBy { it.getOrNull(LinksTable.id)?.value }
-            .fold(mutableMapOf<UUID, List<Link>>()) { map, resultRow ->
-                val companyId = resultRow[CompaniesTable.id].value
-
-                val link = if (resultRow.getOrNull(LinksTable.id) != null) {
-                    resultRow.toLink()
-                } else null
-
-                val current = map.getOrDefault(companyId, emptyList())
-                map[companyId] = current.toMutableList() + listOfNotNull(link)
-                map
-            }
-
-        return newMap
+        return parseLinks(results) {
+            it[CompaniesTable.id].value
+        }
     }
 
     override fun insertTestimonial(insertNewTestimonial: InsertNewTestimonial): Testimonial? {

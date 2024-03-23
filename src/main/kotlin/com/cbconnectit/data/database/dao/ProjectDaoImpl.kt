@@ -55,37 +55,15 @@ class ProjectDaoImpl : IProjectDao {
     }
 
     private fun parseTags(results: Query): MutableMap<UUID, List<Tag>> {
-        return results
-            .distinctBy { it.getOrNull(TagsTable.id)?.value }
-            .fold(mutableMapOf()) { map, resultRow ->
-                val projectId = resultRow[ProjectsTable.id].value
-
-                val tag = if (resultRow.getOrNull(TagsTable.id) != null) {
-                    resultRow.toTag()
-                } else null
-
-                val current = map.getOrDefault(projectId, emptyList())
-                map[projectId] = current.toMutableList() + listOfNotNull(tag)
-                map
-            }
+        return parseTags(results) {
+            it[ProjectsTable.id].value
+        }
     }
 
     private fun parseLinks(results: Query): MutableMap<UUID, List<Link>> {
-        val newMap = results
-            .distinctBy { it.getOrNull(LinksTable.id)?.value }
-            .fold(mutableMapOf<UUID, List<Link>>()) { map, resultRow ->
-                val projectId = resultRow[ProjectsTable.id].value
-
-                val link = if (resultRow.getOrNull(LinksTable.id) != null) {
-                    resultRow.toLink()
-                } else null
-
-                val current = map.getOrDefault(projectId, emptyList())
-                map[projectId] = current.toMutableList() + listOfNotNull(link)
-                map
-            }
-
-        return newMap
+        return parseLinks(results) {
+            it[ProjectsTable.id].value
+        }
     }
 
     override fun insertProject(insertNewProject: InsertNewProject): Project? {

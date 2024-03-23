@@ -2,10 +2,11 @@ package com.cbconnectit.data.database.tables
 
 import com.cbconnectit.domain.models.tag.Tag
 import org.jetbrains.exposed.dao.id.UUIDTable
-import org.jetbrains.exposed.sql.ReferenceOption
+import org.jetbrains.exposed.sql.Query
 import org.jetbrains.exposed.sql.ResultRow
 import org.jetbrains.exposed.sql.javatime.CurrentDateTime
 import org.jetbrains.exposed.sql.javatime.datetime
+import java.util.*
 
 object TagsTable: UUIDTable() {
     val name = varchar("name", 255).uniqueIndex()
@@ -25,3 +26,21 @@ fun ResultRow.toTag() = Tag(
 
 fun Iterable<ResultRow>.toTags() = this.map { it.toTag() }
 fun Iterable<ResultRow>.toTag() = this.firstOrNull()?.toTag()
+
+fun parseTags(results: Query, getParentId: (ResultRow) -> UUID): MutableMap<UUID, List<Tag>> {
+    val newMap = results
+        .distinctBy { it.getOrNull(LinksTable.id)?.value }
+        .fold(mutableMapOf<UUID, List<Tag>>()) { map, resultRow ->
+            val parentId = getParentId(resultRow)
+
+            val link = if (resultRow.getOrNull(TagsTable.id) != null) {
+                resultRow.toTag()
+            } else null
+
+            val current = map.getOrDefault(parentId, emptyList())
+            map[parentId] = current.toMutableList() + listOfNotNull(link)
+            map
+        }
+
+    return newMap
+}

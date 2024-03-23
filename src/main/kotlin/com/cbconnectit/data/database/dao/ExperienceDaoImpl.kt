@@ -49,21 +49,9 @@ class ExperienceDaoImpl : IExperienceDao {
     }
 
     private fun parseTags(results: Query): MutableMap<UUID, List<Tag>> {
-        val newMap = results
-            .distinctBy { it.getOrNull(TagsTable.id)?.value }
-            .fold(mutableMapOf<UUID, List<Tag>>()) { map, resultRow ->
-                val experienceId = resultRow[ExperiencesTable.id].value
-
-                val tag = if (resultRow.getOrNull(TagsTable.id) != null) {
-                    resultRow.toTag()
-                } else null
-
-                val current = map.getOrDefault(experienceId, emptyList())
-                map[experienceId] = current.toMutableList() + listOfNotNull(tag)
-                map
-            }
-
-        return newMap
+        return parseTags(results) {
+            it[ExperiencesTable.id].value
+        }
     }
 
     override fun insertExperience(insertNewExperience: InsertNewExperience): Experience? {
