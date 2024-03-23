@@ -3,18 +3,20 @@ package com.cbconnectit.data.database.dao
 import com.cbconnectit.data.database.tables.ServicesTable
 import com.cbconnectit.data.database.tables.TagsTable
 import com.cbconnectit.data.database.tables.toService
-import com.cbconnectit.data.database.tables.toServices
 import com.cbconnectit.data.dto.requests.service.InsertNewService
 import com.cbconnectit.data.dto.requests.service.UpdateService
 import com.cbconnectit.domain.interfaces.IServiceDao
 import com.cbconnectit.domain.models.service.Service
-import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
+import org.jetbrains.exposed.sql.deleteWhere
+import org.jetbrains.exposed.sql.insertAndGetId
+import org.jetbrains.exposed.sql.select
 import org.jetbrains.exposed.sql.transactions.transaction
+import org.jetbrains.exposed.sql.update
 import java.time.LocalDateTime
 import java.util.*
 
-class ServiceDaoImpl: IServiceDao {
+class ServiceDaoImpl : IServiceDao {
 
     override fun getServiceById(id: UUID): Service? =
         fetchServicesWithSubServices(id)
@@ -54,19 +56,29 @@ class ServiceDaoImpl: IServiceDao {
 
     override fun insertService(insertNewService: InsertNewService): Service? {
         val id = ServicesTable.insertAndGetId {
-            it[name] = insertNewService.name
+            it[title] = insertNewService.title
+            it[imageUrl] = insertNewService.imageUrl
+            it[description] = insertNewService.description
+            it[bannerDescription] = insertNewService.bannerDescription
+            it[shortDescription] = insertNewService.shortDescription
+            it[extraInfo] = insertNewService.extraInfo
             it[parentServiceId] = insertNewService.parentServiceId?.let { id -> UUID.fromString(id) }
-            it[tagId] = UUID.fromString(insertNewService.tagId)
+            it[tagId] = insertNewService.tagId?.let { id -> UUID.fromString(id) }
         }.value
 
         return getServiceById(id)
     }
 
     override fun updateService(id: UUID, updateService: UpdateService): Service? {
-        ServicesTable.update({ ServicesTable.id eq id}) {
-            it[name] = updateService.name
+        ServicesTable.update({ ServicesTable.id eq id }) {
+            it[title] = updateService.title
+            it[imageUrl] = updateService.imageUrl
+            it[description] = updateService.description
+            it[bannerDescription] = updateService.bannerDescription
+            it[shortDescription] = updateService.shortDescription
+            it[extraInfo] = updateService.extraInfo
             it[parentServiceId] = updateService.parentServiceId?.let { parentId -> UUID.fromString(parentId) }
-            it[tagId] = UUID.fromString(updateService.tagId)
+            it[tagId] = updateService.tagId?.let { id -> UUID.fromString(id) }
 
             it[updatedAt] = LocalDateTime.now()
         }

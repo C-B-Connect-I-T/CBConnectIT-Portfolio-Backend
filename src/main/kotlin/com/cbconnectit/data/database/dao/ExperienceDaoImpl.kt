@@ -5,6 +5,7 @@ import com.cbconnectit.data.dto.requests.experience.InsertNewExperience
 import com.cbconnectit.data.dto.requests.experience.UpdateExperience
 import com.cbconnectit.domain.interfaces.IExperienceDao
 import com.cbconnectit.domain.models.experience.Experience
+import com.cbconnectit.domain.models.link.Link
 import com.cbconnectit.domain.models.tag.Tag
 import com.cbconnectit.utils.toLocalDateTime
 import org.jetbrains.exposed.sql.*
@@ -17,53 +18,60 @@ class ExperienceDaoImpl : IExperienceDao {
 
     override fun getExperienceById(id: UUID): Experience? {
 
-        val experienceWithRelations = (ExperiencesTable leftJoin TagsExperiencesPivotTable leftJoin TagsTable) leftJoin JobPositionsTable leftJoin CompaniesTable
+        val experienceWithRelations = ExperiencesTable leftJoin TagsExperiencesPivotTable leftJoin TagsTable leftJoin JobPositionsTable leftJoin CompaniesTable leftJoin CompaniesLinksPivotTable leftJoin LinksTable
 
         val results = experienceWithRelations.select { ExperiencesTable.id eq id }
         val tags = parseTags(results)
+        val links = parseLinks(results)
 
         return results
             .distinctBy { it[ExperiencesTable.id].value }
             .map { row ->
-                row.toExperience().copy(
-                    tags = tags[id]?.distinctBy { it.id } ?: emptyList()
+                val temp = row.toExperience()
+                temp.copy(
+                    tags = tags[id]?.distinctBy { it.id } ?: emptyList(),
+                    company = temp.company.copy(
+                        links = links[id]?.distinctBy { it.id } ?: emptyList()
+                    )
                 )
             }
             .firstOrNull()
     }
 
     override fun getExperiences(): List<Experience> {
-        val experienceWithRelations = (ExperiencesTable leftJoin TagsExperiencesPivotTable leftJoin TagsTable) leftJoin JobPositionsTable leftJoin CompaniesTable
+        val experienceWithRelations = ExperiencesTable leftJoin JobPositionsTable leftJoin(TagsExperiencesPivotTable leftJoin TagsTable) leftJoin CompaniesTable leftJoin(CompaniesLinksPivotTable leftJoin LinksTable)
 
         val results = experienceWithRelations.selectAll()
         val tags = parseTags(results)
+        val links = parseLinks(results)
+
+        //TODO: getting to many relations is "messing" up the parsing for tags and links. (to many rows)... should be fixed because of to many repetitions
 
         return results
             .distinctBy { it[ExperiencesTable.id].value }
             .map { row ->
-                val id = row[CompaniesTable.id].value
-                row.toExperience().copy(
-                    tags = tags[id]?.distinctBy { it.id } ?: emptyList()
+                val id = row[ExperiencesTable.id].value
+                val companyId = row[CompaniesTable.id].value
+                val temp = row.toExperience()
+                temp.copy(
+                    tags = tags[id]?.distinctBy { it.id } ?: emptyList(),
+                    company = temp.company.copy(
+                        links = links[companyId]?.distinctBy { it.id } ?: emptyList()
+                    )
                 )
             }
     }
 
     private fun parseTags(results: Query): MutableMap<UUID, List<Tag>> {
-        val newMap = results
-            .distinctBy { it.getOrNull(TagsTable.id)?.value }
-            .fold(mutableMapOf<UUID, List<Tag>>()) { map, resultRow ->
-                val experienceId = resultRow[ExperiencesTable.id].value
+        return parseTags(results) {
+            it[ExperiencesTable.id].value
+        }
+    }
 
-                val tag = if (resultRow.getOrNull(TagsTable.id) != null) {
-                    resultRow.toTag()
-                } else null
-
-                val current = map.getOrDefault(experienceId, emptyList())
-                map[experienceId] = current.toMutableList() + listOfNotNull(tag)
-                map
-            }
-
-        return newMap
+    private fun parseLinks(results: Query): MutableMap<UUID, List<Link>> {
+        return parseLinks(results) {
+            it[CompaniesTable.id].value
+        }
     }
 
     override fun insertExperience(insertNewExperience: InsertNewExperience): Experience? {
@@ -76,7 +84,7 @@ class ExperienceDaoImpl : IExperienceDao {
             it[companyId] = UUID.fromString(insertNewExperience.companyId)
         }.value
 
-        insertNewExperience.tags.forEach { tagId ->
+        insertNewExperience.tags?.forEach { tagId ->
             TagsExperiencesPivotTable.insert {
                 it[this.tagId] = UUID.fromString(tagId)
                 it[experienceId] = id
@@ -99,10 +107,10 @@ class ExperienceDaoImpl : IExperienceDao {
         }
 
         TagsExperiencesPivotTable.deleteWhere {
-            experienceId eq id and (tagId notInList updateExperience.tags.map { tagId -> UUID.fromString(tagId) })
+            experienceId eq id and (tagId notInList (updateExperience.tags?.map { tagId -> UUID.fromString(tagId) } ?: emptyList()))
         }
 
-        updateExperience.tags.forEach { tagId ->
+        updateExperience.tags?.forEach { tagId ->
             TagsExperiencesPivotTable.insert {
                 it[this.tagId] = UUID.fromString(tagId)
                 it[experienceId] = id

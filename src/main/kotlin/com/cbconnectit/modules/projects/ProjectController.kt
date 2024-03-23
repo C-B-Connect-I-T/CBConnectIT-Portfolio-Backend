@@ -30,20 +30,20 @@ class ProjectControllerImpl : BaseController(), ProjectController {
     override suspend fun postProject(insertNewProject: InsertNewProject): ProjectDto = dbQuery {
         if (!insertNewProject.isValid) throw ErrorInvalidParameters
 
-        val tagUUIDs = insertNewProject.tags.map { UUID.fromString(it) }
+        val tagUUIDs = insertNewProject.tags?.map { UUID.fromString(it) } ?: emptyList()
         val existingTagUUIDs = tagDao.getListOfExistingTagIds(tagUUIDs)
 
-        val linkUUIDS = insertNewProject.links.map { UUID.fromString(it) }
+        val linkUUIDS = insertNewProject.links?.map { UUID.fromString(it) } ?: emptyList()
         val existingLinkUUIDs = linkDao.getListOfExistingLinkIds(linkUUIDS)
 
         // A project can only be added when all the added tags exist
-        if (existingTagUUIDs.count() != insertNewProject.tags.count()) {
+        if (tagUUIDs.isNotEmpty() && existingTagUUIDs.count() != insertNewProject.tags?.count()) {
             val nonExistingIds = tagUUIDs.filterNot { existingTagUUIDs.contains(it) }
             throw ErrorUnknownTagIdsForCreateProject(nonExistingIds)
         }
 
         // A project can only be added when all the added tags exist
-        if (existingLinkUUIDs.count() != insertNewProject.links.count()) {
+        if (linkUUIDS.isNotEmpty() && existingLinkUUIDs.count() != insertNewProject.links?.count()) {
             val nonExistingIds = linkUUIDS.filterNot { existingLinkUUIDs.contains(it) }
             throw ErrorUnknownLinkIdsForCreateProject(nonExistingIds)
         }
@@ -54,20 +54,20 @@ class ProjectControllerImpl : BaseController(), ProjectController {
     override suspend fun updateProjectById(projectId: UUID, updateProject: UpdateProject): ProjectDto = dbQuery {
         if (!updateProject.isValid) throw ErrorInvalidParameters
 
-        val tagUUIDs = updateProject.tags.map { UUID.fromString(it) }
+        val tagUUIDs = updateProject.tags?.map { UUID.fromString(it) } ?: emptyList()
         val existingTagUUIDs = tagDao.getListOfExistingTagIds(tagUUIDs)
 
-        val linkUUIDS = updateProject.links.map { UUID.fromString(it) }
+        val linkUUIDS = updateProject.links?.map { UUID.fromString(it) } ?: emptyList()
         val existingLinkUUIDs = linkDao.getListOfExistingLinkIds(linkUUIDS)
 
         // A project can only be added when all the added tags exist
-        if (existingTagUUIDs.count() != updateProject.tags.count()) {
+        if (tagUUIDs.isNotEmpty() && existingTagUUIDs.count() != updateProject.tags?.count()) {
             val nonExistingIds = tagUUIDs.filterNot { existingTagUUIDs.contains(it) }
             throw ErrorUnknownTagIdsForUpdateProject(nonExistingIds)
         }
 
         // A project can only be added when all the added tags exist
-        if (existingLinkUUIDs.count() != updateProject.links.count()) {
+        if (linkUUIDS.isNotEmpty() && existingLinkUUIDs.count() != updateProject.links?.count()) {
             val nonExistingIds = linkUUIDS.filterNot { existingLinkUUIDs.contains(it) }
             throw ErrorUnknownLinkIdsForUpdateProject(nonExistingIds)
         }

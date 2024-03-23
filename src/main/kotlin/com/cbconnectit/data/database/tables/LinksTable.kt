@@ -3,9 +3,11 @@ package com.cbconnectit.data.database.tables
 import com.cbconnectit.domain.models.link.Link
 import com.cbconnectit.domain.models.link.LinkType
 import org.jetbrains.exposed.dao.id.UUIDTable
+import org.jetbrains.exposed.sql.Query
 import org.jetbrains.exposed.sql.ResultRow
 import org.jetbrains.exposed.sql.javatime.CurrentDateTime
 import org.jetbrains.exposed.sql.javatime.datetime
+import java.util.*
 
 object LinksTable: UUIDTable() {
     val url = varchar("url", 255)
@@ -24,3 +26,21 @@ fun ResultRow.toLink() = Link(
 
 fun Iterable<ResultRow>.toLinks() = this.map { it.toLink() }
 fun Iterable<ResultRow>.toLink() = this.firstOrNull()?.toLink()
+
+fun parseLinks(results: Query, getParentId: (ResultRow) -> UUID): MutableMap<UUID, List<Link>> {
+    val newMap = results
+        .distinctBy { it.getOrNull(LinksTable.id)?.value }
+        .fold(mutableMapOf<UUID, List<Link>>()) { map, resultRow ->
+            val parentId = getParentId(resultRow)
+
+            val link = if (resultRow.getOrNull(LinksTable.id) != null) {
+                resultRow.toLink()
+            } else null
+
+            val current = map.getOrDefault(parentId, emptyList())
+            map[parentId] = current.toMutableList() + listOfNotNull(link)
+            map
+        }
+
+    return newMap
+}

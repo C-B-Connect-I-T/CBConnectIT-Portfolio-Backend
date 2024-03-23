@@ -52,7 +52,7 @@ internal class ServiceDaoImplTest : BaseDaoTest() {
             val service = dao.getServiceById(UUID.fromString("00000000-0000-0000-0000-000000000001"))
 
             assertThat(service).matches {
-                it?.name == "First parent service"
+                it?.title == "First parent service"
             }
         }
     }
@@ -75,7 +75,7 @@ internal class ServiceDaoImplTest : BaseDaoTest() {
             val service = dao.insertService(validService)
 
             assertThat(service).matches {
-                it?.name == validService.name &&
+                it?.title == validService.title &&
                         it.createdAt == it.updatedAt
             }
         }
@@ -105,7 +105,7 @@ internal class ServiceDaoImplTest : BaseDaoTest() {
             val service = dao.updateService(UUID.fromString("00000000-0000-0000-0000-000000000001"), validUpdateService)
 
             assertThat(service).matches {
-                it?.name == validUpdateService.name &&
+                it?.title == validUpdateService.title &&
                         it.createdAt != it.updatedAt
             }
         }
@@ -176,15 +176,17 @@ internal class ServiceDaoImplTest : BaseDaoTest() {
             }
 
             listOf(
-                Service(id = UUID.fromString("00000000-0000-0000-0000-000000000001"), name = "First parent service", tag = Tag(UUID.fromString("00000000-0000-0000-0000-000000000001"))) to null,
-                Service(id = UUID.fromString("00000000-0000-0000-0000-000000000002"), name = "Sub service of First parent service", tag = Tag(UUID.fromString("00000000-0000-0000-0000-000000000001"))) to UUID.fromString("00000000-0000-0000-0000-000000000001"),
-                Service(id = UUID.fromString("00000000-0000-0000-0000-000000000003"), name = "Second parent service", tag = Tag(UUID.fromString("00000000-0000-0000-0000-000000000001"))) to null,
-                Service(id = UUID.fromString("00000000-0000-0000-0000-000000000004"), name = "Sub service of Sub service of First parent service", tag = Tag(UUID.fromString("00000000-0000-0000-0000-000000000001"))) to UUID.fromString("00000000-0000-0000-0000-000000000002")
+                Service(id = UUID.fromString("00000000-0000-0000-0000-000000000001"), title = "First parent service", imageUrl = "https://www.google.be/image", description = "Description", tag = Tag(UUID.fromString("00000000-0000-0000-0000-000000000001"))) to null,
+                Service(id = UUID.fromString("00000000-0000-0000-0000-000000000002"), title = "Sub service of First parent service", imageUrl = "https://www.google.be/image", description = "Description", tag = Tag(UUID.fromString("00000000-0000-0000-0000-000000000001"))) to UUID.fromString("00000000-0000-0000-0000-000000000001"),
+                Service(id = UUID.fromString("00000000-0000-0000-0000-000000000003"), title = "Second parent service", imageUrl = "https://www.google.be/image", description = "Description", tag = Tag(UUID.fromString("00000000-0000-0000-0000-000000000001"))) to null,
+                Service(id = UUID.fromString("00000000-0000-0000-0000-000000000004"), title = "Sub service of Sub service of First parent service", imageUrl = "https://www.google.be/image", description = "Description", tag = Tag(UUID.fromString("00000000-0000-0000-0000-000000000001"))) to UUID.fromString("00000000-0000-0000-0000-000000000002")
             ).forEach { data ->
                 ServicesTable.insert {
                     it[id] = data.first.id
-                    it[name] = data.first.name
-                    it[tagId] = data.first.tag.id
+                    it[title] = data.first.title
+                    it[imageUrl] = data.first.imageUrl
+                    it[description] = data.first.description
+                    it[tagId] = data.first.tag?.id
                     it[parentServiceId] = data.second
                 }
             }
