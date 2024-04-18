@@ -11,6 +11,7 @@ object ExperiencesTable : UUIDTable() {
     val jobPositionId = reference("job_position_id", JobPositionsTable, ReferenceOption.CASCADE)
     val shortDescription = text("short_description")
     val description = mediumText("description")
+    val asFreelance = bool("as_freelance").default(false)
     val companyId = reference("company_id", CompaniesTable, ReferenceOption.CASCADE)
     val from = datetime("from")
     val to = datetime("to")

@@ -80,6 +80,7 @@ class ExperienceDaoImpl : IExperienceDao {
             it[description] = insertNewExperience.description
             it[from] = insertNewExperience.from.toLocalDateTime()
             it[to] = insertNewExperience.to.toLocalDateTime()
+            it[asFreelance] = insertNewExperience.asFreelance
             it[jobPositionId] = UUID.fromString(insertNewExperience.jobPositionId)
             it[companyId] = UUID.fromString(insertNewExperience.companyId)
         }.value
@@ -100,6 +101,7 @@ class ExperienceDaoImpl : IExperienceDao {
             it[description] = updateExperience.description
             it[from] = updateExperience.from.toLocalDateTime()
             it[to] = updateExperience.to.toLocalDateTime()
+            it[asFreelance] = updateExperience.asFreelance
             it[jobPositionId] = UUID.fromString(updateExperience.jobPositionId)
             it[companyId] = UUID.fromString(updateExperience.companyId)
 

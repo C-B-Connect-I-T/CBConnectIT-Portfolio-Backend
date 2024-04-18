@@ -15,6 +15,8 @@ data class ExperienceDto(
     val to: String = "",
     val tags: List<TagDto> = emptyList(),
     val company: CompanyDto = CompanyDto(),
+    @SerializedName("as_freelance")
+    val asFreelance: Boolean = false,
     @SerializedName("job_position")
     val jobPosition: JobPositionDto = JobPositionDto(),
     @SerializedName("created_at")
