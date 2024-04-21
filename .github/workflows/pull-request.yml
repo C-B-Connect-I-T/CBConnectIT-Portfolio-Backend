@@ -18,6 +18,8 @@ jobs:
           distribution: "adopt"
       - name: Run Unit Tests
         run: ./gradlew test
+      - name: Make gradlew executable
+        run: chmod +x ./gradlew
 
   linter:
     runs-on: ubuntu-latest
@@ -34,3 +36,5 @@ jobs:
           distribution: "adopt"
       - name: Run Kotlin Linter
         run: ./gradlew detekt
+      - name: Make gradlew executable
+        run: chmod +x ./gradlew
