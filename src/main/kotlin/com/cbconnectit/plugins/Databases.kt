@@ -28,7 +28,7 @@ fun Application.configureDatabase() {
     val passwordEncryption by inject<PasswordManagerContract>()
 
     Database.connect(
-        System.getenv("database-url"),
+        url = "jdbc:mysql://${System.getenv("database-host")}/${System.getenv("database-name")}",
         user = System.getenv("database-username"),
         password = System.getenv("database-password")
     )
@@ -97,14 +97,42 @@ private fun seedDatabase(passwordEncryption: PasswordManagerContract) {
         Link(id = UUID.fromString("00000000-0000-0000-0000-000000000001"), url = "https://zappware.com"),
         Link(id = UUID.fromString("00000000-0000-0000-0000-000000000002"), url = "https://wisemen.digital"),
         Link(id = UUID.fromString("00000000-0000-0000-0000-000000000003"), url = "https://www.cbconnectit.com"),
-        Link(id = UUID.fromString("00000000-0000-0000-0000-000000000004"), url = "https://github.com/wisemen-digital/AndroidCore", type = LinkType.Github),
-        Link(id = UUID.fromString("00000000-0000-0000-0000-000000000005"), url = "https://github.com/ShaHar91/Measurements", type = LinkType.Github),
-        Link(id = UUID.fromString("00000000-0000-0000-0000-000000000006"), url = "https://github.com/ShaHar91/DemoPokedex", type = LinkType.Github),
-        Link(id = UUID.fromString("00000000-0000-0000-0000-000000000007"), url = "https://play.google.com/store/apps/details?id=be.christiano.demoPokedex", type = LinkType.PlayStore),
-        Link(id = UUID.fromString("00000000-0000-0000-0000-000000000008"), url = "https://github.com/ShaHar91/FoodWatcher-Android", type = LinkType.Github),
-        Link(id = UUID.fromString("00000000-0000-0000-0000-000000000009"), url = "https://github.com/ShaHar91/PoemCollection-backend-ktor", type = LinkType.Github),
-        Link(id = UUID.fromString("00000000-0000-0000-0000-000000000010"), url = "https://github.com/ShaHar91/PoemCollection-Backend-Node", type = LinkType.Github),
-        Link(id = UUID.fromString("00000000-0000-0000-0000-000000000011"), url = "https://github.com/ShaHar91/PoemCollection-Android", type = LinkType.Github),
+        Link(
+            id = UUID.fromString("00000000-0000-0000-0000-000000000004"),
+            url = "https://github.com/wisemen-digital/AndroidCore",
+            type = LinkType.Github
+        ),
+        Link(
+            id = UUID.fromString("00000000-0000-0000-0000-000000000005"),
+            url = "https://github.com/ShaHar91/Measurements",
+            type = LinkType.Github
+        ),
+        Link(
+            id = UUID.fromString("00000000-0000-0000-0000-000000000006"),
+            url = "https://github.com/ShaHar91/DemoPokedex",
+            type = LinkType.Github
+        ),
+//        Link(id = UUID.fromString("00000000-0000-0000-0000-000000000007"), url = "https://play.google.com/store/apps/details?id=be.christiano.demoPokedex", type = LinkType.PlayStore),
+        Link(
+            id = UUID.fromString("00000000-0000-0000-0000-000000000008"),
+            url = "https://github.com/ShaHar91/FoodWatcher-Android",
+            type = LinkType.Github
+        ),
+        Link(
+            id = UUID.fromString("00000000-0000-0000-0000-000000000009"),
+            url = "https://github.com/ShaHar91/PoemCollection-backend-ktor",
+            type = LinkType.Github
+        ),
+        Link(
+            id = UUID.fromString("00000000-0000-0000-0000-000000000010"),
+            url = "https://github.com/ShaHar91/PoemCollection-Backend-Node",
+            type = LinkType.Github
+        ),
+        Link(
+            id = UUID.fromString("00000000-0000-0000-0000-000000000011"),
+            url = "https://github.com/ShaHar91/PoemCollection-Android",
+            type = LinkType.Github
+        ),
     ).forEach { link ->
         LinksTable.insertIgnore {
             it[id] = link.id
@@ -115,9 +143,21 @@ private fun seedDatabase(passwordEncryption: PasswordManagerContract) {
 
     // Companies
     listOf(
-        Company(id = UUID.fromString("00000000-0000-0000-0000-000000000001"), name = "C.B. Connect I.T.", listOf(Link(id = UUID.fromString("00000000-0000-0000-0000-000000000003")))),
-        Company(id = UUID.fromString("00000000-0000-0000-0000-000000000002"), name = "Wisemen (formerly Appwise)", listOf(Link(id = UUID.fromString("00000000-0000-0000-0000-000000000002")))),
-        Company(id = UUID.fromString("00000000-0000-0000-0000-000000000003"), name = "Zappware", listOf(Link(id = UUID.fromString("00000000-0000-0000-0000-000000000001")))),
+        Company(
+            id = UUID.fromString("00000000-0000-0000-0000-000000000001"),
+            name = "C.B. Connect I.T.",
+            listOf(Link(id = UUID.fromString("00000000-0000-0000-0000-000000000003")))
+        ),
+        Company(
+            id = UUID.fromString("00000000-0000-0000-0000-000000000002"),
+            name = "Wisemen (formerly Appwise)",
+            listOf(Link(id = UUID.fromString("00000000-0000-0000-0000-000000000002")))
+        ),
+        Company(
+            id = UUID.fromString("00000000-0000-0000-0000-000000000003"),
+            name = "Zappware",
+            listOf(Link(id = UUID.fromString("00000000-0000-0000-0000-000000000001")))
+        ),
     ).forEach { company ->
         CompaniesTable.insertIgnore {
             it[id] = company.id
@@ -421,7 +461,7 @@ private fun seedDatabase(passwordEncryption: PasswordManagerContract) {
             ),
             links = listOf(
                 Link(id = UUID.fromString("00000000-0000-0000-0000-000000000006")),
-                Link(id = UUID.fromString("00000000-0000-0000-0000-000000000007"))
+//                Link(id = UUID.fromString("00000000-0000-0000-0000-000000000007"))
             )
         ),
         Project(

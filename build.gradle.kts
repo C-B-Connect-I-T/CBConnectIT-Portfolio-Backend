@@ -8,9 +8,11 @@ val postgres_version: String by project
 val koin_version: String by project
 
 plugins {
+    application
     kotlin("jvm") version "1.9.22"
     id("io.ktor.plugin") version "2.3.7"
     id("org.jetbrains.kotlin.plugin.serialization") version "1.9.22"
+    id("io.gitlab.arturbosch.detekt") version("1.23.3")
 }
 
 group = "com.cbconnectit"
@@ -25,6 +27,13 @@ application {
 
 repositories {
     mavenCentral()
+    jcenter()
+    maven {
+        url = uri("https://dl.bintray.com/kotlin/ktor")
+    }
+    maven {
+        url = uri("https://dl.bintray.com/kotlin/kotlinx")
+    }
 }
 
 dependencies {
