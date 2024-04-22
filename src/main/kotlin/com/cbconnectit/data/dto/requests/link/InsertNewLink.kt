@@ -1,6 +1,5 @@
 package com.cbconnectit.data.dto.requests.link
 
-import com.cbconnectit.domain.models.link.LinkType
 import com.cbconnectit.utils.isValidUrl
 
 data class InsertNewLink(

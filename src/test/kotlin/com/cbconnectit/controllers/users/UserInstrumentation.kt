@@ -4,7 +4,6 @@ import com.cbconnectit.data.dto.requests.user.InsertNewUser
 import com.cbconnectit.data.dto.requests.user.UpdatePassword
 import com.cbconnectit.data.dto.requests.user.UpdateUser
 import com.cbconnectit.domain.models.user.User
-import org.jetbrains.exposed.sql.javatime.CurrentDateTime
 import java.time.LocalDateTime
 import java.util.*
 

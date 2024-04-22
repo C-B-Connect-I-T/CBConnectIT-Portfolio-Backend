@@ -13,7 +13,6 @@ object JobPositionInstrumentation {
 
     fun givenAnEmptyInsertJobPositionBody() = InsertNewJobPosition("    ")
 
-
     fun givenJobPositionList() = listOf(
         givenAJobPosition("JobPosition no. 1"),
         givenAJobPosition("JobPosition no. 2"),

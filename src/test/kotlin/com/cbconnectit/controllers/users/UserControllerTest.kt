@@ -16,7 +16,15 @@ import com.cbconnectit.data.dto.requests.user.UpdateUser
 import com.cbconnectit.domain.interfaces.IUserDao
 import com.cbconnectit.modules.users.UserController
 import com.cbconnectit.modules.users.UserControllerImpl
-import com.cbconnectit.statuspages.*
+import com.cbconnectit.statuspages.ErrorFailedDelete
+import com.cbconnectit.statuspages.ErrorFailedUpdate
+import com.cbconnectit.statuspages.ErrorInvalidCredentials
+import com.cbconnectit.statuspages.ErrorInvalidParameters
+import com.cbconnectit.statuspages.ErrorNotFound
+import com.cbconnectit.statuspages.ErrorPasswordsDoNotMatch
+import com.cbconnectit.statuspages.ErrorSameAsOldPassword
+import com.cbconnectit.statuspages.ErrorUsernameExists
+import com.cbconnectit.statuspages.ErrorWeakPassword
 import com.cbconnectit.utils.PasswordManagerContract
 import com.cbconnectit.utils.toDatabaseString
 import io.mockk.clearMocks
@@ -24,7 +32,11 @@ import io.mockk.coEvery
 import io.mockk.mockk
 import kotlinx.coroutines.runBlocking
 import org.assertj.core.api.Assertions.assertThat
-import org.junit.jupiter.api.*
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.TestInstance
+import org.junit.jupiter.api.assertDoesNotThrow
+import org.junit.jupiter.api.assertThrows
 import org.koin.dsl.module
 import java.util.*
 

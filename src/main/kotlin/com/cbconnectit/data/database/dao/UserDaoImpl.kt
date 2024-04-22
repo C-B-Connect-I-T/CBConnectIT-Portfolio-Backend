@@ -1,16 +1,21 @@
 package com.cbconnectit.data.database.dao
 
-import com.cbconnectit.data.database.tables.*
+import com.cbconnectit.data.database.tables.UsersTable
+import com.cbconnectit.data.database.tables.toUser
+import com.cbconnectit.data.database.tables.toUserHashable
+import com.cbconnectit.data.database.tables.toUsers
 import com.cbconnectit.data.dto.requests.user.InsertNewUser
 import com.cbconnectit.data.dto.requests.user.UpdateUser
 import com.cbconnectit.domain.interfaces.IUserDao
 import com.cbconnectit.domain.models.user.User
 import com.cbconnectit.domain.models.user.UserRoles
-import com.cbconnectit.utils.toDatabaseString
-import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
+import org.jetbrains.exposed.sql.deleteWhere
+import org.jetbrains.exposed.sql.insertAndGetId
 import org.jetbrains.exposed.sql.javatime.CurrentDateTime
-import java.time.LocalDateTime
+import org.jetbrains.exposed.sql.select
+import org.jetbrains.exposed.sql.selectAll
+import org.jetbrains.exposed.sql.update
 import java.util.*
 
 class UserDaoImpl : IUserDao {

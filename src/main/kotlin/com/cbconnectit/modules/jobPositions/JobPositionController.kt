@@ -7,7 +7,12 @@ import com.cbconnectit.domain.interfaces.IJobPositionDao
 import com.cbconnectit.domain.models.jobPosition.toDto
 import com.cbconnectit.modules.BaseController
 import com.cbconnectit.plugins.dbQuery
-import com.cbconnectit.statuspages.*
+import com.cbconnectit.statuspages.ErrorDuplicateEntity
+import com.cbconnectit.statuspages.ErrorFailedCreate
+import com.cbconnectit.statuspages.ErrorFailedDelete
+import com.cbconnectit.statuspages.ErrorFailedUpdate
+import com.cbconnectit.statuspages.ErrorInvalidParameters
+import com.cbconnectit.statuspages.ErrorNotFound
 import org.koin.core.component.inject
 import java.util.*
 

@@ -10,4 +10,3 @@ data class UpdateUser(
 
     val isValid get() = !fullName.isNullOrBlank() || !username.isNullOrBlank()
 }
-

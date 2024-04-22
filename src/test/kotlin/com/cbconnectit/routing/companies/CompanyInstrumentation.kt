@@ -1,7 +1,7 @@
 package com.cbconnectit.routing.companies
 
-import com.cbconnectit.data.dto.requests.company.InsertNewCompany
 import com.cbconnectit.data.dto.requests.company.CompanyDto
+import com.cbconnectit.data.dto.requests.company.InsertNewCompany
 import com.cbconnectit.data.dto.requests.company.UpdateCompany
 import com.cbconnectit.utils.toDatabaseString
 import java.time.LocalDateTime
@@ -12,7 +12,6 @@ object CompanyInstrumentation {
     fun givenAValidUpdateCompanyBody() = UpdateCompany("Updated Company")
 
     fun givenAnEmptyInsertCompanyBody() = InsertNewCompany("    ")
-
 
     fun givenCompanyList() = listOf(
         givenACompany("Company no. 1"),

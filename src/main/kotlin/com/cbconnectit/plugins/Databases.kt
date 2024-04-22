@@ -1,6 +1,18 @@
 package com.cbconnectit.plugins
 
-import com.cbconnectit.data.database.tables.*
+import com.cbconnectit.data.database.tables.CompaniesLinksPivotTable
+import com.cbconnectit.data.database.tables.CompaniesTable
+import com.cbconnectit.data.database.tables.ExperiencesTable
+import com.cbconnectit.data.database.tables.JobPositionsTable
+import com.cbconnectit.data.database.tables.LinksProjectsPivotTable
+import com.cbconnectit.data.database.tables.LinksTable
+import com.cbconnectit.data.database.tables.ProjectsTable
+import com.cbconnectit.data.database.tables.ServicesTable
+import com.cbconnectit.data.database.tables.TagsExperiencesPivotTable
+import com.cbconnectit.data.database.tables.TagsProjectsPivotTable
+import com.cbconnectit.data.database.tables.TagsTable
+import com.cbconnectit.data.database.tables.TestimonialsTable
+import com.cbconnectit.data.database.tables.UsersTable
 import com.cbconnectit.domain.models.company.Company
 import com.cbconnectit.domain.models.experience.Experience
 import com.cbconnectit.domain.models.jobPosition.JobPosition
@@ -54,6 +66,7 @@ fun Application.configureDatabase() {
     }
 }
 
+@SuppressWarnings("LongMethod", "MaximumLineLength", "MagicNumber")
 private fun seedDatabase(passwordEncryption: PasswordManagerContract) {
 
     UsersTable.insertIgnore {

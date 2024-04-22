@@ -8,9 +8,13 @@ import com.cbconnectit.data.dto.requests.jobPosition.InsertNewJobPosition
 import com.cbconnectit.data.dto.requests.jobPosition.UpdateJobPosition
 import com.cbconnectit.domain.interfaces.IJobPositionDao
 import com.cbconnectit.domain.models.jobPosition.JobPosition
-import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
+import org.jetbrains.exposed.sql.deleteWhere
+import org.jetbrains.exposed.sql.insertAndGetId
 import org.jetbrains.exposed.sql.javatime.CurrentDateTime
+import org.jetbrains.exposed.sql.select
+import org.jetbrains.exposed.sql.selectAll
+import org.jetbrains.exposed.sql.update
 import java.util.*
 
 class JobPositionDaoImpl : IJobPositionDao {

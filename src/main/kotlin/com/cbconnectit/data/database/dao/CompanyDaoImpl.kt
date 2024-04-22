@@ -1,15 +1,26 @@
 package com.cbconnectit.data.database.dao
 
-import com.cbconnectit.data.database.tables.*
+import com.cbconnectit.data.database.tables.CompaniesLinksPivotTable
+import com.cbconnectit.data.database.tables.CompaniesTable
+import com.cbconnectit.data.database.tables.LinksTable
+import com.cbconnectit.data.database.tables.parseLinks
+import com.cbconnectit.data.database.tables.toCompany
 import com.cbconnectit.data.dto.requests.company.InsertNewCompany
 import com.cbconnectit.data.dto.requests.company.UpdateCompany
 import com.cbconnectit.domain.interfaces.ICompanyDao
 import com.cbconnectit.domain.models.company.Company
 import com.cbconnectit.domain.models.link.Link
-import org.jetbrains.exposed.sql.*
+import org.jetbrains.exposed.sql.Query
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.notInList
+import org.jetbrains.exposed.sql.and
+import org.jetbrains.exposed.sql.deleteWhere
+import org.jetbrains.exposed.sql.insert
+import org.jetbrains.exposed.sql.insertAndGetId
 import org.jetbrains.exposed.sql.javatime.CurrentDateTime
+import org.jetbrains.exposed.sql.select
+import org.jetbrains.exposed.sql.selectAll
+import org.jetbrains.exposed.sql.update
 import java.util.*
 
 class CompanyDaoImpl : ICompanyDao {

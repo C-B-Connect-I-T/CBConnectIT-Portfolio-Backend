@@ -2,7 +2,10 @@ package com.cbconnectit.modules.jobPositions
 
 import com.cbconnectit.data.dto.requests.jobPosition.InsertNewJobPosition
 import com.cbconnectit.data.dto.requests.jobPosition.UpdateJobPosition
-import com.cbconnectit.utils.*
+import com.cbconnectit.utils.ParamConstants
+import com.cbconnectit.utils.getJobPositionId
+import com.cbconnectit.utils.receiveOrRespondWithError
+import com.cbconnectit.utils.sendOk
 import io.ktor.http.*
 import io.ktor.server.application.*
 import io.ktor.server.auth.*

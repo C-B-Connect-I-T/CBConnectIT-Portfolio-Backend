@@ -48,6 +48,9 @@ dependencies {
     implementation("io.ktor:ktor-server-status-pages-jvm")
     implementation("io.ktor:ktor-server-call-logging-jvm")
 
+//    detektPlugins("io.gitlab.arturbosch.detekt:detekt:1.23.3")
+    detektPlugins("io.gitlab.arturbosch.detekt:detekt-formatting:1.23.3")
+
     // Unsure what this does!!
     implementation("io.ktor:ktor-server-host-common-jvm")
 

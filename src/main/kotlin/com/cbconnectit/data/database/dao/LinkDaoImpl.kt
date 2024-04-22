@@ -8,9 +8,13 @@ import com.cbconnectit.data.dto.requests.link.UpdateLink
 import com.cbconnectit.domain.interfaces.ILinkDao
 import com.cbconnectit.domain.models.link.Link
 import com.cbconnectit.domain.models.link.LinkType
-import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
+import org.jetbrains.exposed.sql.deleteWhere
+import org.jetbrains.exposed.sql.insertAndGetId
 import org.jetbrains.exposed.sql.javatime.CurrentDateTime
+import org.jetbrains.exposed.sql.select
+import org.jetbrains.exposed.sql.selectAll
+import org.jetbrains.exposed.sql.update
 import java.util.*
 
 class LinkDaoImpl : ILinkDao {

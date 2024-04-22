@@ -5,8 +5,6 @@ import com.cbconnectit.domain.models.company.Company
 import com.cbconnectit.domain.models.company.toDto
 import com.cbconnectit.domain.models.jobPosition.JobPosition
 import com.cbconnectit.domain.models.jobPosition.toDto
-import com.cbconnectit.domain.models.tag.Tag
-import com.cbconnectit.domain.models.tag.toDto
 import com.cbconnectit.utils.toDatabaseString
 import java.time.LocalDateTime
 import java.util.*

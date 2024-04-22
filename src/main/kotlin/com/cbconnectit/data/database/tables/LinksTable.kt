@@ -1,5 +1,6 @@
 package com.cbconnectit.data.database.tables
 
+import com.cbconnectit.data.database.tables.Constants.normalTextSize
 import com.cbconnectit.domain.models.link.Link
 import com.cbconnectit.domain.models.link.LinkType
 import org.jetbrains.exposed.dao.id.UUIDTable
@@ -10,7 +11,7 @@ import org.jetbrains.exposed.sql.javatime.datetime
 import java.util.*
 
 object LinksTable: UUIDTable() {
-    val url = varchar("url", 255)
+    val url = varchar("url", normalTextSize)
     val type = enumeration<LinkType>("type").default(LinkType.Unknown)
     val createdAt = datetime("created_at").defaultExpression(CurrentDateTime)
     val updatedAt = datetime("updated_at").defaultExpression(CurrentDateTime)
@@ -33,9 +34,7 @@ fun parseLinks(results: Query, getParentId: (ResultRow) -> UUID): MutableMap<UUI
         .fold(mutableMapOf<UUID, List<Link>>()) { map, resultRow ->
             val parentId = getParentId(resultRow)
 
-            val link = if (resultRow.getOrNull(LinksTable.id) != null) {
-                resultRow.toLink()
-            } else null
+            val link = resultRow.getOrNull(LinksTable.id)?.let { resultRow.toLink() }
 
             val current = map.getOrDefault(parentId, emptyList())
             map[parentId] = current.toMutableList() + listOfNotNull(link)

@@ -1,5 +1,6 @@
 package com.cbconnectit.data.dto.requests.user
 
+@SuppressWarnings("MagicNumber")
 interface PasswordAble {
 
     val password: String

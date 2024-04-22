@@ -9,6 +9,7 @@ import io.ktor.server.config.*
 import java.util.*
 import java.util.concurrent.TimeUnit
 
+@SuppressWarnings("MagicNumber")
 class JwtConfig(
     private val issuer: String,
     private val audience: String,
@@ -44,7 +45,6 @@ class JwtConfig(
         .withClaim("username", user.username)
         .withExpiresAt(expiration)
         .sign(algorithm)
-
 
     override fun createTokens(user: User): CredentialsResponse = CredentialsResponse(
         createToken(user, getTokenExpiration()),

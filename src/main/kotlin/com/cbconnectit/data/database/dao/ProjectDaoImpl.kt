@@ -1,15 +1,30 @@
 package com.cbconnectit.data.database.dao
 
-import com.cbconnectit.data.database.tables.*
+import com.cbconnectit.data.database.tables.LinksProjectsPivotTable
+import com.cbconnectit.data.database.tables.LinksTable
+import com.cbconnectit.data.database.tables.ProjectsTable
+import com.cbconnectit.data.database.tables.TagsProjectsPivotTable
+import com.cbconnectit.data.database.tables.TagsTable
+import com.cbconnectit.data.database.tables.parseLinks
+import com.cbconnectit.data.database.tables.parseTags
+import com.cbconnectit.data.database.tables.toProject
 import com.cbconnectit.data.dto.requests.project.InsertNewProject
 import com.cbconnectit.data.dto.requests.project.UpdateProject
 import com.cbconnectit.domain.interfaces.IProjectDao
 import com.cbconnectit.domain.models.link.Link
 import com.cbconnectit.domain.models.project.Project
 import com.cbconnectit.domain.models.tag.Tag
-import org.jetbrains.exposed.sql.*
+import org.jetbrains.exposed.sql.Query
+import org.jetbrains.exposed.sql.SortOrder
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.notInList
+import org.jetbrains.exposed.sql.and
+import org.jetbrains.exposed.sql.deleteWhere
+import org.jetbrains.exposed.sql.insert
+import org.jetbrains.exposed.sql.insertAndGetId
+import org.jetbrains.exposed.sql.select
+import org.jetbrains.exposed.sql.selectAll
+import org.jetbrains.exposed.sql.update
 import java.time.LocalDateTime
 import java.util.*
 

@@ -2,11 +2,10 @@ package com.cbconnectit.domain.models.user
 
 import com.cbconnectit.data.dto.requests.user.NameAble
 import com.cbconnectit.data.dto.requests.user.UserDto
-import com.cbconnectit.domain.models.interfaces.DateAble
 import com.cbconnectit.utils.toDatabaseString
 import io.ktor.server.auth.*
 import java.time.LocalDateTime
-import java.util.UUID
+import java.util.*
 
 data class User(
     val id: UUID = UUID.randomUUID(),

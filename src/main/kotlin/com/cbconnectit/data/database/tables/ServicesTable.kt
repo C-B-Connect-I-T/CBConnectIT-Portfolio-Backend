@@ -1,5 +1,7 @@
 package com.cbconnectit.data.database.tables
 
+import com.cbconnectit.data.database.tables.Constants.bigTextSize
+import com.cbconnectit.data.database.tables.Constants.normalTextSize
 import com.cbconnectit.domain.models.service.Service
 import org.jetbrains.exposed.dao.id.UUIDTable
 import org.jetbrains.exposed.sql.ReferenceOption
@@ -8,9 +10,9 @@ import org.jetbrains.exposed.sql.javatime.CurrentDateTime
 import org.jetbrains.exposed.sql.javatime.datetime
 
 object ServicesTable : UUIDTable() {
-    val imageUrl = varchar("image_url", 255)
-    val title = varchar("title", 255).uniqueIndex()
-    val shortDescription = varchar("short_description", 1000).nullable().default(null)
+    val imageUrl = varchar("image_url", normalTextSize)
+    val title = varchar("title", normalTextSize).uniqueIndex()
+    val shortDescription = varchar("short_description", bigTextSize).nullable().default(null)
     val description = text("description")
     val bannerDescription = text("banner_description").nullable().default(null)
     val extraInfo = text("extra_info").nullable().default(null)
@@ -35,3 +37,9 @@ fun ResultRow.toService() = Service(
 
 fun Iterable<ResultRow>.toServices() = this.map { it.toService() }
 fun Iterable<ResultRow>.toService() = this.firstOrNull()?.toService()
+
+object Constants {
+    const val smallerTextSize = 100
+    const val normalTextSize = 255
+    const val bigTextSize = 1000
+}

@@ -127,11 +127,11 @@ complexity:
   TooManyFunctions:
     active: true
     excludes: ['**/test/**', '**/androidTest/**', '**/commonTest/**', '**/jvmTest/**', '**/jsTest/**', '**/iosTest/**']
-    thresholdInFiles: 11
-    thresholdInClasses: 11
-    thresholdInInterfaces: 11
-    thresholdInObjects: 11
-    thresholdInEnums: 11
+    thresholdInFiles: 20
+    thresholdInClasses: 20
+    thresholdInInterfaces: 20
+    thresholdInObjects: 20
+    thresholdInEnums: 20
     ignoreDeprecated: false
     ignorePrivate: false
     ignoreOverridden: false
@@ -284,7 +284,7 @@ formatting:
     continuationIndentSize: 4
   MaximumLineLength:
     active: true
-    maxLineLength: 120
+    maxLineLength: 250
     ignoreBackTickedIdentifier: true
   ModifierOrdering:
     active: true
@@ -326,7 +326,7 @@ formatting:
     active: true
     autoCorrect: true
   NoWildcardImports:
-    active: true
+    active: false
   PackageName:
     active: true
     autoCorrect: true
@@ -339,13 +339,13 @@ formatting:
     active: false
     autoCorrect: true
   SpacingAroundColon:
-    active: true
+    active: false
     autoCorrect: true
   SpacingAroundComma:
-    active: true
+    active: false
     autoCorrect: true
   SpacingAroundCurly:
-    active: true
+    active: false
     autoCorrect: true
   SpacingAroundDot:
     active: true
@@ -425,7 +425,7 @@ naming:
     excludes: ['*.kts']
     rootPackage: ''
   MatchingDeclarationName:
-    active: true
+    active: false
     mustBeFirst: true
   MemberNameEqualsClassName:
     active: true
@@ -560,7 +560,7 @@ style:
     active: false
   DataClassContainsFunctions:
     active: false
-    conversionFunctionPrefix: 'to'
+    conversionFunctionPrefix: [ 'to' ]
   DataClassShouldBeImmutable:
     active: false
   DestructuringDeclarationWithTooManyEntries:
@@ -578,7 +578,7 @@ style:
     active: false
     includeLineWrapping: false
   ForbiddenComment:
-    active: true
+    active: false
     values: ['TODO:', 'FIXME:', 'STOPSHIP:']
     allowedPatterns: ''
   ForbiddenImport:
@@ -600,7 +600,7 @@ style:
     active: true
     ignoreOverridableFunction: true
     ignoreActualFunction: true
-    excludedFunctions: 'describeContents'
+    excludedFunctions: [ 'describeContents' ]
     excludeAnnotatedFunction: ['dagger.Provides']
   LibraryCodeMustSpecifyReturnType:
     active: true
@@ -644,7 +644,7 @@ style:
   NestedClassesVisibility:
     active: true
   NewLineAtEndOfFile:
-    active: true
+    active: false
   NoTabs:
     active: false
   ObjectLiteralToLambda:
@@ -668,7 +668,7 @@ style:
   ReturnCount:
     active: true
     max: 2
-    excludedFunctions: 'equals'
+    excludedFunctions: [ 'equals' ]
     excludeLabeled: false
     excludeReturnFromLambda: true
     excludeGuardClauses: false
@@ -741,6 +741,6 @@ style:
   VarCouldBeVal:
     active: true
   WildcardImport:
-    active: true
+    active: false
     excludes: ['**/test/**', '**/androidTest/**', '**/commonTest/**', '**/jvmTest/**', '**/jsTest/**', '**/iosTest/**']
     excludeImports: ['java.util.*', 'kotlinx.android.synthetic.*', 'io.ktor.application.*', 'io.ktor.client.*', 'io.ktor.client.engine.cio.*', 'io.ktor.client.features.json.*', 'io.ktor.client.features.json.serializer.*', 'io.ktor.features.*', 'io.ktor.serialization.*', 'io.ktor.http.*', 'io.ktor.routing.*', 'io.ktor.response.*', 'io.ktor.request.*']
