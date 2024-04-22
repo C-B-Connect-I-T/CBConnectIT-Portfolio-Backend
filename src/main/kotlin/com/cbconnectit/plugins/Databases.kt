@@ -40,7 +40,7 @@ fun Application.configureDatabase() {
     val passwordEncryption by inject<PasswordManagerContract>()
 
     Database.connect(
-        url = "jdbc:mysql://${System.getenv("database-host")}/${System.getenv("database-name")}",
+        url = System.getenv("database-url"),
         user = System.getenv("database-username"),
         password = System.getenv("database-password")
     )
