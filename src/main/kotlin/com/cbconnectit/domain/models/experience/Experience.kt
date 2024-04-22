@@ -19,6 +19,7 @@ data class Experience(
     val to: LocalDateTime = LocalDateTime.now(),
     val company: Company = Company(),
     val jobPosition: JobPosition = JobPosition(),
+    val asFreelance: Boolean = false,
     val tags: List<Tag> = emptyList(),
     val createdAt: LocalDateTime = LocalDateTime.now(),
     val updatedAt: LocalDateTime = LocalDateTime.now()
@@ -31,6 +32,7 @@ fun Experience.toDto(): ExperienceDto = ExperienceDto(
     from = this.from.toDatabaseString(),
     to = this.to.toDatabaseString(),
     company = this.company.toDto(),
+    asFreelance = asFreelance,
     jobPosition = this.jobPosition.toDto(),
     tags = this.tags.map { it.toDto() },
     createdAt = this.createdAt.toDatabaseString(),

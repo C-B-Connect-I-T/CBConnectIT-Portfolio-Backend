@@ -2,7 +2,7 @@ package com.cbconnectit.plugins
 
 import com.auth0.jwt.interfaces.JWTVerifier
 import com.cbconnectit.domain.interfaces.IUserDao
-import com.cbconnectit.modules.auth.adminOnly
+import com.cbconnectit.modules.auth.ADMIN_ONLY
 import com.cbconnectit.modules.auth.setupAuthentication
 import com.cbconnectit.modules.auth.validateUser
 import com.cbconnectit.modules.auth.validateUserIsAdmin
@@ -22,7 +22,7 @@ fun Application.configureSecurity() {
             }
         }
 
-        jwt(adminOnly) {
+        jwt(ADMIN_ONLY) {
             setupAuthentication(jwtVerifier) {
                 it.validateUserIsAdmin(userDao)
             }

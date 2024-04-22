@@ -4,7 +4,12 @@ import com.cbconnectit.data.database.dao.BaseDaoTest
 import com.cbconnectit.data.database.dao.ExperienceDaoImpl
 import com.cbconnectit.data.database.dao.experiences.ExperienceInstrumentation.givenAValidInsertExperienceBody
 import com.cbconnectit.data.database.dao.experiences.ExperienceInstrumentation.givenAValidUpdateExperienceBody
-import com.cbconnectit.data.database.tables.*
+import com.cbconnectit.data.database.tables.CompaniesLinksPivotTable
+import com.cbconnectit.data.database.tables.CompaniesTable
+import com.cbconnectit.data.database.tables.ExperiencesTable
+import com.cbconnectit.data.database.tables.JobPositionsTable
+import com.cbconnectit.data.database.tables.TagsExperiencesPivotTable
+import com.cbconnectit.data.database.tables.TagsTable
 import com.cbconnectit.domain.models.company.Company
 import com.cbconnectit.domain.models.experience.Experience
 import com.cbconnectit.domain.models.jobPosition.JobPosition
@@ -29,6 +34,7 @@ internal class ExperienceDaoImplTest : BaseDaoTest() {
     fun `getExperiences but none exists, return empty list`() {
         withTables(
             CompaniesTable,
+            CompaniesLinksPivotTable,
             JobPositionsTable,
             ExperiencesTable,
             TagsTable,
@@ -131,11 +137,13 @@ internal class ExperienceDaoImplTest : BaseDaoTest() {
     }
     // </editor-fold>
 
+    @SuppressWarnings("LongMethod")
     private fun baseTest(
         test: suspend Transaction.() -> Unit
     ) {
         withTables(
             CompaniesTable,
+            CompaniesLinksPivotTable,
             JobPositionsTable,
             ExperiencesTable,
             TagsTable,

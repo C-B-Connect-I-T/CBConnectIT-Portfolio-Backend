@@ -1,6 +1,15 @@
 package com.cbconnectit.data.database.dao
 
-import com.cbconnectit.data.database.tables.*
+import com.cbconnectit.data.database.tables.CompaniesLinksPivotTable
+import com.cbconnectit.data.database.tables.CompaniesTable
+import com.cbconnectit.data.database.tables.ExperiencesTable
+import com.cbconnectit.data.database.tables.JobPositionsTable
+import com.cbconnectit.data.database.tables.LinksTable
+import com.cbconnectit.data.database.tables.TagsExperiencesPivotTable
+import com.cbconnectit.data.database.tables.TagsTable
+import com.cbconnectit.data.database.tables.parseLinks
+import com.cbconnectit.data.database.tables.parseTags
+import com.cbconnectit.data.database.tables.toExperience
 import com.cbconnectit.data.dto.requests.experience.InsertNewExperience
 import com.cbconnectit.data.dto.requests.experience.UpdateExperience
 import com.cbconnectit.domain.interfaces.IExperienceDao
@@ -8,9 +17,16 @@ import com.cbconnectit.domain.models.experience.Experience
 import com.cbconnectit.domain.models.link.Link
 import com.cbconnectit.domain.models.tag.Tag
 import com.cbconnectit.utils.toLocalDateTime
-import org.jetbrains.exposed.sql.*
+import org.jetbrains.exposed.sql.Query
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.notInList
+import org.jetbrains.exposed.sql.and
+import org.jetbrains.exposed.sql.deleteWhere
+import org.jetbrains.exposed.sql.insert
+import org.jetbrains.exposed.sql.insertAndGetId
+import org.jetbrains.exposed.sql.select
+import org.jetbrains.exposed.sql.selectAll
+import org.jetbrains.exposed.sql.update
 import java.time.LocalDateTime
 import java.util.*
 
@@ -45,7 +61,7 @@ class ExperienceDaoImpl : IExperienceDao {
         val tags = parseTags(results)
         val links = parseLinks(results)
 
-        //TODO: getting to many relations is "messing" up the parsing for tags and links. (to many rows)... should be fixed because of to many repetitions
+        // TODO: getting to many relations is "messing" up the parsing for tags and links. (to many rows)... should be fixed because of to many repetitions
 
         return results
             .distinctBy { it[ExperiencesTable.id].value }
@@ -80,6 +96,7 @@ class ExperienceDaoImpl : IExperienceDao {
             it[description] = insertNewExperience.description
             it[from] = insertNewExperience.from.toLocalDateTime()
             it[to] = insertNewExperience.to.toLocalDateTime()
+            it[asFreelance] = insertNewExperience.asFreelance
             it[jobPositionId] = UUID.fromString(insertNewExperience.jobPositionId)
             it[companyId] = UUID.fromString(insertNewExperience.companyId)
         }.value
@@ -100,6 +117,7 @@ class ExperienceDaoImpl : IExperienceDao {
             it[description] = updateExperience.description
             it[from] = updateExperience.from.toLocalDateTime()
             it[to] = updateExperience.to.toLocalDateTime()
+            it[asFreelance] = updateExperience.asFreelance
             it[jobPositionId] = UUID.fromString(updateExperience.jobPositionId)
             it[companyId] = UUID.fromString(updateExperience.companyId)
 

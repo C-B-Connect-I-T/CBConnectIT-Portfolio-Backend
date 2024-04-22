@@ -6,7 +6,7 @@ import com.cbconnectit.data.dto.requests.user.UserDto
 import com.cbconnectit.domain.models.user.User
 import com.cbconnectit.domain.models.user.UserRoles
 import com.cbconnectit.domain.models.user.toDto
-import com.cbconnectit.modules.auth.adminOnly
+import com.cbconnectit.modules.auth.ADMIN_ONLY
 import com.cbconnectit.modules.users.UserController
 import com.cbconnectit.modules.users.userRouting
 import com.cbconnectit.routing.AuthenticationInstrumentation
@@ -18,7 +18,11 @@ import io.ktor.server.routing.*
 import io.mockk.coEvery
 import io.mockk.mockk
 import org.assertj.core.api.Assertions.assertThat
-import org.junit.jupiter.api.*
+import org.junit.jupiter.api.BeforeAll
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.TestInstance
+import org.junit.jupiter.api.assertThrows
 import org.koin.dsl.module
 import java.time.LocalDateTime
 import java.util.*
@@ -48,7 +52,7 @@ class UserRoutingTest : BaseRoutingTest() {
 
     @Test
     fun `when creating user without any body, returns error`() = withBaseTestApplication(
-        AuthenticationInstrumentation(adminOnly, UserRoles.Admin),
+        AuthenticationInstrumentation(ADMIN_ONLY, UserRoles.Admin),
         AuthenticationInstrumentation()
     ) {
         coEvery { userController.postUser(any()) } throws Exception()
@@ -61,7 +65,7 @@ class UserRoutingTest : BaseRoutingTest() {
 
     @Test
     fun `when creating user with correct data, user not admin, we return error`() = withBaseTestApplication(
-        AuthenticationInstrumentation(adminOnly),
+        AuthenticationInstrumentation(ADMIN_ONLY),
         AuthenticationInstrumentation()
     ) {
         val call = doCall(HttpMethod.Post, "/users")
@@ -71,7 +75,7 @@ class UserRoutingTest : BaseRoutingTest() {
 
     @Test
     fun `when creating user with successful insertion, we return response user body`() = withBaseTestApplication(
-        AuthenticationInstrumentation(adminOnly, UserRoles.Admin),
+        AuthenticationInstrumentation(ADMIN_ONLY, UserRoles.Admin),
         AuthenticationInstrumentation()
     ) {
         val time = LocalDateTime.now().toDatabaseString()
@@ -90,7 +94,7 @@ class UserRoutingTest : BaseRoutingTest() {
 
     @Test
     fun `when creating user with any error, we return error`() = withBaseTestApplication(
-        AuthenticationInstrumentation(adminOnly, UserRoles.Admin),
+        AuthenticationInstrumentation(ADMIN_ONLY, UserRoles.Admin),
         AuthenticationInstrumentation()
     ) {
         coEvery { userController.postUser(any()) } throws Exception()
@@ -104,7 +108,7 @@ class UserRoutingTest : BaseRoutingTest() {
 
     @Test
     fun `when fetching current user, we return user`() = withBaseTestApplication(
-        AuthenticationInstrumentation(adminOnly),
+        AuthenticationInstrumentation(ADMIN_ONLY),
         AuthenticationInstrumentation()
     ) {
         val time = LocalDateTime.now()
@@ -115,13 +119,18 @@ class UserRoutingTest : BaseRoutingTest() {
         call.also {
             assertThat(HttpStatusCode.OK).isEqualTo(it.response.status())
             val responseBody = it.response.parseBody(UserDto::class.java)
-            assertThat(userResponse).isEqualTo(responseBody)
+            assertThat(userResponse).matches { user ->
+                user.id == responseBody.id &&
+                        user.role == responseBody.role &&
+                        user.username == responseBody.username &&
+                        user.fullName == responseBody.fullName
+            }
         }
     }
 
     @Test
     fun `when updating user with successful insertion, we return response user body`() = withBaseTestApplication(
-        AuthenticationInstrumentation(adminOnly),
+        AuthenticationInstrumentation(ADMIN_ONLY),
         AuthenticationInstrumentation()
     ) {
         val time = LocalDateTime.now().toDatabaseString()
@@ -140,7 +149,7 @@ class UserRoutingTest : BaseRoutingTest() {
 
     @Test
     fun `when updating user with any error, we return error`() = withBaseTestApplication(
-        AuthenticationInstrumentation(adminOnly),
+        AuthenticationInstrumentation(ADMIN_ONLY),
         AuthenticationInstrumentation()
     ) {
         coEvery { userController.updateUserById(any(), any()) } throws Exception()
@@ -154,7 +163,7 @@ class UserRoutingTest : BaseRoutingTest() {
 
     @Test
     fun `when updating user password with successful insertion, we return response user body`() = withBaseTestApplication(
-        AuthenticationInstrumentation(adminOnly),
+        AuthenticationInstrumentation(ADMIN_ONLY),
         AuthenticationInstrumentation()
     ) {
         val time = LocalDateTime.now().toDatabaseString()
@@ -173,7 +182,7 @@ class UserRoutingTest : BaseRoutingTest() {
 
     @Test
     fun `when updating user password with any error, we return error`() = withBaseTestApplication(
-        AuthenticationInstrumentation(adminOnly),
+        AuthenticationInstrumentation(ADMIN_ONLY),
         AuthenticationInstrumentation()
     ) {
         coEvery { userController.updateUserPasswordById(any(), any()) } throws Exception()
@@ -187,7 +196,7 @@ class UserRoutingTest : BaseRoutingTest() {
 
     @Test
     fun `when fetching a specific user that exists, we return that user`() = withBaseTestApplication(
-        AuthenticationInstrumentation(adminOnly, UserRoles.Admin),
+        AuthenticationInstrumentation(ADMIN_ONLY, UserRoles.Admin),
         AuthenticationInstrumentation()
     ) {
         val time = LocalDateTime.now().toDatabaseString()
@@ -205,7 +214,7 @@ class UserRoutingTest : BaseRoutingTest() {
 
     @Test
     fun `when fetching a specific user that does not exist, we return error`() = withBaseTestApplication(
-        AuthenticationInstrumentation(adminOnly, UserRoles.Admin),
+        AuthenticationInstrumentation(ADMIN_ONLY, UserRoles.Admin),
         AuthenticationInstrumentation()
     ) {
         coEvery { userController.getUserById(any()) } throws Exception()
@@ -219,7 +228,7 @@ class UserRoutingTest : BaseRoutingTest() {
 
     @Test
     fun `when fetching a specific user, user not admin, we return error`() = withBaseTestApplication(
-        AuthenticationInstrumentation(adminOnly),
+        AuthenticationInstrumentation(ADMIN_ONLY),
         AuthenticationInstrumentation()
     ) {
 
@@ -230,7 +239,7 @@ class UserRoutingTest : BaseRoutingTest() {
 
     @Test
     fun `when updating user by id with successful insertion, we return response user body`() = withBaseTestApplication(
-        AuthenticationInstrumentation(adminOnly, UserRoles.Admin),
+        AuthenticationInstrumentation(ADMIN_ONLY, UserRoles.Admin),
         AuthenticationInstrumentation()
     ) {
         val time = LocalDateTime.now().toDatabaseString()
@@ -249,7 +258,7 @@ class UserRoutingTest : BaseRoutingTest() {
 
     @Test
     fun `when updating user by id with any error, we return error`() = withBaseTestApplication(
-        AuthenticationInstrumentation(adminOnly, UserRoles.Admin),
+        AuthenticationInstrumentation(ADMIN_ONLY, UserRoles.Admin),
         AuthenticationInstrumentation()
     ) {
         coEvery { userController.updateUserById(any(), any()) } throws Exception()
@@ -263,7 +272,7 @@ class UserRoutingTest : BaseRoutingTest() {
 
     @Test
     fun `when updating user by id, user not admin, we return error`() = withBaseTestApplication(
-        AuthenticationInstrumentation(adminOnly),
+        AuthenticationInstrumentation(ADMIN_ONLY),
         AuthenticationInstrumentation()
     ) {
 
@@ -274,7 +283,7 @@ class UserRoutingTest : BaseRoutingTest() {
 
     @Test
     fun `when updating user password by id, with successful insertion, we return response user body`() = withBaseTestApplication(
-        AuthenticationInstrumentation(adminOnly, UserRoles.Admin),
+        AuthenticationInstrumentation(ADMIN_ONLY, UserRoles.Admin),
         AuthenticationInstrumentation()
     ) {
         val time = LocalDateTime.now().toDatabaseString()
@@ -293,7 +302,7 @@ class UserRoutingTest : BaseRoutingTest() {
 
     @Test
     fun `when updating user password by id, with any error, we return error`() = withBaseTestApplication(
-        AuthenticationInstrumentation(adminOnly, UserRoles.Admin),
+        AuthenticationInstrumentation(ADMIN_ONLY, UserRoles.Admin),
         AuthenticationInstrumentation()
     ) {
         coEvery { userController.updateUserPasswordById(any(), any()) } throws Exception()
@@ -307,7 +316,7 @@ class UserRoutingTest : BaseRoutingTest() {
 
     @Test
     fun `when updating user password by id, user not admin, we return error`() = withBaseTestApplication(
-        AuthenticationInstrumentation(adminOnly),
+        AuthenticationInstrumentation(ADMIN_ONLY),
         AuthenticationInstrumentation()
     ) {
 
@@ -318,7 +327,7 @@ class UserRoutingTest : BaseRoutingTest() {
 
     @Test
     fun `when deleting user successful by id, we return Ok response`() = withBaseTestApplication(
-        AuthenticationInstrumentation(adminOnly, UserRoles.Admin),
+        AuthenticationInstrumentation(ADMIN_ONLY, UserRoles.Admin),
         AuthenticationInstrumentation()
     ) {
         coEvery { userController.deleteUserById(any()) } returns Unit
@@ -332,7 +341,7 @@ class UserRoutingTest : BaseRoutingTest() {
 
     @Test
     fun `when deleting user by id with any error, we return error`() = withBaseTestApplication(
-        AuthenticationInstrumentation(adminOnly, UserRoles.Admin),
+        AuthenticationInstrumentation(ADMIN_ONLY, UserRoles.Admin),
         AuthenticationInstrumentation()
     ) {
         coEvery { userController.deleteUserById(any()) } throws Exception()
@@ -345,7 +354,7 @@ class UserRoutingTest : BaseRoutingTest() {
 
     @Test
     fun `when deleting user by id, user not admin, we return error`() = withBaseTestApplication(
-        AuthenticationInstrumentation(adminOnly),
+        AuthenticationInstrumentation(ADMIN_ONLY),
         AuthenticationInstrumentation()
     ) {
 

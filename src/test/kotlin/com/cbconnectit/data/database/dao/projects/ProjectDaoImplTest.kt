@@ -4,7 +4,11 @@ import com.cbconnectit.data.database.dao.BaseDaoTest
 import com.cbconnectit.data.database.dao.ProjectDaoImpl
 import com.cbconnectit.data.database.dao.projects.ProjectInstrumentation.givenAValidInsertProjectBody
 import com.cbconnectit.data.database.dao.projects.ProjectInstrumentation.givenAValidUpdateProjectBody
-import com.cbconnectit.data.database.tables.*
+import com.cbconnectit.data.database.tables.LinksProjectsPivotTable
+import com.cbconnectit.data.database.tables.LinksTable
+import com.cbconnectit.data.database.tables.ProjectsTable
+import com.cbconnectit.data.database.tables.TagsProjectsPivotTable
+import com.cbconnectit.data.database.tables.TagsTable
 import com.cbconnectit.domain.models.link.Link
 import com.cbconnectit.domain.models.project.Project
 import com.cbconnectit.domain.models.tag.Tag
@@ -133,6 +137,7 @@ internal class ProjectDaoImplTest : BaseDaoTest() {
     }
     // </editor-fold>
 
+    @SuppressWarnings("LongMethod")
     private fun baseTest(
         test: suspend Transaction.() -> Unit
     ) {
@@ -144,10 +149,10 @@ internal class ProjectDaoImplTest : BaseDaoTest() {
             ProjectsTable
         ) {
             listOf(
-                Tag(UUID.fromString("00000000-0000-0000-0000-000000000001"), name = "First tag", slug ="first-tag"),
-                Tag(UUID.fromString("00000000-0000-0000-0000-000000000002"), name = "Second tag", slug ="second-tag"),
-                Tag(UUID.fromString("00000000-0000-0000-0000-000000000003"), name = "Third tag", slug ="third-tag"),
-            ).forEach {  data ->
+                Tag(UUID.fromString("00000000-0000-0000-0000-000000000001"), name = "First tag", slug = "first-tag"),
+                Tag(UUID.fromString("00000000-0000-0000-0000-000000000002"), name = "Second tag", slug = "second-tag"),
+                Tag(UUID.fromString("00000000-0000-0000-0000-000000000003"), name = "Third tag", slug = "third-tag"),
+            ).forEach { data ->
                 TagsTable.insert {
                     it[id] = data.id
                     it[name] = data.name
@@ -159,7 +164,7 @@ internal class ProjectDaoImplTest : BaseDaoTest() {
                 Link(UUID.fromString("00000000-0000-0000-0000-000000000001"), url = "https://www.google.be"),
                 Link(UUID.fromString("00000000-0000-0000-0000-000000000002"), url = "https://www.google.be/second"),
                 Link(UUID.fromString("00000000-0000-0000-0000-000000000003"), url = "https://www.google.be/third"),
-            ).forEach {  data ->
+            ).forEach { data ->
                 LinksTable.insert {
                     it[id] = data.id
                     it[url] = data.url

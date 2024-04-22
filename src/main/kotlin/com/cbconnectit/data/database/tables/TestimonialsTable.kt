@@ -1,5 +1,6 @@
 package com.cbconnectit.data.database.tables
 
+import com.cbconnectit.data.database.tables.Constants.normalTextSize
 import com.cbconnectit.domain.models.testimonial.Testimonial
 import org.jetbrains.exposed.dao.id.UUIDTable
 import org.jetbrains.exposed.sql.ReferenceOption
@@ -8,8 +9,8 @@ import org.jetbrains.exposed.sql.javatime.CurrentDateTime
 import org.jetbrains.exposed.sql.javatime.datetime
 
 object TestimonialsTable : UUIDTable() {
-    val imageUrl = varchar("image_url", 255)
-    val fullName = varchar("full_name", 255)
+    val imageUrl = varchar("image_url", normalTextSize)
+    val fullName = varchar("full_name", normalTextSize)
     val jobPositionId = reference("job_position_id", JobPositionsTable, ReferenceOption.CASCADE)
     val review = text("review")
     val companyId = reference("company_id", CompaniesTable, ReferenceOption.CASCADE)

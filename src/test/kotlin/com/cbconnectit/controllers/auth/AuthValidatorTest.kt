@@ -82,7 +82,6 @@ class AuthValidatorTest : BaseControllerTest() {
         }
     }
 
-
     @Test
     fun `when validating user as admin where payload does not contain UserId, return null -- unauthorized`() {
         coEvery { payload.claims[any()]?.asString() } returns null

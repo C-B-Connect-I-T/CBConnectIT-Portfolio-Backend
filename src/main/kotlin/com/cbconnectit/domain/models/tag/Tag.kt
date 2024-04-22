@@ -1,9 +1,7 @@
 package com.cbconnectit.domain.models.tag
 
 import com.cbconnectit.data.dto.requests.tag.TagDto
-import com.cbconnectit.domain.models.interfaces.DateAble
 import com.cbconnectit.utils.toDatabaseString
-import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.*
 

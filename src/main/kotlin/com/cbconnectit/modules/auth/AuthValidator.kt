@@ -5,9 +5,9 @@ import com.cbconnectit.domain.interfaces.IUserDao
 import com.cbconnectit.plugins.dbQuery
 import io.ktor.server.auth.*
 import io.ktor.server.auth.jwt.*
-import java.util.UUID
+import java.util.*
 
-const val adminOnly = "admin"
+const val ADMIN_ONLY = "admin"
 
 fun JWTAuthenticationProvider.Config.setupAuthentication(
     jwtVerifier: JWTVerifier,
@@ -28,10 +28,11 @@ suspend fun JWTCredential.validateUser(userDao: IUserDao): Principal? {
         userDao.getUser(UUID.fromString(userId))
     }
 
-    return if (payload.audience.contains(JwtConfig.USERS_AUDIENCE))
+    return if (payload.audience.contains(JwtConfig.USERS_AUDIENCE)) {
         user
-    else
+    } else {
         null
+    }
 }
 
 suspend fun JWTCredential.validateUserIsAdmin(userDao: IUserDao): Principal? {
@@ -44,9 +45,9 @@ suspend fun JWTCredential.validateUserIsAdmin(userDao: IUserDao): Principal? {
         isUserRoleAdmin to user
     }
 
-    return if (payload.audience.contains(JwtConfig.USERS_AUDIENCE) && isUserRoleAdmin)
+    return if (payload.audience.contains(JwtConfig.USERS_AUDIENCE) && isUserRoleAdmin) {
         user
-    else
+    } else {
         null
+    }
 }
-

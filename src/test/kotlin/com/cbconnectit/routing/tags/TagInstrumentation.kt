@@ -13,7 +13,6 @@ object TagInstrumentation {
 
     fun givenAnEmptyInsertTagBody() = InsertNewTag("    ")
 
-
     fun givenTagList() = listOf(
         givenATag("Tag no. 1"),
         givenATag("Tag no. 2"),

@@ -4,6 +4,7 @@ import com.cbconnectit.data.database.dao.BaseDaoTest
 import com.cbconnectit.data.database.dao.TestimonialDaoImpl
 import com.cbconnectit.data.database.dao.testimonials.TestimonialInstrumentation.givenAValidInsertTestimonialBody
 import com.cbconnectit.data.database.dao.testimonials.TestimonialInstrumentation.givenAValidUpdateTestimonialBody
+import com.cbconnectit.data.database.tables.CompaniesLinksPivotTable
 import com.cbconnectit.data.database.tables.CompaniesTable
 import com.cbconnectit.data.database.tables.JobPositionsTable
 import com.cbconnectit.data.database.tables.TestimonialsTable
@@ -29,6 +30,7 @@ internal class TestimonialDaoImplTest : BaseDaoTest() {
     fun `getTestimonials but none exists, return empty list`() {
         withTables(
             CompaniesTable,
+            CompaniesLinksPivotTable,
             JobPositionsTable,
             TestimonialsTable
         ) {
@@ -129,11 +131,13 @@ internal class TestimonialDaoImplTest : BaseDaoTest() {
     }
     // </editor-fold>
 
+    @SuppressWarnings("LongMethod")
     private fun baseTest(
         test: suspend Transaction.() -> Unit
     ) {
         withTables(
             CompaniesTable,
+            CompaniesLinksPivotTable,
             JobPositionsTable,
             TestimonialsTable
         ) {

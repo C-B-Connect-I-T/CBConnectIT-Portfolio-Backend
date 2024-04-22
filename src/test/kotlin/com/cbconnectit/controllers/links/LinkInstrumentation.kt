@@ -4,7 +4,6 @@ import com.cbconnectit.data.dto.requests.link.InsertNewLink
 import com.cbconnectit.data.dto.requests.link.UpdateLink
 import com.cbconnectit.domain.models.link.Link
 import com.cbconnectit.domain.models.link.LinkType
-import com.github.slugify.Slugify
 import io.ktor.http.*
 import java.util.*
 

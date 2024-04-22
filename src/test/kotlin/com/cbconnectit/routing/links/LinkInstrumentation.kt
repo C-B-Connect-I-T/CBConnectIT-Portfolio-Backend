@@ -13,7 +13,6 @@ object LinkInstrumentation {
 
     fun givenAnEmptyInsertLinkBody() = InsertNewLink("    ")
 
-
     fun givenLinkList() = listOf(
         givenALink("https://www.google.be"),
         givenALink("https://www.google.be/second"),

@@ -4,7 +4,7 @@ import com.auth0.jwt.JWT
 import com.auth0.jwt.algorithms.Algorithm
 import com.cbconnectit.domain.models.user.User
 import com.cbconnectit.domain.models.user.UserRoles
-import com.cbconnectit.modules.auth.adminOnly
+import com.cbconnectit.modules.auth.ADMIN_ONLY
 import com.cbconnectit.utils.toDatabaseString
 import com.google.gson.Gson
 import io.ktor.http.*
@@ -69,7 +69,7 @@ abstract class BaseRoutingTest {
             val time = LocalDateTime.now().toDatabaseString()
 
             return@validate when (authenticationTest.name) {
-                adminOnly -> {
+                ADMIN_ONLY -> {
                     if (authenticationTest.userRole != UserRoles.Admin) return@validate null
 
                     User(UUID.fromString("00000000-0000-0000-0000-000000000001"), "Chris Bol", "chris.bol@example.com", LocalDateTime.now(), LocalDateTime.now(), authenticationTest.userRole)

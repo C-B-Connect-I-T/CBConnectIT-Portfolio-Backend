@@ -16,6 +16,7 @@ import java.util.*
 
 val ApplicationCall.authenticatedUser get() = authentication.principal<User>()!!
 
+@SuppressWarnings("TooGenericExceptionCaught", "SwallowedException")
 suspend inline fun <reified T> ApplicationCall.receiveOrRespondWithError(): T {
     return try {
         runCatching { receiveNullable<T>() }.getOrNull() ?: run {
@@ -37,8 +38,7 @@ fun ApplicationCall.getTestimonialId(): UUID = parameters[ParamConstants.TESTIMO
 fun ApplicationCall.getExperienceId(): UUID = parameters[ParamConstants.EXPERIENCE_ID_KEY]?.let { UUID.fromString(it) } ?: throw ErrorInvalidUUID
 fun ApplicationCall.getProjectId(): UUID = parameters[ParamConstants.PROJECT_ID_KEY]?.let { UUID.fromString(it) } ?: throw ErrorInvalidUUID
 fun ApplicationCall.getTagIdentifier(): String = parameters[ParamConstants.TAG_IDENTIFIER_KEY] ?: throw ErrorInvalidParameters
-//fun ApplicationCall.getProjectId(): UUID = parameters[ParamConstants.PROJECT_ID_KEY]?.toIntOrNull() ?: throw ErrorInvalidUUID
-
+// fun ApplicationCall.getProjectId(): UUID = parameters[ParamConstants.PROJECT_ID_KEY]?.toIntOrNull() ?: throw ErrorInvalidUUID
 
 suspend fun PipelineContext<Unit, ApplicationCall>.sendOk() {
     call.respond(HttpStatusCode.OK)
@@ -47,6 +47,7 @@ suspend fun PipelineContext<Unit, ApplicationCall>.sendOk() {
 object TBDException : ApiException("TBD_error", "An error, but still under development", HttpStatusCode.InternalServerError)
 
 val String.isValidUrl: Boolean
+    @SuppressWarnings("TooGenericExceptionCaught", "SwallowedException")
     get() = try {
         // Attempt to create a URL object from the given string
         URL(this)

@@ -8,9 +8,13 @@ import com.cbconnectit.data.dto.requests.tag.UpdateTag
 import com.cbconnectit.domain.interfaces.ITagDao
 import com.cbconnectit.domain.models.tag.Tag
 import com.github.slugify.Slugify
-import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
+import org.jetbrains.exposed.sql.deleteWhere
+import org.jetbrains.exposed.sql.insertAndGetId
 import org.jetbrains.exposed.sql.javatime.CurrentDateTime
+import org.jetbrains.exposed.sql.lowerCase
+import org.jetbrains.exposed.sql.select
+import org.jetbrains.exposed.sql.update
 import java.util.*
 
 class TagDaoImpl : ITagDao {

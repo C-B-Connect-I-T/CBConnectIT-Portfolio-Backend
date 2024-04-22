@@ -8,24 +8,32 @@ import com.cbconnectit.domain.interfaces.ITagDao
 import com.cbconnectit.domain.models.service.toDto
 import com.cbconnectit.modules.BaseController
 import com.cbconnectit.plugins.dbQuery
-import com.cbconnectit.statuspages.*
+import com.cbconnectit.statuspages.ErrorFailedCreate
+import com.cbconnectit.statuspages.ErrorFailedDelete
+import com.cbconnectit.statuspages.ErrorFailedUpdate
+import com.cbconnectit.statuspages.ErrorInvalidParameters
+import com.cbconnectit.statuspages.ErrorNotFound
+import com.cbconnectit.statuspages.ErrorUnknownServiceIdsForCreate
+import com.cbconnectit.statuspages.ErrorUnknownServiceIdsForUpdate
+import com.cbconnectit.statuspages.ErrorUnknownTagIdsForCreate
+import com.cbconnectit.statuspages.ErrorUnknownTagIdsForUpdate
 import org.koin.core.component.inject
 import java.util.*
 
-class ServiceControllerImpl: BaseController(), ServiceController {
+class ServiceControllerImpl : BaseController(), ServiceController {
 
     private val serviceDao by inject<IServiceDao>()
     private val tagDao by inject<ITagDao>()
 
-    override suspend fun getServices(): List<ServiceDto> = dbQuery{
+    override suspend fun getServices(): List<ServiceDto> = dbQuery {
         serviceDao.getServices().map { it.toDto() }
     }
 
-    override suspend fun getServiceById(serviceId: UUID): ServiceDto = dbQuery{
+    override suspend fun getServiceById(serviceId: UUID): ServiceDto = dbQuery {
         serviceDao.getServiceById(serviceId)?.toDto() ?: throw ErrorNotFound
     }
 
-    override suspend fun postService(insertNewService: InsertNewService): ServiceDto = dbQuery{
+    override suspend fun postService(insertNewService: InsertNewService): ServiceDto = dbQuery {
         if (!insertNewService.isValid) throw ErrorInvalidParameters
 
         val parentServiceIds = insertNewService.parentServiceUuid?.let { serviceDao.getListOfExistingServiceIds(listOf(it)) }
@@ -33,12 +41,12 @@ class ServiceControllerImpl: BaseController(), ServiceController {
             throw ErrorUnknownServiceIdsForCreate(listOfNotNull(insertNewService.parentServiceUuid))
         }
 
-        val tagIds = insertNewService.tagUuid?.let {  tagDao.getListOfExistingTagIds(listOf(it)) }
+        val tagIds = insertNewService.tagUuid?.let { tagDao.getListOfExistingTagIds(listOf(it)) }
         if (tagIds != null && tagIds.count() != 1) {
             throw ErrorUnknownTagIdsForCreate(listOfNotNull(insertNewService.tagUuid))
         }
 
-        serviceDao.insertService(insertNewService)?.toDto() ?: throw  ErrorFailedCreate
+        serviceDao.insertService(insertNewService)?.toDto() ?: throw ErrorFailedCreate
     }
 
     override suspend fun updateServiceById(serviceId: UUID, updateService: UpdateService): ServiceDto = dbQuery {
@@ -49,7 +57,7 @@ class ServiceControllerImpl: BaseController(), ServiceController {
             throw ErrorUnknownServiceIdsForUpdate(listOfNotNull(updateService.parentServiceUuid))
         }
 
-        val tagIds = updateService.tagUuid?.let {  tagDao.getListOfExistingTagIds(listOf(it)) }
+        val tagIds = updateService.tagUuid?.let { tagDao.getListOfExistingTagIds(listOf(it)) }
         if (tagIds != null && tagIds.count() != 1) {
             throw ErrorUnknownTagIdsForUpdate(listOfNotNull(updateService.tagUuid))
         }
@@ -57,13 +65,13 @@ class ServiceControllerImpl: BaseController(), ServiceController {
         serviceDao.updateService(serviceId, updateService)?.toDto() ?: throw ErrorFailedUpdate
     }
 
-    override suspend fun deleteServiceById(serviceId: UUID) = dbQuery{
+    override suspend fun deleteServiceById(serviceId: UUID) = dbQuery {
         val deleted = serviceDao.deleteService(serviceId)
         if (!deleted) throw ErrorFailedDelete
     }
 }
 
-interface ServiceController  {
+interface ServiceController {
     suspend fun getServices(): List<ServiceDto>
     suspend fun getServiceById(serviceId: UUID): ServiceDto
     suspend fun postService(insertNewService: InsertNewService): ServiceDto

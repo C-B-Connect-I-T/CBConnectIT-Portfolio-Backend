@@ -1,13 +1,24 @@
 package com.cbconnectit.data.database.dao
 
-import com.cbconnectit.data.database.tables.*
+import com.cbconnectit.data.database.tables.CompaniesLinksPivotTable
+import com.cbconnectit.data.database.tables.CompaniesTable
+import com.cbconnectit.data.database.tables.JobPositionsTable
+import com.cbconnectit.data.database.tables.LinksTable
+import com.cbconnectit.data.database.tables.TestimonialsTable
+import com.cbconnectit.data.database.tables.parseLinks
+import com.cbconnectit.data.database.tables.toTestimonial
 import com.cbconnectit.data.dto.requests.testimonial.InsertNewTestimonial
 import com.cbconnectit.data.dto.requests.testimonial.UpdateTestimonial
 import com.cbconnectit.domain.interfaces.ITestimonialDao
 import com.cbconnectit.domain.models.link.Link
 import com.cbconnectit.domain.models.testimonial.Testimonial
-import org.jetbrains.exposed.sql.*
+import org.jetbrains.exposed.sql.Query
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
+import org.jetbrains.exposed.sql.deleteWhere
+import org.jetbrains.exposed.sql.insertAndGetId
+import org.jetbrains.exposed.sql.select
+import org.jetbrains.exposed.sql.selectAll
+import org.jetbrains.exposed.sql.update
 import java.time.LocalDateTime
 import java.util.*
 
@@ -40,7 +51,6 @@ class TestimonialDaoImpl : ITestimonialDao {
         val links = parseLinks(results)
 
         return results
-            .distinctBy { it[CompaniesTable.id].value }
             .map { row ->
                 val id = row[CompaniesTable.id].value
                 val temp = row.toTestimonial()

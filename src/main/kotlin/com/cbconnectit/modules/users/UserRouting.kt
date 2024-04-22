@@ -4,8 +4,12 @@ import com.cbconnectit.data.dto.requests.user.InsertNewUser
 import com.cbconnectit.data.dto.requests.user.UpdatePassword
 import com.cbconnectit.data.dto.requests.user.UpdateUser
 import com.cbconnectit.domain.models.user.toDto
-import com.cbconnectit.modules.auth.adminOnly
-import com.cbconnectit.utils.*
+import com.cbconnectit.modules.auth.ADMIN_ONLY
+import com.cbconnectit.utils.ParamConstants
+import com.cbconnectit.utils.authenticatedUser
+import com.cbconnectit.utils.getUserId
+import com.cbconnectit.utils.receiveOrRespondWithError
+import com.cbconnectit.utils.sendOk
 import io.ktor.http.*
 import io.ktor.server.application.*
 import io.ktor.server.auth.*
@@ -13,7 +17,7 @@ import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import org.koin.ktor.ext.inject
 
-//TODO: use DTO for outgoing data, todo everywhere!!!
+// TODO: use DTO for outgoing data, todo everywhere!!!
 fun Route.userRouting() {
 
     val userController by inject<UserController>()
@@ -39,14 +43,14 @@ fun Route.userRouting() {
             }
         }
 
-        authenticate(adminOnly) {
+        authenticate(ADMIN_ONLY) {
             post {
                 val insertNewUser = call.receiveOrRespondWithError<InsertNewUser>()
                 val user = userController.postUser(insertNewUser)
                 call.respond(HttpStatusCode.Created, user)
             }
 
-            //TODO: do we need a route to fetch all users? Maybe to have a nice overview in the backoffice for easy password reset or something?
+            // TODO: do we need a route to fetch all users? Maybe to have a nice overview in the backoffice for easy password reset or something?
 
             route("{${ParamConstants.USER_ID_KEY}}") {
                 get {

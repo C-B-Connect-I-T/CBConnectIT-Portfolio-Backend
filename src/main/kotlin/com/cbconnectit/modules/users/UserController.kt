@@ -1,11 +1,23 @@
 package com.cbconnectit.modules.users
 
-import com.cbconnectit.data.dto.requests.user.*
+import com.cbconnectit.data.dto.requests.user.InsertNewUser
+import com.cbconnectit.data.dto.requests.user.UpdatePassword
+import com.cbconnectit.data.dto.requests.user.UpdateUser
+import com.cbconnectit.data.dto.requests.user.UserDto
 import com.cbconnectit.domain.interfaces.IUserDao
 import com.cbconnectit.domain.models.user.toDto
 import com.cbconnectit.modules.BaseController
 import com.cbconnectit.plugins.dbQuery
-import com.cbconnectit.statuspages.*
+import com.cbconnectit.statuspages.ErrorFailedCreate
+import com.cbconnectit.statuspages.ErrorFailedDelete
+import com.cbconnectit.statuspages.ErrorFailedUpdate
+import com.cbconnectit.statuspages.ErrorInvalidCredentials
+import com.cbconnectit.statuspages.ErrorInvalidParameters
+import com.cbconnectit.statuspages.ErrorNotFound
+import com.cbconnectit.statuspages.ErrorPasswordsDoNotMatch
+import com.cbconnectit.statuspages.ErrorSameAsOldPassword
+import com.cbconnectit.statuspages.ErrorUsernameExists
+import com.cbconnectit.statuspages.ErrorWeakPassword
 import com.cbconnectit.utils.PasswordManagerContract
 import org.koin.core.component.inject
 import java.util.*
@@ -35,7 +47,7 @@ class UserControllerImpl : BaseController(), UserController {
     }
 
     override suspend fun updateUserById(userId: UUID, updateUser: UpdateUser): UserDto = dbQuery {
-        //TODO: should we check for Admin or logged in user here as well?
+        // TODO: should we check for Admin or logged in user here as well?
 
         if (!updateUser.isValid) throw ErrorInvalidParameters
 
@@ -43,7 +55,7 @@ class UserControllerImpl : BaseController(), UserController {
     }
 
     override suspend fun updateUserPasswordById(userId: UUID, updatePassword: UpdatePassword): UserDto = dbQuery {
-        //TODO: should we check for Admin or logged in user here as well?
+        // TODO: should we check for Admin or logged in user here as well?
 
         val userHashable = userDao.getUserHashableById(userId) ?: throw ErrorNotFound
 
@@ -62,7 +74,7 @@ class UserControllerImpl : BaseController(), UserController {
     }
 
     override suspend fun deleteUserById(userId: UUID) {
-        //TODO: should we check for Admin or logged in user here as well?
+        // TODO: should we check for Admin or logged in user here as well?
 
         return dbQuery {
             val deleted = userDao.deleteUser(userId)

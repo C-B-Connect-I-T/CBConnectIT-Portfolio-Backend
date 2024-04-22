@@ -2,7 +2,10 @@ package com.cbconnectit.modules.companies
 
 import com.cbconnectit.data.dto.requests.company.InsertNewCompany
 import com.cbconnectit.data.dto.requests.company.UpdateCompany
-import com.cbconnectit.utils.*
+import com.cbconnectit.utils.ParamConstants
+import com.cbconnectit.utils.getCompanyId
+import com.cbconnectit.utils.receiveOrRespondWithError
+import com.cbconnectit.utils.sendOk
 import io.ktor.http.*
 import io.ktor.server.application.*
 import io.ktor.server.auth.*

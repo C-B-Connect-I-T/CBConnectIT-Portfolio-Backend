@@ -1,7 +1,7 @@
 package com.cbconnectit.domain.models.link
 
 import io.ktor.http.*
-import org.junit.jupiter.api.Assertions.*
+import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
 class LinkTypeTest {

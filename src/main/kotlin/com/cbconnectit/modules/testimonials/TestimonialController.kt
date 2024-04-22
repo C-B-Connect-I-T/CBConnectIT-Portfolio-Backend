@@ -9,52 +9,60 @@ import com.cbconnectit.domain.interfaces.ITestimonialDao
 import com.cbconnectit.domain.models.testimonial.toDto
 import com.cbconnectit.modules.BaseController
 import com.cbconnectit.plugins.dbQuery
-import com.cbconnectit.statuspages.*
+import com.cbconnectit.statuspages.ErrorFailedCreate
+import com.cbconnectit.statuspages.ErrorFailedDelete
+import com.cbconnectit.statuspages.ErrorFailedUpdate
+import com.cbconnectit.statuspages.ErrorInvalidParameters
+import com.cbconnectit.statuspages.ErrorNotFound
+import com.cbconnectit.statuspages.ErrorUnknownCompanyIdsForCreateTestimonial
+import com.cbconnectit.statuspages.ErrorUnknownCompanyIdsForUpdateTestimonial
+import com.cbconnectit.statuspages.ErrorUnknownJobPositionIdsForCreateTestimonial
+import com.cbconnectit.statuspages.ErrorUnknownJobPositionIdsForUpdateTestimonial
 import org.koin.core.component.inject
 import java.util.*
 
-class TestimonialControllerImpl: BaseController(), TestimonialController {
+class TestimonialControllerImpl : BaseController(), TestimonialController {
 
     private val testimonialDao by inject<ITestimonialDao>()
     private val companyDao by inject<ICompanyDao>()
     private val jobPositionDao by inject<IJobPositionDao>()
 
-    override suspend fun getTestimonials(): List<TestimonialDto> = dbQuery{
+    override suspend fun getTestimonials(): List<TestimonialDto> = dbQuery {
         testimonialDao.getTestimonials().map { it.toDto() }
     }
 
-    override suspend fun getTestimonialById(testimonialId: UUID): TestimonialDto = dbQuery{
+    override suspend fun getTestimonialById(testimonialId: UUID): TestimonialDto = dbQuery {
         testimonialDao.getTestimonialById(testimonialId)?.toDto() ?: throw ErrorNotFound
     }
 
-    override suspend fun postTestimonial(insertNewTestimonial: InsertNewTestimonial): TestimonialDto = dbQuery{
+    override suspend fun postTestimonial(insertNewTestimonial: InsertNewTestimonial): TestimonialDto = dbQuery {
         if (!insertNewTestimonial.isValid) throw ErrorInvalidParameters
 
-        val companyIds = insertNewTestimonial.companyUuid.let {  companyDao.getListOfExistingCompanyIds(listOf(it)) }
+        val companyIds = insertNewTestimonial.companyUuid.let { companyDao.getListOfExistingCompanyIds(listOf(it)) }
 
         if (companyIds.count() != 1) {
             throw ErrorUnknownCompanyIdsForCreateTestimonial(listOf(insertNewTestimonial.companyUuid))
         }
 
-        val jobPositionIds = insertNewTestimonial.jobPositionUuid.let {  jobPositionDao.getListOfExistingJobPositionIds(listOf(it)) }
+        val jobPositionIds = insertNewTestimonial.jobPositionUuid.let { jobPositionDao.getListOfExistingJobPositionIds(listOf(it)) }
 
         if (jobPositionIds.count() != 1) {
             throw ErrorUnknownJobPositionIdsForCreateTestimonial(listOf(insertNewTestimonial.jobPositionUuid))
         }
 
-        testimonialDao.insertTestimonial(insertNewTestimonial)?.toDto() ?: throw  ErrorFailedCreate
+        testimonialDao.insertTestimonial(insertNewTestimonial)?.toDto() ?: throw ErrorFailedCreate
     }
 
     override suspend fun updateTestimonialById(testimonialId: UUID, updateTestimonial: UpdateTestimonial): TestimonialDto = dbQuery {
         if (!updateTestimonial.isValid) throw ErrorInvalidParameters
 
-        val companyIds = updateTestimonial.companyUuid.let {  companyDao.getListOfExistingCompanyIds(listOf(it)) }
+        val companyIds = updateTestimonial.companyUuid.let { companyDao.getListOfExistingCompanyIds(listOf(it)) }
 
         if (companyIds.count() != 1) {
             throw ErrorUnknownCompanyIdsForUpdateTestimonial(listOf(updateTestimonial.companyUuid))
         }
 
-        val jobPositionIds = updateTestimonial.jobPositionUuid.let {  jobPositionDao.getListOfExistingJobPositionIds(listOf(it)) }
+        val jobPositionIds = updateTestimonial.jobPositionUuid.let { jobPositionDao.getListOfExistingJobPositionIds(listOf(it)) }
 
         if (jobPositionIds.count() != 1) {
             throw ErrorUnknownJobPositionIdsForUpdateTestimonial(listOf(updateTestimonial.jobPositionUuid))
@@ -63,13 +71,13 @@ class TestimonialControllerImpl: BaseController(), TestimonialController {
         testimonialDao.updateTestimonial(testimonialId, updateTestimonial)?.toDto() ?: throw ErrorFailedUpdate
     }
 
-    override suspend fun deleteTestimonialById(testimonialId: UUID) = dbQuery{
+    override suspend fun deleteTestimonialById(testimonialId: UUID) = dbQuery {
         val deleted = testimonialDao.deleteTestimonial(testimonialId)
         if (!deleted) throw ErrorFailedDelete
     }
 }
 
-interface TestimonialController  {
+interface TestimonialController {
     suspend fun getTestimonials(): List<TestimonialDto>
     suspend fun getTestimonialById(testimonialId: UUID): TestimonialDto
     suspend fun postTestimonial(insertNewTestimonial: InsertNewTestimonial): TestimonialDto
