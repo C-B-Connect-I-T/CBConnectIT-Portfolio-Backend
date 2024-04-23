@@ -51,7 +51,7 @@ class TestimonialDaoImpl : ITestimonialDao {
         val links = parseLinks(results)
 
         return results
-            //TODO: big issue!! Unit Test fails with this, but removing this results in duplicate data when fetching
+            // TODO: big issue!! Unit Test fails with this, but removing this results in duplicate data when fetching
             .distinctBy { it[CompaniesTable.id].value }
             .map { row ->
                 val id = row[CompaniesTable.id].value

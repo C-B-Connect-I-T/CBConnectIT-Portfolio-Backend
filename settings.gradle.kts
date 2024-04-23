@@ -1,1 +1,1 @@
-rootProject.name = "com.cbconnectit.portfolio-backend"
+rootProject.name = "C.B. Connect I.T. - Portfolio - BackEnd"
