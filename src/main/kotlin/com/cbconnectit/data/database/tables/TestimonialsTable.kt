@@ -13,7 +13,7 @@ object TestimonialsTable : UUIDTable() {
     val fullName = varchar("full_name", normalTextSize)
     val jobPositionId = reference("job_position_id", JobPositionsTable, ReferenceOption.CASCADE)
     val review = text("review")
-    val companyId = reference("company_id", CompaniesTable, ReferenceOption.CASCADE)
+    val companyId = optReference("company_id", CompaniesTable, ReferenceOption.CASCADE)
     val createdAt = datetime("created_at").defaultExpression(CurrentDateTime)
     val updatedAt = datetime("updated_at").defaultExpression(CurrentDateTime)
 }
@@ -24,7 +24,7 @@ fun ResultRow.toTestimonial() = Testimonial(
     fullName = this[TestimonialsTable.fullName],
     review = this[TestimonialsTable.review],
     jobPosition = this.toJobPosition(),
-    company = this.toCompany(),
+    company = this[TestimonialsTable.companyId]?.value?.let { this.toCompany() },
     createdAt = this[TestimonialsTable.createdAt],
     updatedAt = this[TestimonialsTable.updatedAt],
 )
