@@ -53,7 +53,7 @@ class ProjectDaoImpl : IProjectDao {
         val projectWithRelations = (ProjectsTable leftJoin TagsProjectsPivotTable leftJoin TagsTable leftJoin LinksProjectsPivotTable leftJoin LinksTable)
 
         val results = projectWithRelations.selectAll()
-            .orderBy(ProjectsTable.createdAt to SortOrder.DESC)
+            .orderBy(ProjectsTable.updatedAt to SortOrder.DESC)
 
         val tags = parseTags(results)
         val links = parseLinks(results)

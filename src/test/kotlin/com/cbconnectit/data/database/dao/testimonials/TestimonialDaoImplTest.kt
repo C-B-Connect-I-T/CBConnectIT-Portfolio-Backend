@@ -43,7 +43,7 @@ internal class TestimonialDaoImplTest : BaseDaoTest() {
     fun `getTestimonials return the list`() {
         baseTest {
             val list = dao.getTestimonials()
-            assertThat(list).hasSize(4)
+            assertThat(list).hasSize(5)
         }
     }
     // </editor-fold>
@@ -185,12 +185,18 @@ internal class TestimonialDaoImplTest : BaseDaoTest() {
                     review = "Fourth Testimonial",
                     company = Company(UUID.fromString("00000000-0000-0000-0000-000000000002")),
                     jobPosition = JobPosition(UUID.fromString("00000000-0000-0000-0000-000000000001"))
+                ),
+                Testimonial(
+                    id = UUID.fromString("00000000-0000-0000-0000-000000000005"),
+                    review = "Fifth Testimonial",
+                    company = null,
+                    jobPosition = JobPosition(UUID.fromString("00000000-0000-0000-0000-000000000001"))
                 )
             ).forEach { data ->
                 TestimonialsTable.insert {
                     it[id] = data.id
                     it[review] = data.review
-                    it[companyId] = data.company.id
+                    it[companyId] = data.company?.id
                     it[jobPositionId] = data.jobPosition.id
                     it[imageUrl] = ""
                     it[fullName] = ""

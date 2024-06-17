@@ -283,7 +283,7 @@ private fun seedDatabase(passwordEncryption: PasswordManagerContract) {
             id = UUID.fromString("00000000-0000-0000-0000-000000000003"),
             imageUrl = "https://raw.githubusercontent.com/ShaHar91/Portfolio/master/public/avatar3.png",
             fullName = "Els Schuurmans",
-            company = Company(id = UUID.fromString("00000000-0000-0000-0000-000000000001")),
+            company = null,
             jobPosition = JobPosition(id = UUID.fromString("00000000-0000-0000-0000-000000000002")),
             review = "I had the pleasure of working closely with Christiano Bolla in the process of making an personalised tracker application. He was very aware of the requirements I had, we discussed them thoroughly and he was able to give me some insights and good suggestions that broadend my view. During the process we could communicate in a very productive and convivial way. He kept me updated, had intermediate updates and was very clear in what feature was possible or would be a little more difficult to achieve. The end result was a very nice looking, usability friendly and functional application. I also managed to get a glimps of his coaching attitude when he was explaining certain technical steps in a friendly and understandable, yet concrete, way to me. Since a recent amount of time I have started working more in IT myself, as a test engineer. He has been a supportive help in the process as after -support. This even states his way of working in an agile method more. I would definetly advice him to others!"
         ),
@@ -292,7 +292,7 @@ private fun seedDatabase(passwordEncryption: PasswordManagerContract) {
             it[id] = testimonial.id
             it[imageUrl] = testimonial.imageUrl
             it[fullName] = testimonial.fullName
-            it[companyId] = testimonial.company.id
+            it[companyId] = testimonial.company?.id
             it[jobPositionId] = testimonial.jobPosition.id
             it[review] = testimonial.review
         }
@@ -459,7 +459,7 @@ private fun seedDatabase(passwordEncryption: PasswordManagerContract) {
         ),
         Project(
             id = UUID.fromString("00000000-0000-0000-0000-000000000003"),
-            bannerImageUrl = "https://lh3.googleusercontent.com/d/1TuciQOGztSYYGfGGNYk3ImMqd13wTILi",
+            bannerImageUrl = "https://lh3.googleusercontent.com/d/1Lk1pwvHKvD5VH3Nfpw_v7rZuz1QFuDrK",
             imageUrl = "https://lh3.googleusercontent.com/d/1_pKhvivjniijBarYV3AqANWOZ3GjSAsc",
             title = "Pokédex",
             shortDescription = "A try-out project with Jetpack Compose, where I use Koin for DI, and try to implement clean architecture by using a clear separation of concerns.",

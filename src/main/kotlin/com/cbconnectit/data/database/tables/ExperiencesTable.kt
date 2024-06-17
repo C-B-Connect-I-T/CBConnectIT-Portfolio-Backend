@@ -23,6 +23,7 @@ fun ResultRow.toExperience() = Experience(
     id = this[ExperiencesTable.id].value,
     shortDescription = this[ExperiencesTable.shortDescription],
     description = this[ExperiencesTable.description],
+    asFreelance = this[ExperiencesTable.asFreelance],
     from = this[ExperiencesTable.from],
     to = this[ExperiencesTable.to],
     jobPosition = this.toJobPosition(),
