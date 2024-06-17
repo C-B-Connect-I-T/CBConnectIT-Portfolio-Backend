@@ -459,7 +459,7 @@ private fun seedDatabase(passwordEncryption: PasswordManagerContract) {
         ),
         Project(
             id = UUID.fromString("00000000-0000-0000-0000-000000000003"),
-            bannerImageUrl = "https://lh3.googleusercontent.com/d/1TuciQOGztSYYGfGGNYk3ImMqd13wTILi",
+            bannerImageUrl = "https://lh3.googleusercontent.com/d/1Lk1pwvHKvD5VH3Nfpw_v7rZuz1QFuDrK",
             imageUrl = "https://lh3.googleusercontent.com/d/1_pKhvivjniijBarYV3AqANWOZ3GjSAsc",
             title = "Pokédex",
             shortDescription = "A try-out project with Jetpack Compose, where I use Koin for DI, and try to implement clean architecture by using a clear separation of concerns.",
