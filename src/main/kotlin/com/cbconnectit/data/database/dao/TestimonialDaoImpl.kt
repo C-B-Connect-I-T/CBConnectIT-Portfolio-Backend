@@ -52,7 +52,7 @@ class TestimonialDaoImpl : ITestimonialDao {
 
         return results
             // TODO: big issue!! Unit Test fails with this, but removing this results in duplicate data when fetching
-//            .distinctBy { it[CompaniesTable.id].value }
+            .distinctBy { it[TestimonialsTable.id].value }
             .map { row ->
                 val id = row[TestimonialsTable.companyId]?.value
                 val temp = row.toTestimonial()
