@@ -302,7 +302,7 @@ private fun seedDatabase(passwordEncryption: PasswordManagerContract) {
     listOf(
         Service(
             id = UUID.fromString("00000000-0000-0000-0000-000000000001"),
-            imageUrl = "https://raw.githubusercontent.com/ShaHar91/LandingPageCompose/develop/site/src/jsMain/resources/public/images/img_services_mobile_banner.jpg",
+            imageUrl = "https://firebasestorage.googleapis.com/v0/b/portfolio-d54c5.appspot.com/o/img_services_mobile.svg?alt=media&token=9e48b29f-aff3-4c27-b10c-902992b2c715",
             title = "Mobile development",
             shortDescription = "Whether it's a new app or optimizing an existing one, I offer Mobile development expertise. Let's collaborate to make your mobile application a success in the Google Play or App Store.",
             description = "My prime focus has always been Mobile and creating cutting edge applications that captivate the users from the very first launch. I turn ideas and designs into robust, user-friendly and scalable applications.\n\nTogether with a team, or individually, I am able to turn requirements into tasks and provide the users with well-timed updates of the application.",
@@ -310,14 +310,14 @@ private fun seedDatabase(passwordEncryption: PasswordManagerContract) {
             subServices = listOf(
                 Service(
                     id = UUID.fromString("00000000-0000-0000-0000-000000000002"),
-                    imageUrl = "https://raw.githubusercontent.com/ShaHar91/LandingPageCompose/develop/site/src/jsMain/resources/public/images/img_services_android.svg",
+                    imageUrl = "https://firebasestorage.googleapis.com/v0/b/portfolio-d54c5.appspot.com/o/img_services_android.svg?alt=media&token=bc0e4d15-9b15-4097-871b-5432d7d285cb",
                     title = "Android",
                     description = "Professionally working with the Android Framework since 2017, working on it as a hobbyist well before that. Touched a lot of the Framework during my career, ranging from the standard functionalities like fetching and showing data to working with the Bluetooth and WiFi API. Also, I am no stranger to creating custom views using the Material Design System as a basis.\n\nIn order to increase my output while working on multiple projects for a client I also created a core library which contained a lot of default classes and provided a basis for a project setup. This made it easier to switch between projects.\n\nI have experience in working with the default XML layout system but also jumped on the Compose train and noticed what all the hype about it was.",
                     tag = Tag(id = UUID.fromString("00000000-0000-0000-0000-000000000009"))
                 ),
                 Service(
                     id = UUID.fromString("00000000-0000-0000-0000-000000000003"),
-                    imageUrl = "https://raw.githubusercontent.com/ShaHar91/LandingPageCompose/develop/site/src/jsMain/resources/public/images/img_services_ios.svg",
+                    imageUrl = "https://firebasestorage.googleapis.com/v0/b/portfolio-d54c5.appspot.com/o/img_services_ios.svg?alt=media&token=b9512db8-ba14-4605-8536-6e5b3b8ed237",
                     title = "iOS",
                     description = "While my prime focus is on Android, I had to look into an existing iOS code base to make sure the same changes where reflected in an Android project. Because of this I had to learn a bit about a Swift project, about the setup, and some specifics about the Swift Language.\n\nI am still interested to do a proper project in Native iOS, but didn't have the free time up till now.",
                     tag = Tag(id = UUID.fromString("00000000-0000-0000-0000-000000000010"))
@@ -340,7 +340,7 @@ private fun seedDatabase(passwordEncryption: PasswordManagerContract) {
         ),
         Service(
             id = UUID.fromString("00000000-0000-0000-0000-000000000006"),
-            imageUrl = "https://raw.githubusercontent.com/ShaHar91/LandingPageCompose/develop/site/src/jsMain/resources/public/images/img_services_web_banner.jpg",
+            imageUrl = "https://firebasestorage.googleapis.com/v0/b/portfolio-d54c5.appspot.com/o/img_services_web.svg?alt=media&token=aa5947f1-1b8d-4e89-92d4-056364a63863",
             title = "Web development",
             shortDescription = "From concept to deployment, I offer web development to transform your online ideas into reality. Let's collaborate to create a user-friendly and feature-rich website that meets your needs.",
             description = "Explore the vast landscape of web development alongside me, where every line of code is a step towards mastery. While I'm still honing my skills in this domain, my commitment to excellence ensures your website receives the utmost care and attention.\n\nLet's embark on this journey together, creating a digital presence that truly stands out.",
@@ -348,7 +348,7 @@ private fun seedDatabase(passwordEncryption: PasswordManagerContract) {
             subServices = listOf(
                 Service(
                     id = UUID.fromString("00000000-0000-0000-0000-000000000007"),
-                    imageUrl = "https://raw.githubusercontent.com/ShaHar91/LandingPageCompose/develop/site/src/jsMain/resources/public/images/img_services_kobweb.svg",
+                    imageUrl = "https://firebasestorage.googleapis.com/v0/b/portfolio-d54c5.appspot.com/o/img_services_kobweb.svg?alt=media&token=04324568-fbb9-430e-b023-5c560fa90053",
                     title = "Kobweb",
                     description = "\"Kobweb is an opinionated Kotlin framework for creating websites and web apps, built on top of <a href=\"https://github.com/JetBrains/compose-multiplatform#compose-html\">Compose HTML</a> and inspired by <a href=\"https://nextjs.org/\">Next JS</a> and <a href=\"https://v2.chakra-ui.com/\">Chakra UI</a>.\"\n\nDriven by my hunger to learn new things I stumbled upon the Kobweb framework. It’s a new framework, in heavy development, to create website by utilizing the Kotlin language in a Compose way. Coming from Android it seemed natural to try my hand at this and see what it’s all about.\n\nBy using this framework you can create a rudimentary website in just a few minutes and have a fully functioning one in a couple of days. Since it compiles down to javascript and html, you can do technically everything that a website build with Next.js can do.",
                     tag = Tag(id = UUID.fromString("00000000-0000-0000-0000-000000000013"))
@@ -357,7 +357,7 @@ private fun seedDatabase(passwordEncryption: PasswordManagerContract) {
         ),
         Service(
             id = UUID.fromString("00000000-0000-0000-0000-000000000008"),
-            imageUrl = "https://raw.githubusercontent.com/ShaHar91/LandingPageCompose/develop/site/src/jsMain/resources/public/images/img_services_mobile_banner.jpg",
+            imageUrl = "https://firebasestorage.googleapis.com/v0/b/portfolio-d54c5.appspot.com/o/img_services_backend.svg?alt=media&token=41927adc-3c8e-4e06-b19c-5c20f9f9fc44",
             title = "Backend development",
             shortDescription = "Looking to establish a system for managing persistent data or serve as a vital intermediary between two systems? Together, we can explore the possbilities and craft a solution tailored to your needs.",
             description = "Venture into the backbone of your digital ecosystem, where my expertise is growing steadily. While backend development may seem daunting, rest assured that I'm dedicated to crafting robust, efficient solutions that power your applications seamlessly.<br><br>Trust in my passion for learning and problem-solving as we navigate the complexities of backend development together.",
@@ -372,14 +372,14 @@ private fun seedDatabase(passwordEncryption: PasswordManagerContract) {
 //                ),
                 Service(
                     id = UUID.fromString("00000000-0000-0000-0000-000000000011"),
-                    imageUrl = "https://raw.githubusercontent.com/ShaHar91/LandingPageCompose/develop/site/src/jsMain/resources/public/images/img_services_backend_node_js.svg",
+                    imageUrl = "https://firebasestorage.googleapis.com/v0/b/portfolio-d54c5.appspot.com/o/img_services_backend_node_js.svg?alt=media&token=062281b0-9ffc-4e2e-9b8a-2688513c1a54",
                     title = "Node JS",
                     description = "Step into the dynamic world of Node.js backend development, where I've expanded my skills through various projects while constantly pushing the boundaries of what's achievable. With its event-driven architecture and vast ecosystem of libraries, Node.js empowers me to build fast, scalable, and real-time applications.<br><br>Join me as we harness the power of Node.js to create innovative solutions that drive your digital success.",
                     tag = Tag(id = UUID.fromString("00000000-0000-0000-0000-000000000016"))
                 ),
                 Service(
                     id = UUID.fromString("00000000-0000-0000-0000-000000000010"),
-                    imageUrl = "https://raw.githubusercontent.com/ShaHar91/LandingPageCompose/develop/site/src/jsMain/resources/public/images/img_services_backend_ktor.svg",
+                    imageUrl = "https://firebasestorage.googleapis.com/v0/b/portfolio-d54c5.appspot.com/o/img_services_backend_ktor.svg?alt=media&token=697c5b0c-98bf-4c80-b142-cbdd21a777ad",
                     title = "Ktor",
                     description = "Join me on a journey of discovery with Ktor backend development, where I've already crafted several projects while continuously exploring its vast potential.<br><br>With its lightweight and intuitive framework, Ktor empowers me to create scalable and efficient backend solutions with ease. Join me as we push the boundaries of what's possible, leveraging Ktor's flexibility to bring your ideas to life in the digital realm",
                     tag = Tag(id = UUID.fromString("00000000-0000-0000-0000-000000000008"))
@@ -388,7 +388,7 @@ private fun seedDatabase(passwordEncryption: PasswordManagerContract) {
         ),
         Service(
             id = UUID.fromString("00000000-0000-0000-0000-000000000009"),
-            imageUrl = "https://lh3.googleusercontent.com/d/14mFwr4cgIG54AmEVrVorrh8fxpY3mgSz",
+            imageUrl = "https://firebasestorage.googleapis.com/v0/b/portfolio-d54c5.appspot.com/o/img_services_tutoring.svg?alt=media&token=2ca8e72b-0837-44a2-acad-4507cb87e2f9",
             title = "Tutoring",
             shortDescription = "Looking to bring your (or your peer’s) skills to the next level, or just need someone to look into a bug/error? Let’s work together to maximize your potential and achieve your aspirations.",
             description = "Delve into the realm of knowledge sharing and growth, where I offer guidance and support tailored to your learning journey. Whether you're just starting out or looking to enhance your skills, my tutoring services provide a nurturing environment to explore the intricacies of mobile and web development.<br><br>Together, let's unlock your potential and pave the way for success in the digital world.",
@@ -443,8 +443,8 @@ private fun seedDatabase(passwordEncryption: PasswordManagerContract) {
         ),
         Project(
             id = UUID.fromString("00000000-0000-0000-0000-000000000002"),
-            bannerImageUrl = "https://lh3.googleusercontent.com/d/1XS0gfSlLee3E_YwdUgfRb9zHm1_TrHT8",
-            imageUrl = "https://lh3.googleusercontent.com/d/1Yis96uGpu9T_sH6SU24sJzdSJJN8NeEJ",
+            bannerImageUrl = "https://firebasestorage.googleapis.com/v0/b/portfolio-d54c5.appspot.com/o/measurements_backdrop.png?alt=media&token=cd35aa53-8dab-4405-9f6a-d0625c1ba7fd",
+            imageUrl = "https://firebasestorage.googleapis.com/v0/b/portfolio-d54c5.appspot.com/o/measurements_project.png?alt=media&token=2b1698a0-891d-4d7f-8f76-3dbf3e5f1d72",
             title = "Measurements",
             shortDescription = "Android had no standardized way to define Measurements and convert between other Measurements within the same Unit. I noticed iOS had a nice API for this, so I took that as an inspiration and essentialy created the iOS equivalent for Android.",
             description = "Android had no standardized way to define Measurements and convert between other Measurements within the same Unit. I noticed iOS had a nice API for this, so I took that as an inspiration and essentialy created the iOS equivalent for Android.<br><br>Converting between Measurements in the same Unit is very easy by invoking a function which takes in the expected Unit as a parameter. Unit Tests have been created to ensure stability and quality. Functions for calculations have also been added. Adding, subtracting, ... are all possible with Measurements of the same Unit. In case a different scale is being used in a calculation (e.g.: nauticalMiles + miles), both scales will be converted to the base Unit (meters) and only then will they be added onto each other. Comparing (+ equals) scales within the same Unit is also possible.<br><br>A Measurement can always be formatted in a standardized way with the correct symbol appended to it. There is also a possibility to add the amount of fraction digits in case you want the more fine grained results.",
@@ -459,8 +459,8 @@ private fun seedDatabase(passwordEncryption: PasswordManagerContract) {
         ),
         Project(
             id = UUID.fromString("00000000-0000-0000-0000-000000000003"),
-            bannerImageUrl = "https://lh3.googleusercontent.com/d/1Lk1pwvHKvD5VH3Nfpw_v7rZuz1QFuDrK",
-            imageUrl = "https://lh3.googleusercontent.com/d/1_pKhvivjniijBarYV3AqANWOZ3GjSAsc",
+            bannerImageUrl = "https://firebasestorage.googleapis.com/v0/b/portfolio-d54c5.appspot.com/o/demopokedex_backdrop.png?alt=media&token=a74d29a5-39eb-4faa-b189-4c4f32fb7cd4",
+            imageUrl = "https://firebasestorage.googleapis.com/v0/b/portfolio-d54c5.appspot.com/o/demopokedex_android.png?alt=media&token=4c4c0b5e-d76e-4e36-8bea-3c7012fa1403",
             title = "Pokédex",
             shortDescription = "A try-out project with Jetpack Compose, where I use Koin for DI, and try to implement clean architecture by using a clear separation of concerns.",
             description = "This project was a nice opportunity to try out a couple of new things in combination with each other. For DI, Koin was used, as it is a lightweight Dependency Injection framework and does not add too much \"magical autogenerated code\" via the use of annotations. This way I could try to grasp what was happening under the hood more easily to actually try and understand dependency injection some more.<br><br>Jetpack Compose was used for the layout to see what it was and how it behaves in a project. In conjunction with Jetpack Compose, I also used the recommended way of a State object with the UiEVent and Event classes.<br><br>These new classes ensured the layout only gets updated whenever the state is being updated and actions will trigger an event which will then trigger a change in the state or trigger other events back to the UI. By doing things this way (the new classes + DI) it should be a lot easier to test all the other components of the applications. ViewModels, Repositories, Extension functions, Use Cases,... can all be isolated and tested seperate from each other.",
@@ -479,8 +479,8 @@ private fun seedDatabase(passwordEncryption: PasswordManagerContract) {
         ),
         Project(
             id = UUID.fromString("00000000-0000-0000-0000-000000000004"),
-            bannerImageUrl = "https://lh3.googleusercontent.com/d/17hGybvkdXIgkotIOAAKJInPohUDhBQsX",
-            imageUrl = "https://lh3.googleusercontent.com/d/1mydjliRyN8ETwzvFEOYXKCdN2iNIsVj6",
+            bannerImageUrl = "https://firebasestorage.googleapis.com/v0/b/portfolio-d54c5.appspot.com/o/foodwatcher_android_backdrop.png?alt=media&token=a9faea63-326f-4405-b5e9-ab184b3e74df",
+            imageUrl = "https://firebasestorage.googleapis.com/v0/b/portfolio-d54c5.appspot.com/o/foodwatcher_project.png?alt=media&token=3a917899-731c-4717-8a23-b9a3d5db321d",
             title = "FoodWatcher",
             shortDescription = "With this project I implemented a different data persistent layer depending on the build flavor name. One is pure local Room database use, the other is a link to Firebase.",
             description = "With this project I implemented a different data persistent layer depending on the build flavor name. One is pure local Room database use, the other is a link to Firebase. This was mainly a try-out to understand the use of interfaces and actual implementation for different build flavors.<br><br>In this case, Koin is being used to actually add the correct dependencies per build flavor. Interfaces for the Repositories are being used where the function just expects specific return types which the app itself then can process into the needed data. For the Room Build flavor, DAO's are created and Entity objects, these objects can just be inserted, queried and deleted by using the built in annotations and the LiveData support. For Firebase, the collection of the Firestore is being queried, inserted,... and then converted into livedata which is then being returned by the Repository.<br><br>Also fastlane was added to simplify the process of getting builds out faster to the Firebase Release track.",
@@ -497,8 +497,8 @@ private fun seedDatabase(passwordEncryption: PasswordManagerContract) {
         ),
         Project(
             id = UUID.fromString("00000000-0000-0000-0000-000000000005"),
-            bannerImageUrl = "https://lh3.googleusercontent.com/d/1DSZfY4Gat5xubuGC3EtNiI-0t1d_XaAt",
-            imageUrl = "https://lh3.googleusercontent.com/d/16dcRhKatn6_AyZN6XAtxPA6h0kyMYV0w",
+            bannerImageUrl = "https://firebasestorage.googleapis.com/v0/b/portfolio-d54c5.appspot.com/o/poemcollection_backend_backdrop.png?alt=media&token=573f4ea5-7401-4f0b-99a5-8b69477ba7a6",
+            imageUrl = "https://firebasestorage.googleapis.com/v0/b/portfolio-d54c5.appspot.com/o/poemcollection_project.png?alt=media&token=c259c3e1-01e9-421c-9be0-dba33d4192eb",
             title = "PoemCollection Backend (Ktor)",
             shortDescription = "A backend created with the Ktor Server library to see what is possible with this technology. Still work in progress to actually request and process the data in an app.",
             description = "A backend created with the Ktor Server library to see what is possible with this technology. Still work in progress to actually request and process the data in an app.",
@@ -513,8 +513,8 @@ private fun seedDatabase(passwordEncryption: PasswordManagerContract) {
         ),
         Project(
             id = UUID.fromString("00000000-0000-0000-0000-000000000006"),
-            bannerImageUrl = "https://lh3.googleusercontent.com/d/1DSZfY4Gat5xubuGC3EtNiI-0t1d_XaAt",
-            imageUrl = "https://lh3.googleusercontent.com/d/16dcRhKatn6_AyZN6XAtxPA6h0kyMYV0w",
+            bannerImageUrl = "https://firebasestorage.googleapis.com/v0/b/portfolio-d54c5.appspot.com/o/poemcollection_backend_backdrop.png?alt=media&token=573f4ea5-7401-4f0b-99a5-8b69477ba7a6",
+            imageUrl = "https://firebasestorage.googleapis.com/v0/b/portfolio-d54c5.appspot.com/o/poemcollection_project.png?alt=media&token=c259c3e1-01e9-421c-9be0-dba33d4192eb",
             title = "PoemCollection Backend (NodeJS)",
             shortDescription = "A backend created with the NodeJS framework. My first backend with this technology proved very educational. Experimented with some things like virtual table/fields, authenticator (oauth) and more.",
             description = "A backend created with the NodeJS framework. My first backend with this technology proved very educational. Experimented with some things like virtual table/fields, authenticator (oauth) and more.",
@@ -530,8 +530,8 @@ private fun seedDatabase(passwordEncryption: PasswordManagerContract) {
         ),
         Project(
             id = UUID.fromString("00000000-0000-0000-0000-000000000007"),
-            bannerImageUrl = "https://lh3.googleusercontent.com/d/1YoRLRjRlRdpxAWv-F3Un8fhtOYJaIFgN",
-            imageUrl = "https://lh3.googleusercontent.com/d/16dcRhKatn6_AyZN6XAtxPA6h0kyMYV0w",
+            bannerImageUrl = "https://firebasestorage.googleapis.com/v0/b/portfolio-d54c5.appspot.com/o/poemcollection_android_backdrop.png?alt=media&token=03cb5f14-db00-492e-93f2-e877c383b8bd",
+            imageUrl = "https://firebasestorage.googleapis.com/v0/b/portfolio-d54c5.appspot.com/o/poemcollection_project.png?alt=media&token=c259c3e1-01e9-421c-9be0-dba33d4192eb",
             title = "PoemCollection Android",
             shortDescription = "An android application to catalog a bunch of Poems, also supports a review system and creating you own poems after logging in.",
             description = "An android application to catalog a bunch of Poems, also supports a review system and creating you own poems after logging in.",
