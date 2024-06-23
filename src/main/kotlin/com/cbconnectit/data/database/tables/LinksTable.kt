@@ -28,11 +28,11 @@ fun ResultRow.toLink() = Link(
 fun Iterable<ResultRow>.toLinks() = this.map { it.toLink() }
 fun Iterable<ResultRow>.toLink() = this.firstOrNull()?.toLink()
 
-fun parseLinks(results: Query, getParentId: (ResultRow) -> UUID): MutableMap<UUID, List<Link>> {
+fun parseLinks(results: Query, getParentId: (ResultRow) -> UUID?): MutableMap<UUID, List<Link>> {
     val newMap = results
         .distinctBy { it.getOrNull(LinksTable.id)?.value }
         .fold(mutableMapOf<UUID, List<Link>>()) { map, resultRow ->
-            val parentId = getParentId(resultRow)
+            val parentId = getParentId(resultRow) ?: return@fold map
 
             val link = resultRow.getOrNull(LinksTable.id)?.let { resultRow.toLink() }
 

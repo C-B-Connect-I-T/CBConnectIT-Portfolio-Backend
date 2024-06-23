@@ -11,6 +11,7 @@ import org.jetbrains.exposed.sql.javatime.datetime
 
 object ServicesTable : UUIDTable() {
     val imageUrl = varchar("image_url", normalTextSize)
+    val bannerImageUrl = varchar("banner_image_url", normalTextSize).nullable().default(null)
     val title = varchar("title", normalTextSize).uniqueIndex()
     val shortDescription = varchar("short_description", bigTextSize).nullable().default(null)
     val description = text("description")
@@ -25,6 +26,7 @@ object ServicesTable : UUIDTable() {
 fun ResultRow.toService() = Service(
     id = this[ServicesTable.id].value,
     imageUrl = this[ServicesTable.imageUrl],
+    bannerImageUrl = this[ServicesTable.bannerImageUrl],
     title = this[ServicesTable.title],
     shortDescription = this[ServicesTable.shortDescription],
     description = this[ServicesTable.description],

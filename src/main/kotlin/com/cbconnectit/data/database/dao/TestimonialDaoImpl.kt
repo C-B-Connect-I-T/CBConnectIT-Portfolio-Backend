@@ -32,7 +32,7 @@ class TestimonialDaoImpl : ITestimonialDao {
         val links = parseLinks(results)
 
         return results
-            .distinctBy { it[CompaniesTable.id].value }
+            .distinctBy { it[TestimonialsTable.companyId]?.value }
             .map { row ->
                 val temp = row.toTestimonial()
                 temp.copy(
@@ -66,7 +66,7 @@ class TestimonialDaoImpl : ITestimonialDao {
 
     private fun parseLinks(results: Query): MutableMap<UUID, List<Link>> {
         return parseLinks(results) {
-            it[CompaniesTable.id].value
+            it[TestimonialsTable.companyId]?.value
         }
     }
 

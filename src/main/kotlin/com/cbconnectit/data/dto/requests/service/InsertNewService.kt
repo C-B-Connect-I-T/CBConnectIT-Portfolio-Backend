@@ -7,6 +7,8 @@ data class InsertNewService(
     val title: String,
     @SerializedName("image_url")
     val imageUrl: String,
+    @SerializedName("banner_image_url")
+    val bannerImageUrl: String? = null,
     @SerializedName("short_description")
     val shortDescription: String? = null,
     val description: String,
@@ -28,6 +30,8 @@ data class UpdateService(
     val title: String,
     @SerializedName("image_url")
     val imageUrl: String,
+    @SerializedName("banner_image_url")
+    val bannerImageUrl: String? = null,
     @SerializedName("short_description")
     val shortDescription: String? = null,
     val description: String,
