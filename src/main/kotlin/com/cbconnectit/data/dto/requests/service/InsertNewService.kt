@@ -23,7 +23,7 @@ data class InsertNewService(
 ) {
     val parentServiceUuid get() = parentServiceId?.let { UUID.fromString(it) }
     val tagUuid: UUID? get() = tagId?.let { id -> UUID.fromString(id) }
-    val isValid get() = title.isNotBlank() && description.isNotBlank() && imageUrl.isNotBlank()// && (tagId == null || tagId.isNotBlank())
+    val isValid get() = title.isNotBlank() && description.isNotBlank() && imageUrl.isNotBlank() // && (tagId == null || tagId.isNotBlank())
 }
 
 data class UpdateService(
