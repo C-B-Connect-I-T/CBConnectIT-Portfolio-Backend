@@ -10,6 +10,7 @@ import java.util.*
 data class Service(
     val id: UUID = UUID.randomUUID(),
     val imageUrl: String = "",
+    val bannerImageUrl: String? = null,
     val title: String = "",
     val shortDescription: String? = null,
     val description: String = "",
@@ -24,6 +25,7 @@ data class Service(
 fun Service.toDto(): ServiceDto = ServiceDto(
     id = this.id.toString(),
     imageUrl = this.imageUrl,
+    bannerImageUrl = this.bannerImageUrl,
     title = this.title,
     shortDescription = this.shortDescription,
     description = this.description,

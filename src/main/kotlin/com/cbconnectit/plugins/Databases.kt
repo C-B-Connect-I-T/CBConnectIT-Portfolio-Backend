@@ -281,7 +281,7 @@ private fun seedDatabase(passwordEncryption: PasswordManagerContract) {
 //        ),
         Testimonial(
             id = UUID.fromString("00000000-0000-0000-0000-000000000003"),
-            imageUrl = "https://raw.githubusercontent.com/ShaHar91/Portfolio/master/public/avatar3.png",
+            imageUrl = "https://media.licdn.com/dms/image/C4D03AQGTz_zYBK8Q0Q/profile-displayphoto-shrink_800_800/0/1612779900432?e=1719446400&v=beta&t=nMj75OJzYRd-9YX77dGE2hI6viBVF_nCa4kgD63kVAo",
             fullName = "Els Schuurmans",
             company = null,
             jobPosition = JobPosition(id = UUID.fromString("00000000-0000-0000-0000-000000000002")),
@@ -303,6 +303,7 @@ private fun seedDatabase(passwordEncryption: PasswordManagerContract) {
         Service(
             id = UUID.fromString("00000000-0000-0000-0000-000000000001"),
             imageUrl = "https://firebasestorage.googleapis.com/v0/b/portfolio-d54c5.appspot.com/o/img_services_mobile.svg?alt=media&token=9e48b29f-aff3-4c27-b10c-902992b2c715",
+            bannerImageUrl = "https://firebasestorage.googleapis.com/v0/b/portfolio-d54c5.appspot.com/o/img_services_mobile_banner.jpg?alt=media&token=ed29230c-758e-4fbe-aa9d-0713e12aae1e",
             title = "Mobile development",
             shortDescription = "Whether it's a new app or optimizing an existing one, I offer Mobile development expertise. Let's collaborate to make your mobile application a success in the Google Play or App Store.",
             description = "My prime focus has always been Mobile and creating cutting edge applications that captivate the users from the very first launch. I turn ideas and designs into robust, user-friendly and scalable applications.\n\nTogether with a team, or individually, I am able to turn requirements into tasks and provide the users with well-timed updates of the application.",
@@ -341,6 +342,7 @@ private fun seedDatabase(passwordEncryption: PasswordManagerContract) {
         Service(
             id = UUID.fromString("00000000-0000-0000-0000-000000000006"),
             imageUrl = "https://firebasestorage.googleapis.com/v0/b/portfolio-d54c5.appspot.com/o/img_services_web.svg?alt=media&token=aa5947f1-1b8d-4e89-92d4-056364a63863",
+            bannerImageUrl = "https://firebasestorage.googleapis.com/v0/b/portfolio-d54c5.appspot.com/o/img_services_web_banner.jpg?alt=media&token=5f327701-d21b-4ffa-83c9-0f8fa4a53a5f",
             title = "Web development",
             shortDescription = "From concept to deployment, I offer web development to transform your online ideas into reality. Let's collaborate to create a user-friendly and feature-rich website that meets your needs.",
             description = "Explore the vast landscape of web development alongside me, where every line of code is a step towards mastery. While I'm still honing my skills in this domain, my commitment to excellence ensures your website receives the utmost care and attention.\n\nLet's embark on this journey together, creating a digital presence that truly stands out.",
@@ -358,6 +360,7 @@ private fun seedDatabase(passwordEncryption: PasswordManagerContract) {
         Service(
             id = UUID.fromString("00000000-0000-0000-0000-000000000008"),
             imageUrl = "https://firebasestorage.googleapis.com/v0/b/portfolio-d54c5.appspot.com/o/img_services_backend.svg?alt=media&token=41927adc-3c8e-4e06-b19c-5c20f9f9fc44",
+            bannerImageUrl = "https://firebasestorage.googleapis.com/v0/b/portfolio-d54c5.appspot.com/o/img_services_web_banner.jpg?alt=media&token=5f327701-d21b-4ffa-83c9-0f8fa4a53a5f",
             title = "Backend development",
             shortDescription = "Looking to establish a system for managing persistent data or serve as a vital intermediary between two systems? Together, we can explore the possbilities and craft a solution tailored to your needs.",
             description = "Venture into the backbone of your digital ecosystem, where my expertise is growing steadily. While backend development may seem daunting, rest assured that I'm dedicated to crafting robust, efficient solutions that power your applications seamlessly.<br><br>Trust in my passion for learning and problem-solving as we navigate the complexities of backend development together.",
@@ -389,6 +392,7 @@ private fun seedDatabase(passwordEncryption: PasswordManagerContract) {
         Service(
             id = UUID.fromString("00000000-0000-0000-0000-000000000009"),
             imageUrl = "https://firebasestorage.googleapis.com/v0/b/portfolio-d54c5.appspot.com/o/img_services_tutoring.svg?alt=media&token=2ca8e72b-0837-44a2-acad-4507cb87e2f9",
+            bannerImageUrl = "https://firebasestorage.googleapis.com/v0/b/portfolio-d54c5.appspot.com/o/tutoring_img.png?alt=media&token=728953ce-e0cf-4c25-8a23-414c51946b87",
             title = "Tutoring",
             shortDescription = "Looking to bring your (or your peer’s) skills to the next level, or just need someone to look into a bug/error? Let’s work together to maximize your potential and achieve your aspirations.",
             description = "Delve into the realm of knowledge sharing and growth, where I offer guidance and support tailored to your learning journey. Whether you're just starting out or looking to enhance your skills, my tutoring services provide a nurturing environment to explore the intricacies of mobile and web development.<br><br>Together, let's unlock your potential and pave the way for success in the digital world.",
@@ -404,6 +408,7 @@ private fun seedDatabase(passwordEncryption: PasswordManagerContract) {
             ServicesTable.insertIgnore {
                 it[id] = service.id
                 it[imageUrl] = service.imageUrl
+                it[bannerImageUrl] = service.bannerImageUrl
                 it[title] = service.title
                 it[shortDescription] = service.shortDescription
                 it[description] = service.description
@@ -421,6 +426,7 @@ private fun seedDatabase(passwordEncryption: PasswordManagerContract) {
         }
     }
 
+    // Projects
     listOf(
         Project(
             id = UUID.fromString("00000000-0000-0000-0000-000000000001"),

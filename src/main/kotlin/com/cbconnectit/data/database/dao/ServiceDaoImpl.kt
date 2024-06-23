@@ -58,6 +58,7 @@ class ServiceDaoImpl : IServiceDao {
         val id = ServicesTable.insertAndGetId {
             it[title] = insertNewService.title
             it[imageUrl] = insertNewService.imageUrl
+            it[bannerImageUrl] = insertNewService.bannerImageUrl
             it[description] = insertNewService.description
             it[bannerDescription] = insertNewService.bannerDescription
             it[shortDescription] = insertNewService.shortDescription
@@ -73,6 +74,7 @@ class ServiceDaoImpl : IServiceDao {
         ServicesTable.update({ ServicesTable.id eq id }) {
             it[title] = updateService.title
             it[imageUrl] = updateService.imageUrl
+            it[bannerImageUrl] = updateService.bannerImageUrl
             it[description] = updateService.description
             it[bannerDescription] = updateService.bannerDescription
             it[shortDescription] = updateService.shortDescription

@@ -8,6 +8,8 @@ data class ServiceDto(
     val id: String = "",
     @SerializedName("image_url")
     val imageUrl: String = "",
+    @SerializedName("banner_image_url")
+    val bannerImageUrl: String? = null,
     val title: String = "",
     @SerializedName("short_description")
     val shortDescription: String? = null,

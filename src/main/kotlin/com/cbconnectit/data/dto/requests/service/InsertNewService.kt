@@ -7,6 +7,8 @@ data class InsertNewService(
     val title: String,
     @SerializedName("image_url")
     val imageUrl: String,
+    @SerializedName("banner_image_url")
+    val bannerImageUrl: String? = null,
     @SerializedName("short_description")
     val shortDescription: String? = null,
     val description: String,
@@ -21,13 +23,15 @@ data class InsertNewService(
 ) {
     val parentServiceUuid get() = parentServiceId?.let { UUID.fromString(it) }
     val tagUuid: UUID? get() = tagId?.let { id -> UUID.fromString(id) }
-    val isValid get() = title.isNotBlank() && description.isNotBlank() && imageUrl.isNotBlank() // && (tagId == null || tagId.isNotBlank())
+    val isValid get() = title.isNotBlank() && description.isNotBlank() && imageUrl.isNotBlank()// && (tagId == null || tagId.isNotBlank())
 }
 
 data class UpdateService(
     val title: String,
     @SerializedName("image_url")
     val imageUrl: String,
+    @SerializedName("banner_image_url")
+    val bannerImageUrl: String? = null,
     @SerializedName("short_description")
     val shortDescription: String? = null,
     val description: String,
