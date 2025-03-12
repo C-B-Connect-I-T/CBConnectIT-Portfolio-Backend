@@ -50,7 +50,6 @@ import org.koin.dsl.module
 import org.koin.ktor.plugin.Koin
 
 fun Application.configureKoin() {
-    module {
         install(Koin) {
             modules(
                 module {
@@ -67,7 +66,6 @@ fun Application.configureKoin() {
                 daoModule()
             )
         }
-    }
 }
 
 fun controllerModule() = module {

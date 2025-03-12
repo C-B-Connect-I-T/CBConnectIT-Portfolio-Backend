@@ -28,23 +28,34 @@ object PasswordManager : PasswordManagerContract {
         isWithSpecial: Boolean = true,
         length: Int = 6
     ): String {
-        var chars = ""
-
-        if (isWithLetters) {
-            chars += letters
-        }
-        if (isWithUppercase) {
-            chars += uppercaseLetters
-        }
-        if (isWithNumbers) {
-            chars += numbers
-        }
-        if (isWithSpecial) {
-            chars += special
-        }
+        if (length < 5) throw IllegalArgumentException("Length should at least be 5")
 
         val rnd = SecureRandom.getInstance("SHA1PRNG").asKotlinRandom()
-        return List(length) { chars.random(rnd) }.joinToString("")
+
+        val chars = mutableListOf<Char>()
+        val charsToUse = mutableListOf<Char>()
+
+        if (isWithLetters) {
+            chars += letters.toList()
+            charsToUse += letters.random(rnd)
+        }
+        if (isWithUppercase) {
+            chars += uppercaseLetters.toList()
+            charsToUse += uppercaseLetters.random(rnd)
+        }
+        if (isWithNumbers) {
+            chars += numbers.toList()
+            charsToUse += numbers.random(rnd)
+        }
+        if (isWithSpecial) {
+            chars += special.toList()
+            charsToUse += special.random(rnd)
+        }
+
+        if (chars.isEmpty()) throw IllegalArgumentException("At least one character type must be selected")
+
+        val passwordBeforeShuffle = charsToUse + List(length - charsToUse.size) { chars.random(rnd) }
+        return passwordBeforeShuffle.shuffled(rnd).joinToString("")
     }
 
     override fun validatePassword(attempt: String, userPassword: String): Boolean {

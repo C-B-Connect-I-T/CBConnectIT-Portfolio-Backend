@@ -23,9 +23,10 @@ fun JWTAuthenticationProvider.Config.setupAuthentication(
 
 suspend fun JWTCredential.validateUser(userDao: IUserDao): Principal? {
     val userId = payload.claims[JwtConfig.TOKEN_CLAIM_USER_ID_KEY]?.asString() ?: return null
+    val userUUID = UUID.fromString(userId)
 
     val user = dbQuery {
-        userDao.getUser(UUID.fromString(userId))
+        userDao.getUser(userUUID)
     }
 
     return if (payload.audience.contains(JwtConfig.USERS_AUDIENCE)) {

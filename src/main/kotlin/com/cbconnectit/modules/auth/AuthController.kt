@@ -18,17 +18,15 @@ class AuthControllerImpl : BaseController(), AuthController {
     private val passwordManager by inject<PasswordManagerContract>()
 
     override suspend fun authorizeUser(tokenDto: CreateTokenDto): CredentialsResponse = dbQuery {
-
         if (!tokenDto.hasData()) throw ErrorInvalidParameters
 
         val userHashable = userDao.getUserHashableByUsername(tokenDto.username) ?: throw ErrorInvalidCredentials
 
         val isValidPassword = passwordManager.validatePassword(tokenDto.password, userHashable.password ?: "")
-        if (isValidPassword) {
-            tokenProvider.createTokens(userHashable.copy(password = null))
-        } else {
-            throw ErrorInvalidCredentials
-        }
+
+        if (!isValidPassword) throw ErrorInvalidCredentials
+
+        tokenProvider.createTokens(userHashable.copy(password = null))
     }
 }
 

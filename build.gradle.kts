@@ -98,6 +98,6 @@ tasks {
 
     // config JVM target to 1.8 for kotlin compilation tasks
     compileKotlin {
-        kotlinOptions.jvmTarget = "17"
+        kotlinOptions.jvmTarget = "21"
     }
 }
