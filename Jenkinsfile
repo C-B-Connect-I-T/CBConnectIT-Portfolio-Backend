@@ -45,11 +45,11 @@ pipeline {
                     env.EXPOSED_PORT = environment == 'production' ? '2027' :
                                        environment == 'staging' ? '2026' : '2025'
 
-                    env.ADMIN_SEED_PASSWORD = "Test1234+@"
-                    env.database-url="jdbc:mysql://0.0.0.0:3307/cbconnectitportfoliodev"
-                    env.database-password="password"
-                    env.database-username="christiano"
-                    env.JWT_SECRET="My-very-secret-jwt-secret"
+                    env.ADMIN_SEED_PASSWORD = 'Test1234+@'
+                    env.DATABASE_URL = 'jdbc:mysql://0.0.0.0:3307/cbconnectitportfoliodev'
+                    env.DATABASE_PASSWORD = 'password'
+                    env.DATABASE_USERNAME = 'christiano'
+                    env.JWT_SECRET = 'My-very-secret-jwt-secret'
 
                     echo "Version: ${VERSION}"
                     echo "Exposed port: ${EXPOSED_PORT}"
