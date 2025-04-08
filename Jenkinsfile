@@ -1,10 +1,10 @@
 pipeline {
     agent any
 
-//     environment {
-//         IMAGE_NAME = "portfolio-frontend"
-//     }
-//
+    environment {
+        IMAGE_NAME = "portfolio-frontend"
+    }
+
     stages {
         stage('Determine Environment') {
             steps {
@@ -40,10 +40,16 @@ pipeline {
 
                     env.ENVIRONMENT = environment
                     env.VERSION = version
-//                     env.CONTAINER_NAME = "${IMAGE_NAME}-${environment}"
+                    env.CONTAINER_NAME = "${IMAGE_NAME}-${environment}"
 
                     env.EXPOSED_PORT = environment == 'production' ? '2027' :
                                        environment == 'staging' ? '2026' : '2025'
+
+                    env.ADMIN_SEED_PASSWORD = "Test1234+@"
+                    env.database-url="jdbc:mysql://0.0.0.0:3307/cbconnectitportfoliodev" # I can work with `db` here because of the same network
+                    env.database-password="password"
+                    env.database-username="christiano"
+                    env.JWT_SECRET="My-very-secret-jwt-secret"
 
                     echo "Version: ${VERSION}"
                     echo "Exposed port: ${EXPOSED_PORT}"
@@ -52,15 +58,20 @@ pipeline {
             }
         }
 
-        stage('Stop existing containers') {
+        stage('Build Docker Image') {
             steps {
-                sh 'docker compose down || true'
+                sh "docker build -t ${IMAGE_NAME}-${ENVIRONMENT}:${VERSION} ."
             }
         }
 
-        stage('Build and Start containers') {
+        stage('Deploy to Docker') {
             steps {
-                sh 'docker compose up -d --build'
+                script {
+                    sh "docker stop ${CONTAINER_NAME} || true"
+                    sh "docker rm ${CONTAINER_NAME} || true"
+                    sh "docker run -d --name ${CONTAINER_NAME} -p ${EXPOSED_PORT}:8080 ${IMAGE_NAME}-${ENVIRONMENT}:${VERSION}"
+                    sh "docker system prune -f"
+                }
             }
         }
     }
