@@ -4,6 +4,8 @@ import org.mindrot.jbcrypt.BCrypt
 import java.security.SecureRandom
 import kotlin.random.asKotlinRandom
 
+private const val DEFAULT_PASSWORD_LENGTH = 6
+
 object PasswordManager : PasswordManagerContract {
     private val letters = 'a'..'z'
     private val uppercaseLetters = 'A'..'Z'
@@ -26,7 +28,7 @@ object PasswordManager : PasswordManagerContract {
         isWithUppercase: Boolean = true,
         isWithNumbers: Boolean = true,
         isWithSpecial: Boolean = true,
-        length: Int = 6
+        length: Int = DEFAULT_PASSWORD_LENGTH
     ): String {
         if (length < 5) throw IllegalArgumentException("Length should at least be 5")
 
