@@ -2,7 +2,13 @@ pipeline {
     agent any
 
     environment {
-        IMAGE_NAME = "portfolio-frontend"
+        IMAGE_NAME = "portfolio-backend"
+
+        ADMIN_SEED_PASSWORD = 'Test1234+@'
+        DATABASE_URL = 'jdbc:mysql://0.0.0.0:3307/cbconnectitportfoliodev'
+        DATABASE_PASSWORD = 'password'
+        DATABASE_USERNAME = 'christiano'
+        JWT_SECRET = 'My-very-secret-jwt-secret'
     }
 
     stages {
@@ -44,12 +50,6 @@ pipeline {
 
                     env.EXPOSED_PORT = environment == 'production' ? '2027' :
                                        environment == 'staging' ? '2026' : '2025'
-
-                    env.ADMIN_SEED_PASSWORD = 'Test1234+@'
-                    env.DATABASE_URL = 'jdbc:mysql://0.0.0.0:3307/cbconnectitportfoliodev'
-                    env.DATABASE_PASSWORD = 'password'
-                    env.DATABASE_USERNAME = 'christiano'
-                    env.JWT_SECRET = 'My-very-secret-jwt-secret'
 
                     echo "Version: ${VERSION}"
                     echo "Exposed port: ${EXPOSED_PORT}"
