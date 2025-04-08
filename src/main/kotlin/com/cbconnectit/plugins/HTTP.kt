@@ -14,6 +14,9 @@ fun Application.configureHTTP() {
 //        header("X-Engine", "Ktor") // will send this header with each response
 //    }
     install(CORS) {
+        allowMethod(HttpMethod.Get)
+        allowMethod(HttpMethod.Post)
+        allowHeader(HttpHeaders.ContentType)
         allowMethod(HttpMethod.Options)
         allowMethod(HttpMethod.Put)
         allowMethod(HttpMethod.Delete)

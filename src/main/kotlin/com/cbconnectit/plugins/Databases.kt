@@ -146,6 +146,7 @@ private fun seedDatabase(passwordEncryption: PasswordManagerContract) {
             url = "https://github.com/ShaHar91/PoemCollection-Android",
             type = LinkType.Github
         ),
+        Link(id = UUID.fromString("00000000-0000-0000-0000-000000000012"), url = "https://www.vrt.be/"),
     ).forEach { link ->
         LinksTable.insertIgnore {
             it[id] = link.id
@@ -170,6 +171,11 @@ private fun seedDatabase(passwordEncryption: PasswordManagerContract) {
             id = UUID.fromString("00000000-0000-0000-0000-000000000003"),
             name = "Zappware",
             listOf(Link(id = UUID.fromString("00000000-0000-0000-0000-000000000001")))
+        ),
+        Company(
+            id = UUID.fromString("00000000-0000-0000-0000-000000000004"),
+            name = "VRT",
+            listOf(Link(id = UUID.fromString("00000000-0000-0000-0000-000000000012")))
         ),
     ).forEach { company ->
         CompaniesTable.insertIgnore {
@@ -200,6 +206,7 @@ private fun seedDatabase(passwordEncryption: PasswordManagerContract) {
     }
 
     // Experiences
+    // TODO: use a contract-type instead of `asFreelance` boolean. ContractType could be something like (Freelance, Consultant, Contract, Volunteer,...)
     listOf(
         Experience(
             id = UUID.fromString("00000000-0000-0000-0000-000000000001"),
@@ -235,6 +242,21 @@ private fun seedDatabase(passwordEncryption: PasswordManagerContract) {
             to = LocalDateTime.of(2020, 12, 31, 0, 0),
             asFreelance = false,
             company = Company(id = UUID.fromString("00000000-0000-0000-0000-000000000003")),
+            jobPosition = JobPosition(id = UUID.fromString("00000000-0000-0000-0000-000000000003")),
+            tags = listOf(
+                Tag(id = UUID.fromString("00000000-0000-0000-0000-000000000009")),
+                Tag(id = UUID.fromString("00000000-0000-0000-0000-000000000014")),
+            )
+        ),
+        Experience(
+            id = UUID.fromString("00000000-0000-0000-0000-000000000004"),
+            shortDescription = "Lorum ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.",
+            // TODO: update the description of my time at VRT!!
+            description = "Providing Fleminsh TV and Radio to every user in Belgium through a collection of apps for the TV, mobile/tablet and car. Working on an app that has more than 1 million of users. Introducing new features and helped rewriting the TV app in Compose from the ground up.",
+            from = LocalDateTime.of(2024, 7, 16, 0, 0),
+            to = LocalDateTime.now(), // TODO: implement nullable... when it is 'null' it means that I'm still working there
+            asFreelance = true,
+            company = Company(id = UUID.fromString("00000000-0000-0000-0000-000000000004")),
             jobPosition = JobPosition(id = UUID.fromString("00000000-0000-0000-0000-000000000003")),
             tags = listOf(
                 Tag(id = UUID.fromString("00000000-0000-0000-0000-000000000009")),

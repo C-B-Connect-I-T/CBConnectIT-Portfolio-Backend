@@ -12,7 +12,7 @@ plugins {
     kotlin("jvm") version "1.9.22"
     id("io.ktor.plugin") version "2.3.7"
     id("org.jetbrains.kotlin.plugin.serialization") version "1.9.22"
-    id("io.gitlab.arturbosch.detekt") version("1.23.3")
+    id("io.gitlab.arturbosch.detekt") version ("1.23.5")
 }
 
 group = "com.cbconnectit"
@@ -98,6 +98,6 @@ tasks {
 
     // config JVM target to 1.8 for kotlin compilation tasks
     compileKotlin {
-        kotlinOptions.jvmTarget = "17"
+        kotlinOptions.jvmTarget = "21"
     }
 }

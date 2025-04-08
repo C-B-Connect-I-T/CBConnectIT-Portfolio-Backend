@@ -18,6 +18,7 @@ import com.cbconnectit.domain.models.link.Link
 import com.cbconnectit.domain.models.tag.Tag
 import com.cbconnectit.utils.toLocalDateTime
 import org.jetbrains.exposed.sql.Query
+import org.jetbrains.exposed.sql.SortOrder
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.notInList
 import org.jetbrains.exposed.sql.and
@@ -57,7 +58,7 @@ class ExperienceDaoImpl : IExperienceDao {
     override fun getExperiences(): List<Experience> {
         val experienceWithRelations = ExperiencesTable leftJoin JobPositionsTable leftJoin(TagsExperiencesPivotTable leftJoin TagsTable) leftJoin CompaniesTable leftJoin(CompaniesLinksPivotTable leftJoin LinksTable)
 
-        val results = experienceWithRelations.selectAll()
+        val results = experienceWithRelations.selectAll().orderBy(ExperiencesTable.to to SortOrder.DESC)
         val tags = parseTags(results)
         val links = parseLinks(results)
 

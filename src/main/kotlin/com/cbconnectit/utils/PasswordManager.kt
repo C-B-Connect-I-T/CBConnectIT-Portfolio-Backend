@@ -4,6 +4,8 @@ import org.mindrot.jbcrypt.BCrypt
 import java.security.SecureRandom
 import kotlin.random.asKotlinRandom
 
+private const val DEFAULT_PASSWORD_LENGTH = 6
+
 object PasswordManager : PasswordManagerContract {
     private val letters = 'a'..'z'
     private val uppercaseLetters = 'A'..'Z'
@@ -26,25 +28,36 @@ object PasswordManager : PasswordManagerContract {
         isWithUppercase: Boolean = true,
         isWithNumbers: Boolean = true,
         isWithSpecial: Boolean = true,
-        length: Int = 6
+        length: Int = DEFAULT_PASSWORD_LENGTH
     ): String {
-        var chars = ""
-
-        if (isWithLetters) {
-            chars += letters
-        }
-        if (isWithUppercase) {
-            chars += uppercaseLetters
-        }
-        if (isWithNumbers) {
-            chars += numbers
-        }
-        if (isWithSpecial) {
-            chars += special
-        }
+        if (length < DEFAULT_PASSWORD_LENGTH) throw IllegalArgumentException("Length should at least be $length")
 
         val rnd = SecureRandom.getInstance("SHA1PRNG").asKotlinRandom()
-        return List(length) { chars.random(rnd) }.joinToString("")
+
+        val chars = mutableListOf<Char>()
+        val charsToUse = mutableListOf<Char>()
+
+        if (isWithLetters) {
+            chars += letters.toList()
+            charsToUse += letters.random(rnd)
+        }
+        if (isWithUppercase) {
+            chars += uppercaseLetters.toList()
+            charsToUse += uppercaseLetters.random(rnd)
+        }
+        if (isWithNumbers) {
+            chars += numbers.toList()
+            charsToUse += numbers.random(rnd)
+        }
+        if (isWithSpecial) {
+            chars += special.toList()
+            charsToUse += special.random(rnd)
+        }
+
+        if (chars.isEmpty()) throw IllegalArgumentException("At least one character type must be selected")
+
+        val passwordBeforeShuffle = charsToUse + List(length - charsToUse.size) { chars.random(rnd) }
+        return passwordBeforeShuffle.shuffled(rnd).joinToString("")
     }
 
     override fun validatePassword(attempt: String, userPassword: String): Boolean {

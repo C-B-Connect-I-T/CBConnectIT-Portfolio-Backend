@@ -29,14 +29,14 @@ suspend inline fun <reified T> ApplicationCall.receiveOrRespondWithError(): T {
     }
 }
 
-fun ApplicationCall.getUserId(): UUID = parameters[ParamConstants.USER_ID_KEY]?.let { UUID.fromString(it) } ?: throw ErrorInvalidUUID
-fun ApplicationCall.getLinkId(): UUID = parameters[ParamConstants.LINK_ID_KEY]?.let { UUID.fromString(it) } ?: throw ErrorInvalidUUID
-fun ApplicationCall.getJobPositionId(): UUID = parameters[ParamConstants.JOB_POSITION_ID_KEY]?.let { UUID.fromString(it) } ?: throw ErrorInvalidUUID
-fun ApplicationCall.getCompanyId(): UUID = parameters[ParamConstants.COMPANY_ID_KEY]?.let { UUID.fromString(it) } ?: throw ErrorInvalidUUID
-fun ApplicationCall.getServiceId(): UUID = parameters[ParamConstants.SERVICE_ID_KEY]?.let { UUID.fromString(it) } ?: throw ErrorInvalidUUID
-fun ApplicationCall.getTestimonialId(): UUID = parameters[ParamConstants.TESTIMONIAL_ID_KEY]?.let { UUID.fromString(it) } ?: throw ErrorInvalidUUID
-fun ApplicationCall.getExperienceId(): UUID = parameters[ParamConstants.EXPERIENCE_ID_KEY]?.let { UUID.fromString(it) } ?: throw ErrorInvalidUUID
-fun ApplicationCall.getProjectId(): UUID = parameters[ParamConstants.PROJECT_ID_KEY]?.let { UUID.fromString(it) } ?: throw ErrorInvalidUUID
+fun ApplicationCall.getUserId(): UUID = parameters[ParamConstants.USER_ID_KEY]?.let(UUID::fromString) ?: throw ErrorInvalidUUID
+fun ApplicationCall.getLinkId(): UUID = parameters[ParamConstants.LINK_ID_KEY]?.let(UUID::fromString) ?: throw ErrorInvalidUUID
+fun ApplicationCall.getJobPositionId(): UUID = parameters[ParamConstants.JOB_POSITION_ID_KEY]?.let(UUID::fromString) ?: throw ErrorInvalidUUID
+fun ApplicationCall.getCompanyId(): UUID = parameters[ParamConstants.COMPANY_ID_KEY]?.let(UUID::fromString) ?: throw ErrorInvalidUUID
+fun ApplicationCall.getServiceId(): UUID = parameters[ParamConstants.SERVICE_ID_KEY]?.let(UUID::fromString) ?: throw ErrorInvalidUUID
+fun ApplicationCall.getTestimonialId(): UUID = parameters[ParamConstants.TESTIMONIAL_ID_KEY]?.let(UUID::fromString) ?: throw ErrorInvalidUUID
+fun ApplicationCall.getExperienceId(): UUID = parameters[ParamConstants.EXPERIENCE_ID_KEY]?.let(UUID::fromString) ?: throw ErrorInvalidUUID
+fun ApplicationCall.getProjectId(): UUID = parameters[ParamConstants.PROJECT_ID_KEY]?.let(UUID::fromString) ?: throw ErrorInvalidUUID
 fun ApplicationCall.getTagIdentifier(): String = parameters[ParamConstants.TAG_IDENTIFIER_KEY] ?: throw ErrorInvalidParameters
 // fun ApplicationCall.getProjectId(): UUID = parameters[ParamConstants.PROJECT_ID_KEY]?.toIntOrNull() ?: throw ErrorInvalidUUID
 
