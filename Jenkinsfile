@@ -46,7 +46,7 @@ pipeline {
                                        environment == 'staging' ? '2026' : '2025'
 
                     env.ADMIN_SEED_PASSWORD = "Test1234+@"
-                    env.database-url="jdbc:mysql://0.0.0.0:3307/cbconnectitportfoliodev" # I can work with `db` here because of the same network
+                    env.database-url="jdbc:mysql://0.0.0.0:3307/cbconnectitportfoliodev"
                     env.database-password="password"
                     env.database-username="christiano"
                     env.JWT_SECRET="My-very-secret-jwt-secret"
