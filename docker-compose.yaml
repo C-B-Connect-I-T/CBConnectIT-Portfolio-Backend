@@ -28,8 +28,6 @@ services:
       - MYSQL_USER=christiano
   backend:
     image: portfolio-backend
-    build:
-      context: Portfolio-Backend
     environment:
       - ADMIN_SEED_PASSWORD=Test1234+@
       - database-url=jdbc:mysql://db/cbconnectitportfoliodev # I can work with `db` here because of the same network
