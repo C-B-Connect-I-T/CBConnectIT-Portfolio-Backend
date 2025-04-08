@@ -30,7 +30,7 @@ object PasswordManager : PasswordManagerContract {
         isWithSpecial: Boolean = true,
         length: Int = DEFAULT_PASSWORD_LENGTH
     ): String {
-        if (length < 5) throw IllegalArgumentException("Length should at least be 5")
+        if (length < DEFAULT_PASSWORD_LENGTH) throw IllegalArgumentException("Length should at least be $length")
 
         val rnd = SecureRandom.getInstance("SHA1PRNG").asKotlinRandom()
 
