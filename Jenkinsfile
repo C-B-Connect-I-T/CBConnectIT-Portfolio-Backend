@@ -1,14 +1,10 @@
+// TODO: remove the secret and environment variables from this file and use .env files. Also expose the .env files to docker
+
 pipeline {
     agent any
 
     environment {
         IMAGE_NAME = "portfolio-backend"
-
-        ADMIN_SEED_PASSWORD = 'Test1234+@'
-        DATABASE_URL = 'jdbc:mysql://0.0.0.0:3307/cbconnectitportfoliodev'
-        DATABASE_PASSWORD = 'password'
-        DATABASE_USERNAME = 'christiano'
-        JWT_SECRET = 'My-very-secret-jwt-secret'
     }
 
     stages {
@@ -18,7 +14,7 @@ pipeline {
                     sh 'git fetch --tags'
 
                     def tag = sh(script: "git describe --exact-match --tags HEAD || echo ''", returnStdout: true).trim()
-                    def branch = env.GIT_BRANCH?.replaceFirst(/^origin\//, '') ?: 'develop'
+                    def branch = env.GIT_BRANCH?.replaceFirst(/^origin\//, '') ?: 'main'
 
                     echo "Branch: ${branch}"
                     echo "Tag: ${tag}"
@@ -27,10 +23,10 @@ pipeline {
                     def version = 'latest'
 
                     if (tag) {
-                        if (tag ==~ ~/^staging-v\d+\.\d+\.\d+$/) {
+                        if (tag ==~ /^staging-v\d+\.\d+\.\d+$/) {
                             environment = 'staging'
                             version = tag.replaceFirst(/^staging-v/, '')
-                        } else if (tag ==~ ~/^v\d+\.\d+\.\d+$/) {
+                        } else if (tag ==~ /^v\d+\.\d+\.\d+$/) {
                             environment = 'production'
                             version = tag.replaceFirst(/^v/, '')
                         } else {
@@ -48,8 +44,8 @@ pipeline {
                     env.VERSION = version
                     env.CONTAINER_NAME = "${IMAGE_NAME}-${environment}"
 
-                    env.EXPOSED_PORT = environment == 'production' ? '2027' :
-                                       environment == 'staging' ? '2026' : '2025'
+                    def ports = [develop: '2025', staging: '2026', production: '2027']
+                    env.EXPOSED_PORT = ports[environment]
 
                     echo "Version: ${VERSION}"
                     echo "Exposed port: ${EXPOSED_PORT}"
@@ -67,10 +63,23 @@ pipeline {
         stage('Deploy to Docker') {
             steps {
                 script {
-                    sh "docker stop ${CONTAINER_NAME} || true"
-                    sh "docker rm ${CONTAINER_NAME} || true"
-                    sh "docker run -d --name ${CONTAINER_NAME} -p ${EXPOSED_PORT}:8080 ${IMAGE_NAME}-${ENVIRONMENT}:${VERSION}"
-                    sh "docker system prune -f"
+                    // Match Secret File ID in Jenkins to format: env-file-develop, env-file-staging, env-file-production
+                    def envFileCredentialId = "env-file-${ENVIRONMENT}"
+
+                    withCredentials([file(credentialsId: envFileCredentialId, variable: 'ENV_FILE')]) {
+                        sh """
+                            docker stop ${CONTAINER_NAME} || true
+                            docker rm ${CONTAINER_NAME} || true
+
+                            docker run -d \\
+                              --env-file $ENV_FILE \\
+                              --name ${CONTAINER_NAME} \\
+                              -p ${EXPOSED_PORT}:8080 \\
+                              ${IMAGE_NAME}-${ENVIRONMENT}:${VERSION}
+
+                            docker system prune -f
+                        """
+                    }
                 }
             }
         }

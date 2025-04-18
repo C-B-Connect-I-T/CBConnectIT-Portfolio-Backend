@@ -36,3 +36,5 @@ out/
 .vscode/
 .run/*
 .DS_Store
+
+.env*
