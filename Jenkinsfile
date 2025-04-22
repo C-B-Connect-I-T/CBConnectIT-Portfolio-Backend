@@ -76,8 +76,6 @@ pipeline {
                               --name ${CONTAINER_NAME} \\
                               -p ${EXPOSED_PORT}:8080 \\
                               ${IMAGE_NAME}-${ENVIRONMENT}:${VERSION}
-
-                            docker system prune -f
                         """
                     }
                 }
