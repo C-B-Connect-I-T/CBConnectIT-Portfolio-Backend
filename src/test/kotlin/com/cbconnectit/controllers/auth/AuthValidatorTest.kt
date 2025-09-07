@@ -16,7 +16,6 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
-import org.koin.dsl.module
 import java.util.*
 import kotlin.test.assertNull
 
@@ -25,12 +24,6 @@ class AuthValidatorTest : BaseControllerTest() {
 
     private val userDao: IUserDao = mockk()
     private val payload: Payload = mockk()
-
-    init {
-        startInjection(module {
-            single { userDao }
-        })
-    }
 
     @BeforeEach
     override fun before() {
