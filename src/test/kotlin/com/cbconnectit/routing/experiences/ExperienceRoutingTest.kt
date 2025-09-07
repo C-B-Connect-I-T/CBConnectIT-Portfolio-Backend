@@ -59,7 +59,6 @@ class ExperienceRoutingTest : BaseRoutingTest() {
 
         assertThat(response.status).isEqualTo(HttpStatusCode.OK)
         assertThat(response.parseBody<List<*>>()).hasSize(4)
-
     }
     // </editor-fold>
 

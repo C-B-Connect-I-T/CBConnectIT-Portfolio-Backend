@@ -212,7 +212,6 @@ class TagRoutingTest : BaseRoutingTest() {
 
         assertThat(response.status).isEqualTo(exception.statusCode)
         assertThat(response.parseBody<ErrorResponse>()).isEqualTo(exception.toErrorResponse())
-
     }
     // </editor-fold>
 }

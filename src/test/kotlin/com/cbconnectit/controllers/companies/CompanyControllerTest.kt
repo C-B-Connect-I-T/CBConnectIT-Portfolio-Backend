@@ -35,7 +35,7 @@ import java.util.*
 import kotlin.test.assertNotNull
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-class CompanyControllerTest : BaseControllerTest() {
+class CompanyControllerTest : BaseControllerTest {
 
     private val companyDao: ICompanyDao = mockk()
     private val linkDao: ILinkDao = mockk()
