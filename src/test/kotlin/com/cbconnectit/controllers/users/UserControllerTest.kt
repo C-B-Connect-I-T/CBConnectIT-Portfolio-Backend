@@ -37,7 +37,6 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import org.junit.jupiter.api.assertDoesNotThrow
 import org.junit.jupiter.api.assertThrows
-import org.koin.dsl.module
 import java.util.*
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
@@ -45,16 +44,7 @@ class UserControllerTest : BaseControllerTest() {
 
     private val userDao: IUserDao = mockk()
     private val passwordEncryption: PasswordManagerContract = mockk()
-    private val controller: UserController by lazy { UserControllerImpl() }
-
-    init {
-        startInjection(
-            module {
-                single { userDao }
-                single { passwordEncryption }
-            }
-        )
-    }
+    private val controller: UserController by lazy { UserControllerImpl(userDao, passwordEncryption) }
 
     @BeforeEach
     override fun before() {

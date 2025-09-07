@@ -34,7 +34,6 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import org.junit.jupiter.api.assertDoesNotThrow
 import org.junit.jupiter.api.assertThrows
-import org.koin.dsl.module
 import java.util.*
 import kotlin.test.assertNotNull
 
@@ -45,18 +44,7 @@ class ExperienceControllerTest : BaseControllerTest() {
     private val companyDao: ICompanyDao = mockk()
     private val jobPositionDao: IJobPositionDao = mockk()
     private val tagDao: ITagDao = mockk()
-    private val controller: ExperienceController by lazy { ExperienceControllerImpl() }
-
-    init {
-        startInjection(
-            module {
-                single { experienceDao }
-                single { companyDao }
-                single { jobPositionDao }
-                single { tagDao }
-            }
-        )
-    }
+    private val controller: ExperienceController by lazy { ExperienceControllerImpl(experienceDao, companyDao, jobPositionDao, tagDao) }
 
     @BeforeEach
     override fun before() {
