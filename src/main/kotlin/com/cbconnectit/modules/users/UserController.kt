@@ -6,7 +6,6 @@ import com.cbconnectit.data.dto.requests.user.UpdateUser
 import com.cbconnectit.data.dto.requests.user.UserDto
 import com.cbconnectit.domain.interfaces.IUserDao
 import com.cbconnectit.domain.models.user.toDto
-import com.cbconnectit.modules.BaseController
 import com.cbconnectit.plugins.dbQuery
 import com.cbconnectit.statuspages.ErrorFailedCreate
 import com.cbconnectit.statuspages.ErrorFailedDelete
@@ -19,13 +18,12 @@ import com.cbconnectit.statuspages.ErrorSameAsOldPassword
 import com.cbconnectit.statuspages.ErrorUsernameExists
 import com.cbconnectit.statuspages.ErrorWeakPassword
 import com.cbconnectit.utils.PasswordManagerContract
-import org.koin.core.component.inject
 import java.util.*
 
-class UserControllerImpl : BaseController(), UserController {
-
-    private val userDao by inject<IUserDao>()
-    private val passwordEncryption by inject<PasswordManagerContract>()
+class UserControllerImpl(
+    private val userDao: IUserDao,
+    private val passwordEncryption: PasswordManagerContract
+) : UserController {
 
     override suspend fun postUser(insertNewUser: InsertNewUser): UserDto = dbQuery {
         if (!insertNewUser.isValid) throw ErrorInvalidParameters

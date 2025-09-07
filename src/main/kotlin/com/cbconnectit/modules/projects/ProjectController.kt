@@ -7,7 +7,6 @@ import com.cbconnectit.domain.interfaces.ILinkDao
 import com.cbconnectit.domain.interfaces.IProjectDao
 import com.cbconnectit.domain.interfaces.ITagDao
 import com.cbconnectit.domain.models.project.toDto
-import com.cbconnectit.modules.BaseController
 import com.cbconnectit.plugins.dbQuery
 import com.cbconnectit.statuspages.ErrorFailedCreate
 import com.cbconnectit.statuspages.ErrorFailedDelete
@@ -18,14 +17,13 @@ import com.cbconnectit.statuspages.ErrorUnknownLinkIdsForCreateProject
 import com.cbconnectit.statuspages.ErrorUnknownLinkIdsForUpdateProject
 import com.cbconnectit.statuspages.ErrorUnknownTagIdsForCreateProject
 import com.cbconnectit.statuspages.ErrorUnknownTagIdsForUpdateProject
-import org.koin.core.component.inject
 import java.util.*
 
-class ProjectControllerImpl : BaseController(), ProjectController {
-
-    private val projectDao by inject<IProjectDao>()
-    private val tagDao by inject<ITagDao>()
-    private val linkDao by inject<ILinkDao>()
+class ProjectControllerImpl(
+    private val projectDao: IProjectDao,
+    private val tagDao: ITagDao,
+    private val linkDao: ILinkDao
+) : ProjectController {
 
     override suspend fun getProjects(): List<ProjectDto> = dbQuery {
         projectDao.getProjects().map { it.toDto() }

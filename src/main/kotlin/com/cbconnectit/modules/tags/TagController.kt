@@ -5,7 +5,6 @@ import com.cbconnectit.data.dto.requests.tag.TagDto
 import com.cbconnectit.data.dto.requests.tag.UpdateTag
 import com.cbconnectit.domain.interfaces.ITagDao
 import com.cbconnectit.domain.models.tag.toDto
-import com.cbconnectit.modules.BaseController
 import com.cbconnectit.plugins.dbQuery
 import com.cbconnectit.statuspages.ErrorDuplicateEntity
 import com.cbconnectit.statuspages.ErrorFailedCreate
@@ -13,12 +12,11 @@ import com.cbconnectit.statuspages.ErrorFailedDelete
 import com.cbconnectit.statuspages.ErrorFailedUpdate
 import com.cbconnectit.statuspages.ErrorInvalidParameters
 import com.cbconnectit.statuspages.ErrorNotFound
-import org.koin.core.component.inject
 import java.util.*
 
-class TagControllerImpl : BaseController(), TagController {
-
-    private val tagDao by inject<ITagDao>()
+class TagControllerImpl(
+    private val tagDao: ITagDao
+) : TagController {
 
     override suspend fun getTags(query: String): List<TagDto> = dbQuery {
         tagDao.getTags(query).map { it.toDto() }
@@ -69,7 +67,8 @@ class TagControllerImpl : BaseController(), TagController {
 interface TagController {
     suspend fun getTags(query: String): List<TagDto>
     suspend fun getTagByIdentifier(tagIdentifier: String): TagDto
-//    suspend fun getTagBySlug(slug: String): TagDto
+
+    //    suspend fun getTagBySlug(slug: String): TagDto
     suspend fun postTag(insertNewTag: InsertNewTag): TagDto
     suspend fun updateTagById(tagId: UUID, updateTag: UpdateTag): TagDto
     suspend fun deleteTagById(tagId: UUID)

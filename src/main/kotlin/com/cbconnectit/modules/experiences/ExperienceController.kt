@@ -8,7 +8,6 @@ import com.cbconnectit.domain.interfaces.IExperienceDao
 import com.cbconnectit.domain.interfaces.IJobPositionDao
 import com.cbconnectit.domain.interfaces.ITagDao
 import com.cbconnectit.domain.models.experience.toDto
-import com.cbconnectit.modules.BaseController
 import com.cbconnectit.plugins.dbQuery
 import com.cbconnectit.statuspages.ErrorFailedCreate
 import com.cbconnectit.statuspages.ErrorFailedDelete
@@ -21,15 +20,14 @@ import com.cbconnectit.statuspages.ErrorUnknownJobPositionIdsForCreateExperience
 import com.cbconnectit.statuspages.ErrorUnknownJobPositionIdsForUpdateExperience
 import com.cbconnectit.statuspages.ErrorUnknownTagIdsForCreateExperience
 import com.cbconnectit.statuspages.ErrorUnknownTagIdsForUpdateExperience
-import org.koin.core.component.inject
 import java.util.*
 
-class ExperienceControllerImpl : BaseController(), ExperienceController {
-
-    private val experienceDao by inject<IExperienceDao>()
-    private val companyDao by inject<ICompanyDao>()
-    private val jobPositionDao by inject<IJobPositionDao>()
-    private val tagDao by inject<ITagDao>()
+class ExperienceControllerImpl(
+    private val experienceDao: IExperienceDao,
+    private val companyDao: ICompanyDao,
+    private val jobPositionDao: IJobPositionDao,
+    private val tagDao: ITagDao
+) : ExperienceController {
 
     override suspend fun getExperiences(): List<ExperienceDto> = dbQuery {
         experienceDao.getExperiences().map { it.toDto() }
