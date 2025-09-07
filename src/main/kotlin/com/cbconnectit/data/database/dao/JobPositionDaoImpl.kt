@@ -12,14 +12,13 @@ import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
 import org.jetbrains.exposed.sql.deleteWhere
 import org.jetbrains.exposed.sql.insertAndGetId
 import org.jetbrains.exposed.sql.javatime.CurrentDateTime
-import org.jetbrains.exposed.sql.select
 import org.jetbrains.exposed.sql.selectAll
 import org.jetbrains.exposed.sql.update
 import java.util.*
 
 class JobPositionDaoImpl : IJobPositionDao {
     override fun getJobPositionById(id: UUID): JobPosition? =
-        JobPositionsTable.select { JobPositionsTable.id eq id }.toJobPosition()
+        JobPositionsTable.selectAll().where { JobPositionsTable.id eq id }.toJobPosition()
 
     override fun getJobPositions(): List<JobPosition> =
         JobPositionsTable.selectAll().toJobPositions()
@@ -45,8 +44,8 @@ class JobPositionDaoImpl : IJobPositionDao {
     override fun deleteJobPosition(id: UUID): Boolean = JobPositionsTable.deleteWhere { JobPositionsTable.id eq id } > 0
 
     override fun jobPositionUnique(name: String): Boolean =
-        JobPositionsTable.select { JobPositionsTable.name eq name }.empty()
+        JobPositionsTable.selectAll().where { JobPositionsTable.name eq name }.empty()
 
     override fun getListOfExistingJobPositionIds(jobPositionIds: List<UUID>): List<UUID> =
-        JobPositionsTable.select { JobPositionsTable.id inList jobPositionIds }.map { it[JobPositionsTable.id].value }
+        JobPositionsTable.selectAll().where { JobPositionsTable.id inList jobPositionIds }.map { it[JobPositionsTable.id].value }
 }

@@ -13,7 +13,6 @@ import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
 import org.jetbrains.exposed.sql.deleteWhere
 import org.jetbrains.exposed.sql.insertAndGetId
 import org.jetbrains.exposed.sql.javatime.CurrentDateTime
-import org.jetbrains.exposed.sql.select
 import org.jetbrains.exposed.sql.selectAll
 import org.jetbrains.exposed.sql.update
 import java.util.*
@@ -21,13 +20,13 @@ import java.util.*
 class UserDaoImpl : IUserDao {
 
     override fun getUser(id: UUID): User? =
-        UsersTable.select { UsersTable.id eq id }.toUser()
+        UsersTable.selectAll().where { UsersTable.id eq id }.toUser()
 
     override fun getUserHashableById(id: UUID): User? =
-        UsersTable.select { UsersTable.id eq id }.toUserHashable()
+        UsersTable.selectAll().where { UsersTable.id eq id }.toUserHashable()
 
     override fun getUserHashableByUsername(username: String): User? =
-        UsersTable.select { UsersTable.username eq username }.toUserHashable()
+        UsersTable.selectAll().where { UsersTable.username eq username }.toUserHashable()
 
     override fun getUsers(): List<User> =
         UsersTable.selectAll().toUsers()
@@ -57,10 +56,10 @@ class UserDaoImpl : IUserDao {
         UsersTable.deleteWhere { UsersTable.id eq id } > 0
 
     override fun userUnique(username: String): Boolean =
-        UsersTable.select { UsersTable.username eq username }.empty()
+        UsersTable.selectAll().where { UsersTable.username eq username }.empty()
 
     override fun isUserRoleAdmin(userId: UUID): Boolean =
-        UsersTable.select { UsersTable.id eq userId }.firstOrNull()?.get(UsersTable.role) == UserRoles.Admin
+        UsersTable.selectAll().where { UsersTable.id eq userId }.firstOrNull()?.get(UsersTable.role) == UserRoles.Admin
 
     override fun updateUserPassword(userId: UUID, updatePassword: String): User? {
         UsersTable.update({ UsersTable.id eq userId }) {

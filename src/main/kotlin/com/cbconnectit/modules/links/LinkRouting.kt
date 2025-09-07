@@ -7,15 +7,11 @@ import com.cbconnectit.utils.getLinkId
 import com.cbconnectit.utils.receiveOrRespondWithError
 import com.cbconnectit.utils.sendOk
 import io.ktor.http.*
-import io.ktor.server.application.*
 import io.ktor.server.auth.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
-import org.koin.ktor.ext.inject
 
-fun Route.linkRouting() {
-
-    val linkController by inject<LinkController>()
+fun Route.linkRouting(linkController: LinkController) {
 
     route("links") {
         get {

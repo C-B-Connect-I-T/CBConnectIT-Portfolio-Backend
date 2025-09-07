@@ -11,9 +11,12 @@ import com.cbconnectit.modules.users.UserController
 import com.cbconnectit.modules.users.userRouting
 import com.cbconnectit.routing.AuthenticationInstrumentation
 import com.cbconnectit.routing.BaseRoutingTest
+import com.cbconnectit.statuspages.ErrorMissingBody
+import com.cbconnectit.statuspages.ErrorResponse
+import com.cbconnectit.statuspages.InternalServerException
+import com.cbconnectit.statuspages.toErrorResponse
 import com.cbconnectit.utils.toDatabaseString
 import io.ktor.http.*
-import io.ktor.server.application.*
 import io.ktor.server.routing.*
 import io.mockk.coEvery
 import io.mockk.mockk
@@ -22,7 +25,6 @@ import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
-import org.junit.jupiter.api.assertThrows
 import org.koin.dsl.module
 import java.time.LocalDateTime
 import java.util.*
@@ -39,8 +41,8 @@ class UserRoutingTest : BaseRoutingTest() {
         }
 
         moduleList = {
-            install(Routing) {
-                userRouting()
+            routing {
+                userRouting(userController)
             }
         }
     }
@@ -55,12 +57,13 @@ class UserRoutingTest : BaseRoutingTest() {
         AuthenticationInstrumentation(ADMIN_ONLY, UserRoles.Admin),
         AuthenticationInstrumentation()
     ) {
-        coEvery { userController.postUser(any()) } throws Exception()
+        val exception = ErrorMissingBody
+        coEvery { userController.postUser(any()) } throws exception
 
-        val exception = assertThrows<Exception> {
-            doCall(HttpMethod.Post, "/users")
-        }
-        assertThat(exception.message).isEqualTo(null)
+        val response = doCall(HttpMethod.Post, "/users")
+
+        assertThat(response.status).isEqualTo(HttpStatusCode.BadRequest)
+        assertThat(response.parseBody<ErrorResponse>()).isEqualTo(exception.toErrorResponse())
     }
 
     @Test
@@ -68,9 +71,9 @@ class UserRoutingTest : BaseRoutingTest() {
         AuthenticationInstrumentation(ADMIN_ONLY),
         AuthenticationInstrumentation()
     ) {
-        val call = doCall(HttpMethod.Post, "/users")
+        val response = doCall(HttpMethod.Post, "/users")
 
-        assertThat(call.response.status()).isEqualTo(HttpStatusCode.Unauthorized)
+        assertThat(response.status).isEqualTo(HttpStatusCode.Unauthorized)
     }
 
     @Test
@@ -83,13 +86,10 @@ class UserRoutingTest : BaseRoutingTest() {
         coEvery { userController.postUser(any()) } returns userDto
 
         val body = toJsonBody(InsertNewUser("", "", "", ""))
-        val call = doCall(HttpMethod.Post, "/users", body)
+        val response = doCall(HttpMethod.Post, "/users", body)
 
-        call.also {
-            assertThat(HttpStatusCode.Created).isEqualTo(it.response.status())
-            val responseBody = it.response.parseBody(UserDto::class.java)
-            assertThat(userDto).isEqualTo(responseBody)
-        }
+        assertThat(response.status).isEqualTo(HttpStatusCode.Created)
+        assertThat(response.parseBody<UserDto>()).isEqualTo(userDto)
     }
 
     @Test
@@ -97,13 +97,14 @@ class UserRoutingTest : BaseRoutingTest() {
         AuthenticationInstrumentation(ADMIN_ONLY, UserRoles.Admin),
         AuthenticationInstrumentation()
     ) {
-        coEvery { userController.postUser(any()) } throws Exception()
+        val exception = ErrorMissingBody
+        coEvery { userController.postUser(any()) } throws exception
 
         val body = toJsonBody(InsertNewUser("", "", "", ""))
-        val exception = assertThrows<Exception> {
-            doCall(HttpMethod.Post, "/users", body)
-        }
-        assertThat(exception.message).isEqualTo(null)
+        val response = doCall(HttpMethod.Post, "/users", body)
+
+        assertThat(response.status).isEqualTo(HttpStatusCode.BadRequest)
+        assertThat(response.parseBody<ErrorResponse>()).isEqualTo(exception.toErrorResponse())
     }
 
     @Test
@@ -114,17 +115,14 @@ class UserRoutingTest : BaseRoutingTest() {
         val time = LocalDateTime.now()
         val userResponse = User(UUID.fromString("00000000-0000-0000-0000-000000000001"), "Chris Bol", "chris.bol@example.com", time, time).toDto()
 
-        val call = doCall(HttpMethod.Get, "/users/me")
+        val response = doCall(HttpMethod.Get, "/users/me")
 
-        call.also {
-            assertThat(HttpStatusCode.OK).isEqualTo(it.response.status())
-            val responseBody = it.response.parseBody(UserDto::class.java)
-            assertThat(userResponse).matches { user ->
-                user.id == responseBody.id &&
-                        user.role == responseBody.role &&
-                        user.username == responseBody.username &&
-                        user.fullName == responseBody.fullName
-            }
+        assertThat(response.status).isEqualTo(HttpStatusCode.OK)
+        assertThat(response.parseBody<UserDto>()).matches { user ->
+            user.id == userResponse.id &&
+                    user.role == userResponse.role &&
+                    user.username == userResponse.username &&
+                    user.fullName == userResponse.fullName
         }
     }
 
@@ -138,13 +136,10 @@ class UserRoutingTest : BaseRoutingTest() {
         coEvery { userController.updateUserById(any(), any()) } returns userDto
 
         val body = toJsonBody(InsertNewUser("", "", "", ""))
-        val call = doCall(HttpMethod.Put, "/users/me", body)
+        val response = doCall(HttpMethod.Put, "/users/me", body)
 
-        call.also {
-            assertThat(HttpStatusCode.OK).isEqualTo(it.response.status())
-            val responseBody = it.response.parseBody(UserDto::class.java)
-            assertThat(userDto).isEqualTo(responseBody)
-        }
+        assertThat(response.status).isEqualTo(HttpStatusCode.OK)
+        assertThat(response.parseBody<UserDto>()).isEqualTo(userDto)
     }
 
     @Test
@@ -155,10 +150,10 @@ class UserRoutingTest : BaseRoutingTest() {
         coEvery { userController.updateUserById(any(), any()) } throws Exception()
 
         val body = toJsonBody(InsertNewUser("", "", "", ""))
-        val exception = assertThrows<Exception> {
-            doCall(HttpMethod.Put, "/users/me", body)
-        }
-        assertThat(exception.message).isEqualTo(null)
+        val response = doCall(HttpMethod.Put, "/users/me", body)
+
+        assertThat(response.status).isEqualTo(InternalServerException().statusCode)
+        assertThat(response.parseBody<ErrorResponse>()).isEqualTo(InternalServerException().toErrorResponse())
     }
 
     @Test
@@ -171,13 +166,10 @@ class UserRoutingTest : BaseRoutingTest() {
         coEvery { userController.updateUserPasswordById(any(), any()) } returns userDto
 
         val body = toJsonBody(UpdatePassword("", "", ""))
-        val call = doCall(HttpMethod.Put, "/users/me/password", body)
+        val response = doCall(HttpMethod.Put, "/users/me/password", body)
 
-        call.also {
-            assertThat(HttpStatusCode.OK).isEqualTo(it.response.status())
-            val responseBody = it.response.parseBody(UserDto::class.java)
-            assertThat(userDto).isEqualTo(responseBody)
-        }
+        assertThat(response.status).isEqualTo(HttpStatusCode.OK)
+        assertThat(response.parseBody<UserDto>()).isEqualTo(userDto)
     }
 
     @Test
@@ -188,10 +180,10 @@ class UserRoutingTest : BaseRoutingTest() {
         coEvery { userController.updateUserPasswordById(any(), any()) } throws Exception()
 
         val body = toJsonBody(InsertNewUser("", "", "", ""))
-        val exception = assertThrows<Exception> {
-            doCall(HttpMethod.Put, "/users/me/password", body)
-        }
-        assertThat(exception.message).isEqualTo(null)
+        val response = doCall(HttpMethod.Put, "/users/me/password", body)
+
+        assertThat(response.status).isEqualTo(InternalServerException().statusCode)
+        assertThat(response.parseBody<ErrorResponse>()).isEqualTo(InternalServerException().toErrorResponse())
     }
 
     @Test
@@ -203,13 +195,10 @@ class UserRoutingTest : BaseRoutingTest() {
         val userResponse = UserDto(UUID.randomUUID().toString(), "", "", time, time)
         coEvery { userController.getUserById(any()) } returns userResponse
 
-        val call = doCall(HttpMethod.Get, "/users/a63a20c4-14dd-4e11-9e87-5ab361a51f65")
+        val response = doCall(HttpMethod.Get, "/users/a63a20c4-14dd-4e11-9e87-5ab361a51f65")
 
-        call.also {
-            assertThat(HttpStatusCode.OK).isEqualTo(it.response.status())
-            val responseBody = it.response.parseBody(UserDto::class.java)
-            assertThat(userResponse).isEqualTo(responseBody)
-        }
+        assertThat(response.status).isEqualTo(HttpStatusCode.OK)
+        assertThat(response.parseBody<UserDto>()).isEqualTo(userResponse)
     }
 
     @Test
@@ -219,11 +208,10 @@ class UserRoutingTest : BaseRoutingTest() {
     ) {
         coEvery { userController.getUserById(any()) } throws Exception()
 
-        val exception = assertThrows<Exception> {
-            doCall(HttpMethod.Get, "/users/a63a20c4-14dd-4e11-9e87-5ab361a51f65")
-        }
+        val response = doCall(HttpMethod.Get, "/users/00000000-0000-0000-0000-000000000001")
 
-        assertThat(exception.message).isEqualTo(null)
+        assertThat(response.status).isEqualTo(InternalServerException().statusCode)
+        assertThat(response.parseBody<ErrorResponse>()).isEqualTo(InternalServerException().toErrorResponse())
     }
 
     @Test
@@ -232,9 +220,9 @@ class UserRoutingTest : BaseRoutingTest() {
         AuthenticationInstrumentation()
     ) {
 
-        val call = doCall(HttpMethod.Get, "/users/a63a20c4-14dd-4e11-9e87-5ab361a51f65")
+        val response = doCall(HttpMethod.Get, "/users/a63a20c4-14dd-4e11-9e87-5ab361a51f65")
 
-        assertThat(call.response.status()).isEqualTo(HttpStatusCode.Unauthorized)
+        assertThat(response.status).isEqualTo(HttpStatusCode.Unauthorized)
     }
 
     @Test
@@ -247,13 +235,10 @@ class UserRoutingTest : BaseRoutingTest() {
         coEvery { userController.updateUserById(any(), any()) } returns userDto
 
         val body = toJsonBody(InsertNewUser("", "", "", ""))
-        val call = doCall(HttpMethod.Put, "/users/a63a20c4-14dd-4e11-9e87-5ab361a51f65", body)
+        val response = doCall(HttpMethod.Put, "/users/a63a20c4-14dd-4e11-9e87-5ab361a51f65", body)
 
-        call.also {
-            assertThat(HttpStatusCode.OK).isEqualTo(it.response.status())
-            val responseBody = it.response.parseBody(UserDto::class.java)
-            assertThat(userDto).isEqualTo(responseBody)
-        }
+        assertThat(response.status).isEqualTo(HttpStatusCode.OK)
+        assertThat(response.parseBody<UserDto>()).isEqualTo(userDto)
     }
 
     @Test
@@ -264,10 +249,10 @@ class UserRoutingTest : BaseRoutingTest() {
         coEvery { userController.updateUserById(any(), any()) } throws Exception()
 
         val body = toJsonBody(InsertNewUser("", "", "", ""))
-        val exception = assertThrows<Exception> {
-            doCall(HttpMethod.Put, "/users/a63a20c4-14dd-4e11-9e87-5ab361a51f65", body)
-        }
-        assertThat(exception.message).isEqualTo(null)
+        val response = doCall(HttpMethod.Put, "/users/00000000-0000-0000-0000-000000000001", body)
+
+        assertThat(response.status).isEqualTo(InternalServerException().statusCode)
+        assertThat(response.parseBody<ErrorResponse>()).isEqualTo(InternalServerException().toErrorResponse())
     }
 
     @Test
@@ -276,9 +261,9 @@ class UserRoutingTest : BaseRoutingTest() {
         AuthenticationInstrumentation()
     ) {
 
-        val call = doCall(HttpMethod.Put, "/users/a63a20c4-14dd-4e11-9e87-5ab361a51f65")
+        val response = doCall(HttpMethod.Put, "/users/a63a20c4-14dd-4e11-9e87-5ab361a51f65")
 
-        assertThat(call.response.status()).isEqualTo(HttpStatusCode.Unauthorized)
+        assertThat(response.status).isEqualTo(HttpStatusCode.Unauthorized)
     }
 
     @Test
@@ -291,13 +276,10 @@ class UserRoutingTest : BaseRoutingTest() {
         coEvery { userController.updateUserPasswordById(any(), any()) } returns userDto
 
         val body = toJsonBody(UpdatePassword("", "", ""))
-        val call = doCall(HttpMethod.Put, "/users/a63a20c4-14dd-4e11-9e87-5ab361a51f65/password", body)
+        val response = doCall(HttpMethod.Put, "/users/a63a20c4-14dd-4e11-9e87-5ab361a51f65/password", body)
 
-        call.also {
-            assertThat(HttpStatusCode.OK).isEqualTo(it.response.status())
-            val responseBody = it.response.parseBody(UserDto::class.java)
-            assertThat(userDto).isEqualTo(responseBody)
-        }
+        assertThat(response.status).isEqualTo(HttpStatusCode.OK)
+        assertThat(response.parseBody<UserDto>()).isEqualTo(userDto)
     }
 
     @Test
@@ -308,10 +290,10 @@ class UserRoutingTest : BaseRoutingTest() {
         coEvery { userController.updateUserPasswordById(any(), any()) } throws Exception()
 
         val body = toJsonBody(InsertNewUser("", "", "", ""))
-        val exception = assertThrows<Exception> {
-            doCall(HttpMethod.Put, "/users/a63a20c4-14dd-4e11-9e87-5ab361a51f65/password", body)
-        }
-        assertThat(exception.message).isEqualTo(null)
+        val response = doCall(HttpMethod.Put, "/users/00000000-0000-0000-0000-000000000001/password", body)
+
+        assertThat(response.status).isEqualTo(InternalServerException().statusCode)
+        assertThat(response.parseBody<ErrorResponse>()).isEqualTo(InternalServerException().toErrorResponse())
     }
 
     @Test
@@ -320,9 +302,9 @@ class UserRoutingTest : BaseRoutingTest() {
         AuthenticationInstrumentation()
     ) {
 
-        val call = doCall(HttpMethod.Put, "/users/a63a20c4-14dd-4e11-9e87-5ab361a51f65/password")
+        val response = doCall(HttpMethod.Put, "/users/a63a20c4-14dd-4e11-9e87-5ab361a51f65/password")
 
-        assertThat(call.response.status()).isEqualTo(HttpStatusCode.Unauthorized)
+        assertThat(response.status).isEqualTo(HttpStatusCode.Unauthorized)
     }
 
     @Test
@@ -332,11 +314,9 @@ class UserRoutingTest : BaseRoutingTest() {
     ) {
         coEvery { userController.deleteUserById(any()) } returns Unit
 
-        val call = doCall(HttpMethod.Delete, "/users/a63a20c4-14dd-4e11-9e87-5ab361a51f65")
+        val response = doCall(HttpMethod.Delete, "/users/a63a20c4-14dd-4e11-9e87-5ab361a51f65")
 
-        call.also {
-            assertThat(HttpStatusCode.OK).isEqualTo(it.response.status())
-        }
+        assertThat(response.status).isEqualTo(HttpStatusCode.OK)
     }
 
     @Test
@@ -346,10 +326,10 @@ class UserRoutingTest : BaseRoutingTest() {
     ) {
         coEvery { userController.deleteUserById(any()) } throws Exception()
 
-        val exception = assertThrows<Exception> {
-            doCall(HttpMethod.Delete, "/users/a63a20c4-14dd-4e11-9e87-5ab361a51f65")
-        }
-        assertThat(exception.message).isEqualTo(null)
+        val response = doCall(HttpMethod.Delete, "/users/00000000-0000-0000-0000-000000000001")
+
+        assertThat(response.status).isEqualTo(InternalServerException().statusCode)
+        assertThat(response.parseBody<ErrorResponse>()).isEqualTo(InternalServerException().toErrorResponse())
     }
 
     @Test
@@ -358,8 +338,8 @@ class UserRoutingTest : BaseRoutingTest() {
         AuthenticationInstrumentation()
     ) {
 
-        val call = doCall(HttpMethod.Put, "/users/a63a20c4-14dd-4e11-9e87-5ab361a51f65/password")
+        val response = doCall(HttpMethod.Put, "/users/a63a20c4-14dd-4e11-9e87-5ab361a51f65/password")
 
-        assertThat(call.response.status()).isEqualTo(HttpStatusCode.Unauthorized)
+        assertThat(response.status).isEqualTo(HttpStatusCode.Unauthorized)
     }
 }

@@ -1,18 +1,8 @@
-val ktor_version: String by project
-val kotlin_version: String by project
-val logback_version: String by project
-
-val exposed_version: String by project
-val h2_version: String by project
-val postgres_version: String by project
-val koin_version: String by project
-
 plugins {
-    application
-    kotlin("jvm") version "1.9.22"
-    id("io.ktor.plugin") version "2.3.7"
-    id("org.jetbrains.kotlin.plugin.serialization") version "1.9.22"
-    id("io.gitlab.arturbosch.detekt") version ("1.23.5")
+    alias(libs.plugins.kotlin.jvm)
+    alias(libs.plugins.kotlin.serialization)
+    alias(libs.plugins.ktor)
+    alias(libs.plugins.detekt)
 }
 
 group = "com.cbconnectit"
@@ -27,65 +17,50 @@ application {
 
 repositories {
     mavenCentral()
-    jcenter()
-    maven {
-        url = uri("https://dl.bintray.com/kotlin/ktor")
-    }
-    maven {
-        url = uri("https://dl.bintray.com/kotlin/kotlinx")
-    }
 }
 
 dependencies {
-    implementation("io.ktor:ktor-server-content-negotiation-jvm")
-    implementation("io.ktor:ktor-server-core-jvm")
-    implementation("io.ktor:ktor-serialization-gson-jvm")
-    implementation("io.ktor:ktor-server-auth-jvm")
-    implementation("io.ktor:ktor-server-auth-jwt-jvm")
-    implementation("io.ktor:ktor-server-netty-jvm")
-    implementation("ch.qos.logback:logback-classic:$logback_version")
-    implementation("io.ktor:ktor-server-cors-jvm")
-    implementation("io.ktor:ktor-server-status-pages-jvm")
-    implementation("io.ktor:ktor-server-call-logging-jvm")
+    implementation(libs.ktor.server.content.negotiation)
+    implementation(libs.ktor.server.core)
+    implementation(libs.ktor.serialization.gson)
+    implementation(libs.ktor.server.auth)
+    implementation(libs.ktor.server.auth.jwt)
+    implementation(libs.ktor.server.netty)
+    implementation(libs.logback)
+    implementation(libs.ktor.server.cors)
+    implementation(libs.ktor.server.status.pages)
+    implementation(libs.ktor.server.call.logging)
+    implementation(libs.ktor.server.request.validation)
+    implementation(libs.ktor.server.swagger)
 
-//    detektPlugins("io.gitlab.arturbosch.detekt:detekt:1.23.3")
-    detektPlugins("io.gitlab.arturbosch.detekt:detekt-formatting:1.23.3")
-
-    // Unsure what this does!!
-    implementation("io.ktor:ktor-server-host-common-jvm")
-
-    implementation("io.ktor:ktor-server-swagger-jvm")
-
+    detektPlugins(libs.detekt.formatting)
 
     // Database
-    implementation("org.jetbrains.exposed:exposed-core:$exposed_version")
-    implementation("org.jetbrains.exposed:exposed-jdbc:$exposed_version")
-    implementation("org.jetbrains.exposed:exposed-dao:$exposed_version")
-    implementation("org.jetbrains.exposed:exposed-java-time:$exposed_version")
-    implementation("mysql:mysql-connector-java:8.0.33")
-    implementation("org.postgresql:postgresql:$postgres_version")
+    implementation(libs.exposed.core)
+    implementation(libs.exposed.jdbc)
+//    implementation(libs.exposed.dao) // TODO: not really using this at the moment I think...
+    implementation(libs.exposed.java.time)
+    implementation(libs.mysql)
+    implementation(libs.jbcrypt)
 
-    // Encrypt/Decrypt password
-    implementation("org.mindrot:jbcrypt:0.4")
+    // Firebase Admin SDK
+//    implementation(libs.firebase.admin)
 
     // Koin for Ktor; make sure you go to File...Project Structure
     // and switch to Java 11
-    implementation("io.insert-koin:koin-ktor:$koin_version")
-    // SLF4J Logger
-    implementation("io.insert-koin:koin-logger-slf4j:$koin_version")
+    implementation(libs.koin.ktor)
+//    implementation(libs.koin.logger.slf4j)
 
-    testImplementation("io.insert-koin:koin-test:3.3.3")
-    testImplementation("io.ktor:ktor-server-test-host:2.2.4")
-    testImplementation("org.assertj:assertj-core:3.24.2")
-    testImplementation("org.junit.jupiter:junit-jupiter:5.9.2")
-    testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:5.9.2")
-    testImplementation("io.mockk:mockk:1.13.4")
-    testImplementation("org.xerial:sqlite-jdbc:3.41.2.2")
+    implementation(libs.slugify)
 
-    testImplementation("io.ktor:ktor-server-tests-jvm")
-    testImplementation("org.jetbrains.kotlin:kotlin-test-junit:$kotlin_version")
-
-    implementation("com.github.slugify:slugify:3.0.6")
+    testImplementation(libs.sqlite)
+    testImplementation(libs.koin.test)
+    testImplementation(libs.ktor.server.test.host)
+    testImplementation(libs.assertj.core)
+    testImplementation(libs.mockk)
+    testImplementation(platform(libs.junit.bom))
+    testImplementation(libs.junit.platform.launcher)
+    testImplementation(libs.junit.jupiter.engine)
 }
 
 tasks {
@@ -94,10 +69,5 @@ tasks {
         testLogging {
             events("passed", "skipped", "failed")
         }
-    }
-
-    // config JVM target to 1.8 for kotlin compilation tasks
-    compileKotlin {
-        kotlinOptions.jvmTarget = "21"
     }
 }

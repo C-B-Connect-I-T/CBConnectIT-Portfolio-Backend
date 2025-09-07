@@ -7,16 +7,12 @@ import com.cbconnectit.utils.getTagIdentifier
 import com.cbconnectit.utils.receiveOrRespondWithError
 import com.cbconnectit.utils.sendOk
 import io.ktor.http.*
-import io.ktor.server.application.*
 import io.ktor.server.auth.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
-import org.koin.ktor.ext.inject
 import java.util.*
 
-fun Route.tagRouting() {
-
-    val tagController by inject<TagController>()
+fun Route.tagRouting(tagController: TagController) {
 
     route("tags") {
         get {

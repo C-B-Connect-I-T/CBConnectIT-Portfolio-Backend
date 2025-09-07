@@ -6,7 +6,6 @@ import com.cbconnectit.modules.auth.AuthController
 import com.cbconnectit.modules.auth.authRouting
 import com.cbconnectit.routing.BaseRoutingTest
 import io.ktor.http.*
-import io.ktor.server.application.*
 import io.ktor.server.routing.*
 import io.mockk.clearMocks
 import io.mockk.coEvery
@@ -30,8 +29,8 @@ class AuthRoutingTest : BaseRoutingTest() {
         }
 
         moduleList = {
-            install(Routing) {
-                authRouting()
+            routing {
+                authRouting(authController)
             }
         }
     }
@@ -47,12 +46,9 @@ class AuthRoutingTest : BaseRoutingTest() {
         coEvery { authController.authorizeUser(any()) } returns authResponse
 
         val body = toJsonBody(CreateTokenDto("", ""))
-        val call = doCall(HttpMethod.Post, "/oauth/token", body)
+        val response = doCall(HttpMethod.Post, "/oauth/token", body)
 
-        call.also {
-            Assertions.assertThat(HttpStatusCode.OK).isEqualTo(it.response.status())
-            val responseBody = it.response.parseBody(CredentialsResponse::class.java)
-            Assertions.assertThat(authResponse).isEqualTo(responseBody)
-        }
+        Assertions.assertThat(response.status).isEqualTo(HttpStatusCode.OK)
+        Assertions.assertThat(response.parseBody<CredentialsResponse>()).isEqualTo(authResponse)
     }
 }

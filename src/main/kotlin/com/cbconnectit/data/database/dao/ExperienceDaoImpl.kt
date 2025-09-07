@@ -25,7 +25,6 @@ import org.jetbrains.exposed.sql.and
 import org.jetbrains.exposed.sql.deleteWhere
 import org.jetbrains.exposed.sql.insert
 import org.jetbrains.exposed.sql.insertAndGetId
-import org.jetbrains.exposed.sql.select
 import org.jetbrains.exposed.sql.selectAll
 import org.jetbrains.exposed.sql.update
 import java.time.LocalDateTime
@@ -37,7 +36,7 @@ class ExperienceDaoImpl : IExperienceDao {
 
         val experienceWithRelations = ExperiencesTable leftJoin TagsExperiencesPivotTable leftJoin TagsTable leftJoin JobPositionsTable leftJoin CompaniesTable leftJoin CompaniesLinksPivotTable leftJoin LinksTable
 
-        val results = experienceWithRelations.select { ExperiencesTable.id eq id }
+        val results = experienceWithRelations.selectAll().where { ExperiencesTable.id eq id }
         val tags = parseTags(results)
         val links = parseLinks(results)
 
@@ -56,7 +55,7 @@ class ExperienceDaoImpl : IExperienceDao {
     }
 
     override fun getExperiences(): List<Experience> {
-        val experienceWithRelations = ExperiencesTable leftJoin JobPositionsTable leftJoin(TagsExperiencesPivotTable leftJoin TagsTable) leftJoin CompaniesTable leftJoin(CompaniesLinksPivotTable leftJoin LinksTable)
+        val experienceWithRelations = ExperiencesTable leftJoin JobPositionsTable leftJoin (TagsExperiencesPivotTable leftJoin TagsTable) leftJoin CompaniesTable leftJoin (CompaniesLinksPivotTable leftJoin LinksTable)
 
         val results = experienceWithRelations.selectAll().orderBy(ExperiencesTable.to to SortOrder.DESC)
         val tags = parseTags(results)

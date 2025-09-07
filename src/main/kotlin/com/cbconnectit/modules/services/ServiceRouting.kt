@@ -7,15 +7,11 @@ import com.cbconnectit.utils.getServiceId
 import com.cbconnectit.utils.receiveOrRespondWithError
 import com.cbconnectit.utils.sendOk
 import io.ktor.http.*
-import io.ktor.server.application.*
 import io.ktor.server.auth.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
-import org.koin.ktor.ext.inject
 
-fun Route.serviceRouting() {
-
-    val serviceController by inject<ServiceController>()
+fun Route.serviceRouting(serviceController: ServiceController) {
 
     route("services") {
         get {

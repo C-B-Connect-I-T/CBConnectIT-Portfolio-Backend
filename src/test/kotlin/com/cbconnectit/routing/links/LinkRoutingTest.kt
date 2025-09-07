@@ -10,8 +10,11 @@ import com.cbconnectit.routing.links.LinkInstrumentation.givenAValidInsertLink
 import com.cbconnectit.routing.links.LinkInstrumentation.givenAValidUpdateLinkBody
 import com.cbconnectit.routing.links.LinkInstrumentation.givenLinkList
 import com.cbconnectit.statuspages.ErrorDuplicateEntity
+import com.cbconnectit.statuspages.ErrorFailedDelete
+import com.cbconnectit.statuspages.ErrorNotFound
+import com.cbconnectit.statuspages.ErrorResponse
+import com.cbconnectit.statuspages.toErrorResponse
 import io.ktor.http.*
-import io.ktor.server.application.*
 import io.ktor.server.routing.*
 import io.mockk.coEvery
 import io.mockk.mockk
@@ -20,11 +23,10 @@ import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
-import org.junit.jupiter.api.assertThrows
 import org.koin.dsl.module
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-class LinkRoutingTest: BaseRoutingTest() {
+class LinkRoutingTest : BaseRoutingTest() {
 
     private val linkController: LinkController = mockk()
 
@@ -34,8 +36,8 @@ class LinkRoutingTest: BaseRoutingTest() {
             single { linkController }
         }
         moduleList = {
-            install(Routing) {
-                linkRouting()
+            routing {
+                linkRouting(linkController)
             }
         }
     }
@@ -52,13 +54,10 @@ class LinkRoutingTest: BaseRoutingTest() {
     ) {
         coEvery { linkController.getLinks() } returns givenLinkList()
 
-        val call = doCall(HttpMethod.Get, "/links")
+        val response = doCall(HttpMethod.Get, "/links")
 
-        call.also {
-            assertThat(HttpStatusCode.OK).isEqualTo(it.response.status())
-            val responseBody = it.response.parseBody(List::class.java)
-            assertThat(responseBody).hasSize(4)
-        }
+        assertThat(response.status).isEqualTo(HttpStatusCode.OK)
+        assertThat(response.parseBody<List<*>>()).hasSize(4)
     }
     // </editor-fold>
 
@@ -70,26 +69,23 @@ class LinkRoutingTest: BaseRoutingTest() {
         val linkResponse = givenALink()
         coEvery { linkController.getLinkById(any()) } returns linkResponse
 
-        val call = doCall(HttpMethod.Get, "/links/a63a20c4-14dd-4e11-9e87-5ab361a51f65")
+        val response = doCall(HttpMethod.Get, "/links/a63a20c4-14dd-4e11-9e87-5ab361a51f65")
 
-        call.also {
-            assertThat(HttpStatusCode.OK).isEqualTo(it.response.status())
-            val responseBody = it.response.parseBody(LinkDto::class.java)
-            assertThat(linkResponse).isEqualTo(responseBody)
-        }
+        assertThat(response.status).isEqualTo(HttpStatusCode.OK)
+        assertThat(response.parseBody<LinkDto>()).isEqualTo(linkResponse)
     }
 
     @Test
     fun `when fetching a specific link by id that does not exists, we return error`() = withBaseTestApplication(
         AuthenticationInstrumentation()
     ) {
-        coEvery { linkController.getLinkById(any()) } throws Exception()
+        val exception = ErrorNotFound
+        coEvery { linkController.getLinkById(any()) } throws exception
 
-        val exception = assertThrows<Exception>{
-            doCall(HttpMethod.Get, "/links/a63a20c4-14dd-4e11-9e87-5ab361a51f65")
-        }
+        val response = doCall(HttpMethod.Get, "/links/a63a20c4-14dd-4e11-9e87-5ab361a51f65")
 
-        assertThat(exception.message).isEqualTo(null)
+        assertThat(response.status).isEqualTo(exception.statusCode)
+        assertThat(response.parseBody<ErrorResponse>()).isEqualTo(exception.toErrorResponse())
     }
     // </editor-fold>
 
@@ -102,26 +98,24 @@ class LinkRoutingTest: BaseRoutingTest() {
         coEvery { linkController.postLink(any()) } returns linkResponse
 
         val body = toJsonBody(givenAValidInsertLink())
-        val call = doCall(HttpMethod.Post, "/links", body)
+        val response = doCall(HttpMethod.Post, "/links", body)
 
-        call.also {
-            assertThat(HttpStatusCode.Created).isEqualTo(it.response.status())
-            val responseBody = it.response.parseBody(LinkDto::class.java)
-            assertThat(linkResponse).isEqualTo(responseBody)
-        }
+        assertThat(response.status).isEqualTo(HttpStatusCode.Created)
+        assertThat(response.parseBody<LinkDto>()).isEqualTo(linkResponse)
     }
 
     @Test
     fun `when creating link already created, we return 409 error`() = withBaseTestApplication(
         AuthenticationInstrumentation()
     ) {
-        coEvery { linkController.postLink(any()) } throws ErrorDuplicateEntity
+        val exception = ErrorDuplicateEntity
+        coEvery { linkController.postLink(any()) } throws exception
 
         val body = toJsonBody(givenAValidInsertLink())
-        val exception = assertThrows<ErrorDuplicateEntity> {
-            doCall(HttpMethod.Post, "/links", body)
-        }
-        assertThat(exception.message).isEqualTo(null)
+        val response = doCall(HttpMethod.Post, "/links", body)
+
+        assertThat(response.status).isEqualTo(exception.statusCode)
+        assertThat(response.parseBody<ErrorResponse>()).isEqualTo(exception.toErrorResponse())
     }
     // </editor-fold>
 
@@ -134,26 +128,24 @@ class LinkRoutingTest: BaseRoutingTest() {
         coEvery { linkController.updateLinkById(any(), any()) } returns linkResponse
 
         val body = toJsonBody(givenAValidUpdateLinkBody())
-        val call = doCall(HttpMethod.Put, "/links/a63a20c4-14dd-4e11-9e87-5ab361a51f65", body)
+        val response = doCall(HttpMethod.Put, "/links/a63a20c4-14dd-4e11-9e87-5ab361a51f65", body)
 
-        call.also {
-            assertThat(HttpStatusCode.OK).isEqualTo(it.response.status())
-            val responseBody = it.response.parseBody(LinkDto::class.java)
-            assertThat(linkResponse).isEqualTo(responseBody)
-        }
+        assertThat(response.status).isEqualTo(HttpStatusCode.OK)
+        assertThat(response.parseBody<LinkDto>()).isEqualTo(linkResponse)
     }
 
     @Test
     fun `when updating link with wrong linkId, we return error`() = withBaseTestApplication(
         AuthenticationInstrumentation()
     ) {
-        coEvery { linkController.updateLinkById(any(), any()) } throws Exception()
+        val exception = ErrorNotFound
+        coEvery { linkController.updateLinkById(any(), any()) } throws exception
 
         val body = toJsonBody(givenAValidUpdateLinkBody())
-        val exception = assertThrows<Exception> {
-            doCall(HttpMethod.Put, "/links/a63a20c4-14dd-4e11-9e87-5ab361a51f65", body)
-        }
-        assertThat(exception.message).isEqualTo(null)
+        val response = doCall(HttpMethod.Put, "/links/a63a20c4-14dd-4e11-9e87-5ab361a51f65", body)
+
+        assertThat(response.status).isEqualTo(exception.statusCode)
+        assertThat(response.parseBody<ErrorResponse>()).isEqualTo(exception.toErrorResponse())
     }
     // </editor-fold>
 
@@ -164,23 +156,22 @@ class LinkRoutingTest: BaseRoutingTest() {
     ) {
         coEvery { linkController.deleteLinkById(any()) } returns Unit
 
-        val call = doCall(HttpMethod.Delete, "/links/a63a20c4-14dd-4e11-9e87-5ab361a51f65")
+        val response = doCall(HttpMethod.Delete, "/links/a63a20c4-14dd-4e11-9e87-5ab361a51f65")
 
-        call.also {
-            assertThat(HttpStatusCode.OK).isEqualTo(it.response.status())
-        }
+        assertThat(response.status).isEqualTo(HttpStatusCode.OK)
     }
 
     @Test
     fun `when deleting link with wrong linkId, we return error`() = withBaseTestApplication(
         AuthenticationInstrumentation()
     ) {
-        coEvery { linkController.deleteLinkById(any()) } throws Exception()
+        val exception = ErrorFailedDelete
+        coEvery { linkController.deleteLinkById(any()) } throws exception
 
-        val exception = assertThrows<Exception> {
-            doCall(HttpMethod.Delete, "/links/a63a20c4-14dd-4e11-9e87-5ab361a51f65")
-        }
-        assertThat(exception.message).isEqualTo(null)
+        val response = doCall(HttpMethod.Delete, "/links/a63a20c4-14dd-4e11-9e87-5ab361a51f65")
+
+        assertThat(response.status).isEqualTo(exception.statusCode)
+        assertThat(response.parseBody<ErrorResponse>()).isEqualTo(exception.toErrorResponse())
     }
     // </editor-fold>
 }
