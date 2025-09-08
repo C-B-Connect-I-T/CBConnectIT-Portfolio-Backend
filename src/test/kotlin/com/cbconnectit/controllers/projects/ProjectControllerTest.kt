@@ -31,7 +31,6 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import org.junit.jupiter.api.assertDoesNotThrow
 import org.junit.jupiter.api.assertThrows
-import org.koin.dsl.module
 import java.util.*
 import kotlin.test.assertNotNull
 
@@ -41,17 +40,7 @@ class ProjectControllerTest : BaseControllerTest() {
     private val projectDao: IProjectDao = mockk()
     private val tagDao: ITagDao = mockk()
     private val linkDao: ILinkDao = mockk()
-    private val controller: ProjectController by lazy { ProjectControllerImpl() }
-
-    init {
-        startInjection(
-            module {
-                single { projectDao }
-                single { tagDao }
-                single { linkDao }
-            }
-        )
-    }
+    private val controller: ProjectController by lazy { ProjectControllerImpl(projectDao, tagDao, linkDao) }
 
     @BeforeEach
     override fun before() {

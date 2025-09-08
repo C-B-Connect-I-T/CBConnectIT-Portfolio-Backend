@@ -12,14 +12,13 @@ import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
 import org.jetbrains.exposed.sql.deleteWhere
 import org.jetbrains.exposed.sql.insertAndGetId
 import org.jetbrains.exposed.sql.javatime.CurrentDateTime
-import org.jetbrains.exposed.sql.select
 import org.jetbrains.exposed.sql.selectAll
 import org.jetbrains.exposed.sql.update
 import java.util.*
 
 class LinkDaoImpl : ILinkDao {
     override fun getLinkById(id: UUID): Link? =
-        LinksTable.select { LinksTable.id eq id }.toLink()
+        LinksTable.selectAll().where { LinksTable.id eq id }.toLink()
 
     override fun getLinks(): List<Link> =
         LinksTable.selectAll().toLinks()
@@ -47,5 +46,5 @@ class LinkDaoImpl : ILinkDao {
     override fun deleteLink(id: UUID): Boolean = LinksTable.deleteWhere { LinksTable.id eq id } > 0
 
     override fun getListOfExistingLinkIds(linkIds: List<UUID>): List<UUID> =
-        LinksTable.select { LinksTable.id inList linkIds }.map { it[LinksTable.id].value }
+        LinksTable.selectAll().where { LinksTable.id inList linkIds }.map { it[LinksTable.id].value }
 }

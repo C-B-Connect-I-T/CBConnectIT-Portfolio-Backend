@@ -22,7 +22,6 @@ import org.jetbrains.exposed.sql.and
 import org.jetbrains.exposed.sql.deleteWhere
 import org.jetbrains.exposed.sql.insert
 import org.jetbrains.exposed.sql.insertAndGetId
-import org.jetbrains.exposed.sql.select
 import org.jetbrains.exposed.sql.selectAll
 import org.jetbrains.exposed.sql.update
 import java.time.LocalDateTime
@@ -32,7 +31,7 @@ class ProjectDaoImpl : IProjectDao {
     override fun getProjectById(id: UUID): Project? {
         val projectWithRelations = (ProjectsTable leftJoin TagsProjectsPivotTable leftJoin TagsTable leftJoin LinksProjectsPivotTable leftJoin LinksTable)
 
-        val results = projectWithRelations.select { ProjectsTable.id eq id }
+        val results = projectWithRelations.selectAll().where { ProjectsTable.id eq id }
             .orderBy(ProjectsTable.createdAt to SortOrder.DESC)
 
         val tags = parseTags(results)

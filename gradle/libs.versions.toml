@@ -1,0 +1,82 @@
+[versions]
+kotlin = "2.2.0" #https://github.com/JetBrains/kotlin/releases
+ktor = "3.2.0" #https://ktor.io/docs/releases.html
+logback = "1.5.18" #https://github.com/qos-ch/logback/releases
+exposed = "0.61.0" #https://github.com/JetBrains/Exposed/releases
+#h2 = "2.1.214"
+koin = "4.0.4" #https://insert-koin.io/docs/support/releases
+#commons-codec = "1.15"
+#postgres = "42.5.1"
+detekt = "1.23.8" #https://github.com/detekt/detekt/releases
+assertj = "3.27.3" #https://github.com/assertj/assertj/releases
+junit = "5.13.3" #https://github.com/junit-team/junit-framework/releases
+mockk = "1.14.5" #https://github.com/mockk/mockk/releases
+sqlite = "3.50.2.0" #https://github.com/xerial/sqlite-jdbc/releases
+jbcrypt = "0.4" # TODO--- Very old (last commit was from 2017), consider updating or replacing
+firebase = "9.5.0" #https://firebase.google.com/support/release-notes/admin/java
+slugify = "3.0.6" #https://github.com/slugify/slugify
+
+[plugins]
+kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
+kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
+ktor = { id = "io.ktor.plugin", version.ref = "ktor" }
+detekt = { id = "io.gitlab.arturbosch.detekt", version.ref = "detekt" }
+
+[libraries]
+
+# Ktor
+ktor-server-core = { module = "io.ktor:ktor-server-core-jvm", version.ref = "ktor" }
+ktor-server-content-negotiation = { module = "io.ktor:ktor-server-content-negotiation-jvm", version.ref = "ktor" }
+ktor-server-auth = { module = "io.ktor:ktor-server-auth-jvm", version.ref = "ktor" }
+ktor-server-auth-jwt = { module = "io.ktor:ktor-server-auth-jwt-jvm", version.ref = "ktor" }
+ktor-server-netty = { module = "io.ktor:ktor-server-netty-jvm", version.ref = "ktor" }
+ktor-serialization-gson = { module = "io.ktor:ktor-serialization-gson-jvm", version.ref = "ktor" }
+ktor-server-cors = { module = "io.ktor:ktor-server-cors-jvm", version.ref = "ktor" }
+ktor-server-status-pages = { module = "io.ktor:ktor-server-status-pages-jvm", version.ref = "ktor" }
+ktor-server-call-logging = { module = "io.ktor:ktor-server-call-logging-jvm", version.ref = "ktor" }
+ktor-server-request-validation = { module = "io.ktor:ktor-server-request-validation-jvm", version.ref = "ktor" }
+ktor-server-swagger = { module = "io.ktor:ktor-server-swagger-jvm", version.ref = "ktor" }
+#ktor-server-default-headers = { module = "io.ktor:ktor-server-default-headers-jvm", version.ref = "ktor" }
+#ktor-server-host-common = { module = "io.ktor:ktor-server-host-common-jvm", version.ref = "ktor" }
+#ktor-server-tests = { module = "io.ktor:ktor-server-tests-jvm", version.ref = "ktor" }
+ktor-server-test-host = { module = "io.ktor:ktor-server-test-host", version = "2.2.4" }
+
+# Logging
+logback = { module = "ch.qos.logback:logback-classic", version.ref = "logback" }
+
+# Exposed
+exposed-core = { module = "org.jetbrains.exposed:exposed-core", version.ref = "exposed" }
+exposed-jdbc = { module = "org.jetbrains.exposed:exposed-jdbc", version.ref = "exposed" }
+#exposed-dao = { module = "org.jetbrains.exposed:exposed-dao", version.ref = "exposed" }
+exposed-java-time = { module = "org.jetbrains.exposed:exposed-java-time", version.ref = "exposed" }
+
+# DB
+mysql = { module = "mysql:mysql-connector-java", version = "8.0.33" }
+#postgresql = { module = "org.postgresql:postgresql", version.ref = "postgres" }
+sqlite = { module = "org.xerial:sqlite-jdbc", version.ref = "sqlite" }
+
+# Other libraries
+jbcrypt = { module = "org.mindrot:jbcrypt", version.ref = "jbcrypt" }
+#commons-codec = { module = "commons-codec:commons-codec", version.ref = "commons-codec" }
+
+# Koin
+koin-ktor = { module = "io.insert-koin:koin-ktor", version.ref = "koin" }
+#koin-logger-slf4j = { module = "io.insert-koin:koin-logger-slf4j", version.ref = "koin" }
+koin-test = { module = "io.insert-koin:koin-test", version.ref = "koin" }
+
+# Static analysis
+detekt-formatting = { module = "io.gitlab.arturbosch.detekt:detekt-formatting", version = "1.23.3" }
+
+# Firebase
+firebase-admin = { module = "com.google.firebase:firebase-admin", version.ref = "firebase" }
+
+# Slugify
+slugify = { module = "com.github.slugify:slugify", version.ref = "slugify" }
+
+# Testing
+assertj-core = { module = "org.assertj:assertj-core", version.ref = "assertj" }
+junit-bom = { module = "org.junit:junit-bom", version.ref = "junit" }
+junit-platform-launcher = { module = "org.junit.platform:junit-platform-launcher", version = "1.13.3" }
+junit-jupiter-engine = { module = "org.junit.jupiter:junit-jupiter-engine", version.ref = "junit" }
+
+mockk = { module = "io.mockk:mockk", version.ref = "mockk" }

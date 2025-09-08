@@ -6,7 +6,6 @@ import com.cbconnectit.data.dto.requests.service.UpdateService
 import com.cbconnectit.domain.interfaces.IServiceDao
 import com.cbconnectit.domain.interfaces.ITagDao
 import com.cbconnectit.domain.models.service.toDto
-import com.cbconnectit.modules.BaseController
 import com.cbconnectit.plugins.dbQuery
 import com.cbconnectit.statuspages.ErrorFailedCreate
 import com.cbconnectit.statuspages.ErrorFailedDelete
@@ -17,13 +16,12 @@ import com.cbconnectit.statuspages.ErrorUnknownServiceIdsForCreate
 import com.cbconnectit.statuspages.ErrorUnknownServiceIdsForUpdate
 import com.cbconnectit.statuspages.ErrorUnknownTagIdsForCreate
 import com.cbconnectit.statuspages.ErrorUnknownTagIdsForUpdate
-import org.koin.core.component.inject
 import java.util.*
 
-class ServiceControllerImpl : BaseController(), ServiceController {
-
-    private val serviceDao by inject<IServiceDao>()
-    private val tagDao by inject<ITagDao>()
+class ServiceControllerImpl(
+    private val serviceDao: IServiceDao,
+    private val tagDao: ITagDao
+) : ServiceController {
 
     override suspend fun getServices(): List<ServiceDto> = dbQuery {
         serviceDao.getServices().map { it.toDto() }

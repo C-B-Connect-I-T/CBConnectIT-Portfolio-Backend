@@ -27,7 +27,6 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import org.junit.jupiter.api.assertDoesNotThrow
 import org.junit.jupiter.api.assertThrows
-import org.koin.dsl.module
 import java.util.*
 import kotlin.test.assertNotNull
 
@@ -35,15 +34,7 @@ import kotlin.test.assertNotNull
 class TagControllerTest : BaseControllerTest() {
 
     private val tagDao: ITagDao = mockk()
-    private val controller: TagController by lazy { TagControllerImpl() }
-
-    init {
-        startInjection(
-            module {
-                single { tagDao }
-            }
-        )
-    }
+    private val controller: TagController by lazy { TagControllerImpl(tagDao) }
 
     @BeforeEach
     override fun before() {

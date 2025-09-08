@@ -13,19 +13,19 @@ import org.jetbrains.exposed.sql.deleteWhere
 import org.jetbrains.exposed.sql.insertAndGetId
 import org.jetbrains.exposed.sql.javatime.CurrentDateTime
 import org.jetbrains.exposed.sql.lowerCase
-import org.jetbrains.exposed.sql.select
+import org.jetbrains.exposed.sql.selectAll
 import org.jetbrains.exposed.sql.update
 import java.util.*
 
 class TagDaoImpl : ITagDao {
     override fun getTagById(id: UUID): Tag? =
-        TagsTable.select { TagsTable.id eq id }.toTag()
+        TagsTable.selectAll().where { TagsTable.id eq id }.toTag()
 
     override fun getTagBySlug(slug: String): Tag? =
-        TagsTable.select { TagsTable.slug eq slug }.toTag()
+        TagsTable.selectAll().where { TagsTable.slug eq slug }.toTag()
 
     override fun getTags(query: String): List<Tag> =
-        TagsTable.select {
+        TagsTable.selectAll().where {
             TagsTable.name.lowerCase() like "%${query.lowercase()}%"
         }.toTags()
 
@@ -52,8 +52,8 @@ class TagDaoImpl : ITagDao {
         TagsTable.deleteWhere { TagsTable.id eq id } > 0
 
     override fun tagUnique(name: String): Boolean =
-        TagsTable.select { TagsTable.name eq name }.empty()
+        TagsTable.selectAll().where { TagsTable.name eq name }.empty()
 
     override fun getListOfExistingTagIds(tagIds: List<UUID>): List<UUID> =
-        TagsTable.select { TagsTable.id inList tagIds }.map { it[TagsTable.id].value }
+        TagsTable.selectAll().where { TagsTable.id inList tagIds }.map { it[TagsTable.id].value }
 }

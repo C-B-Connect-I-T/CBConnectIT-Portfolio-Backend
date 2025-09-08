@@ -10,7 +10,7 @@ import com.cbconnectit.domain.models.service.Service
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
 import org.jetbrains.exposed.sql.deleteWhere
 import org.jetbrains.exposed.sql.insertAndGetId
-import org.jetbrains.exposed.sql.select
+import org.jetbrains.exposed.sql.selectAll
 import org.jetbrains.exposed.sql.transactions.transaction
 import org.jetbrains.exposed.sql.update
 import java.time.LocalDateTime
@@ -28,7 +28,7 @@ class ServiceDaoImpl : IServiceDao {
         var service: Service? = null
 
         transaction {
-            service = (ServicesTable leftJoin TagsTable).select { ServicesTable.id eq id }
+            service = (ServicesTable leftJoin TagsTable).selectAll().where { ServicesTable.id eq id }
                 .toService()
 
             val subServices = fetchServicesRecursive(id)
@@ -42,7 +42,7 @@ class ServiceDaoImpl : IServiceDao {
         val subService = mutableListOf<Service>()
 
         transaction {
-            val services = (ServicesTable leftJoin TagsTable).select { ServicesTable.parentServiceId eq parentId }
+            val services = (ServicesTable leftJoin TagsTable).selectAll().where { ServicesTable.parentServiceId eq parentId }
                 .map { it.toService() }
 
             services.forEach { childService ->
@@ -92,5 +92,5 @@ class ServiceDaoImpl : IServiceDao {
         ServicesTable.deleteWhere { ServicesTable.id eq id } > 0
 
     override fun getListOfExistingServiceIds(serviceIds: List<UUID>): List<UUID> =
-        ServicesTable.select { ServicesTable.id inList serviceIds }.map { it[ServicesTable.id].value }
+        ServicesTable.selectAll().where { ServicesTable.id inList serviceIds }.map { it[ServicesTable.id].value }
 }

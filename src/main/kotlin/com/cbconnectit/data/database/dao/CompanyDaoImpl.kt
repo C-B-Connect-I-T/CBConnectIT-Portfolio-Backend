@@ -18,7 +18,6 @@ import org.jetbrains.exposed.sql.deleteWhere
 import org.jetbrains.exposed.sql.insert
 import org.jetbrains.exposed.sql.insertAndGetId
 import org.jetbrains.exposed.sql.javatime.CurrentDateTime
-import org.jetbrains.exposed.sql.select
 import org.jetbrains.exposed.sql.selectAll
 import org.jetbrains.exposed.sql.update
 import java.util.*
@@ -27,7 +26,7 @@ class CompanyDaoImpl : ICompanyDao {
     override fun getCompanyById(id: UUID): Company? {
         val companyWithRelations = (CompaniesTable leftJoin CompaniesLinksPivotTable leftJoin LinksTable)
 
-        val results = companyWithRelations.select { CompaniesTable.id eq id }
+        val results = companyWithRelations.selectAll().where { CompaniesTable.id eq id }
         val links = parseLinks(results)
 
         return results
@@ -106,8 +105,8 @@ class CompanyDaoImpl : ICompanyDao {
     }
 
     override fun companyUnique(name: String): Boolean =
-        CompaniesTable.select { CompaniesTable.name eq name }.empty()
+        CompaniesTable.selectAll().where { CompaniesTable.name eq name }.empty()
 
     override fun getListOfExistingCompanyIds(companyIds: List<UUID>): List<UUID> =
-        CompaniesTable.select { CompaniesTable.id inList companyIds }.map { it[CompaniesTable.id].value }
+        CompaniesTable.selectAll().where { CompaniesTable.id inList companyIds }.map { it[CompaniesTable.id].value }
 }

@@ -10,8 +10,11 @@ import com.cbconnectit.routing.testimonials.TestimonialInstrumentation.givenAVal
 import com.cbconnectit.routing.testimonials.TestimonialInstrumentation.givenAValidUpdateTestimonialBody
 import com.cbconnectit.routing.testimonials.TestimonialInstrumentation.givenTestimonialList
 import com.cbconnectit.statuspages.ErrorDuplicateEntity
+import com.cbconnectit.statuspages.ErrorFailedDelete
+import com.cbconnectit.statuspages.ErrorNotFound
+import com.cbconnectit.statuspages.ErrorResponse
+import com.cbconnectit.statuspages.toErrorResponse
 import io.ktor.http.*
-import io.ktor.server.application.*
 import io.ktor.server.routing.*
 import io.mockk.clearMocks
 import io.mockk.coEvery
@@ -21,11 +24,10 @@ import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
-import org.junit.jupiter.api.assertThrows
 import org.koin.dsl.module
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-class TestimonialRoutingTest: BaseRoutingTest() {
+class TestimonialRoutingTest : BaseRoutingTest() {
 
     private val testimonialController: TestimonialController = mockk()
 
@@ -35,8 +37,8 @@ class TestimonialRoutingTest: BaseRoutingTest() {
             single { testimonialController }
         }
         moduleList = {
-            install(Routing) {
-                testimonialRouting()
+            routing {
+                testimonialRouting(testimonialController)
             }
         }
     }
@@ -53,13 +55,10 @@ class TestimonialRoutingTest: BaseRoutingTest() {
     ) {
         coEvery { testimonialController.getTestimonials() } returns givenTestimonialList()
 
-        val call = doCall(HttpMethod.Get, "/testimonials")
+        val response = doCall(HttpMethod.Get, "/testimonials")
 
-        call.also {
-            assertThat(HttpStatusCode.OK).isEqualTo(it.response.status())
-            val responseBody = it.response.parseBody(List::class.java)
-            assertThat(responseBody).hasSize(4)
-        }
+        assertThat(response.status).isEqualTo(HttpStatusCode.OK)
+        assertThat(response.parseBody<List<*>>()).hasSize(4)
     }
     // </editor-fold>
 
@@ -71,26 +70,23 @@ class TestimonialRoutingTest: BaseRoutingTest() {
         val testimonialResponse = givenATestimonial()
         coEvery { testimonialController.getTestimonialById(any()) } returns testimonialResponse
 
-        val call = doCall(HttpMethod.Get, "/testimonials/a63a20c4-14dd-4e11-9e87-5ab361a51f65")
+        val response = doCall(HttpMethod.Get, "/testimonials/a63a20c4-14dd-4e11-9e87-5ab361a51f65")
 
-        call.also {
-            assertThat(HttpStatusCode.OK).isEqualTo(it.response.status())
-            val responseBody = it.response.parseBody(TestimonialDto::class.java)
-            assertThat(testimonialResponse).isEqualTo(responseBody)
-        }
+        assertThat(response.status).isEqualTo(HttpStatusCode.OK)
+        assertThat(response.parseBody<TestimonialDto>()).isEqualTo(testimonialResponse)
     }
 
     @Test
     fun `when fetching a specific testimonial by id that does not exists, we return error`() = withBaseTestApplication(
         AuthenticationInstrumentation()
     ) {
-        coEvery { testimonialController.getTestimonialById(any()) } throws Exception()
+        val exception = ErrorNotFound
+        coEvery { testimonialController.getTestimonialById(any()) } throws exception
 
-        val exception = assertThrows<Exception>{
-            doCall(HttpMethod.Get, "/testimonials/a63a20c4-14dd-4e11-9e87-5ab361a51f65")
-        }
+        val response = doCall(HttpMethod.Get, "/testimonials/a63a20c4-14dd-4e11-9e87-5ab361a51f65")
 
-        assertThat(exception.message).isEqualTo(null)
+        assertThat(response.status).isEqualTo(exception.statusCode)
+        assertThat(response.parseBody<ErrorResponse>()).isEqualTo(exception.toErrorResponse())
     }
     // </editor-fold>
 
@@ -103,26 +99,24 @@ class TestimonialRoutingTest: BaseRoutingTest() {
         coEvery { testimonialController.postTestimonial(any()) } returns testimonialResponse
 
         val body = toJsonBody(givenAValidInsertTestimonial())
-        val call = doCall(HttpMethod.Post, "/testimonials", body)
+        val response = doCall(HttpMethod.Post, "/testimonials", body)
 
-        call.also {
-            assertThat(HttpStatusCode.Created).isEqualTo(it.response.status())
-            val responseBody = it.response.parseBody(TestimonialDto::class.java)
-            assertThat(testimonialResponse).isEqualTo(responseBody)
-        }
+        assertThat(response.status).isEqualTo(HttpStatusCode.Created)
+        assertThat(response.parseBody<TestimonialDto>()).isEqualTo(testimonialResponse)
     }
 
     @Test
     fun `when creating testimonial already created, we return 409 error`() = withBaseTestApplication(
         AuthenticationInstrumentation()
     ) {
-        coEvery { testimonialController.postTestimonial(any()) } throws ErrorDuplicateEntity
+        val exception = ErrorDuplicateEntity
+        coEvery { testimonialController.postTestimonial(any()) } throws exception
 
         val body = toJsonBody(givenAValidInsertTestimonial())
-        val exception = assertThrows<ErrorDuplicateEntity> {
-            doCall(HttpMethod.Post, "/testimonials", body)
-        }
-        assertThat(exception.message).isEqualTo(null)
+        val response = doCall(HttpMethod.Post, "/testimonials", body)
+
+        assertThat(response.status).isEqualTo(exception.statusCode)
+        assertThat(response.parseBody<ErrorResponse>()).isEqualTo(exception.toErrorResponse())
     }
     // </editor-fold>
 
@@ -135,26 +129,24 @@ class TestimonialRoutingTest: BaseRoutingTest() {
         coEvery { testimonialController.updateTestimonialById(any(), any()) } returns testimonialResponse
 
         val body = toJsonBody(givenAValidUpdateTestimonialBody())
-        val call = doCall(HttpMethod.Put, "/testimonials/a63a20c4-14dd-4e11-9e87-5ab361a51f65", body)
+        val response = doCall(HttpMethod.Put, "/testimonials/a63a20c4-14dd-4e11-9e87-5ab361a51f65", body)
 
-        call.also {
-            assertThat(HttpStatusCode.OK).isEqualTo(it.response.status())
-            val responseBody = it.response.parseBody(TestimonialDto::class.java)
-            assertThat(testimonialResponse).isEqualTo(responseBody)
-        }
+        assertThat(response.status).isEqualTo(HttpStatusCode.OK)
+        assertThat(response.parseBody<TestimonialDto>()).isEqualTo(testimonialResponse)
     }
 
     @Test
     fun `when updating testimonial with wrong testimonialId, we return error`() = withBaseTestApplication(
         AuthenticationInstrumentation()
     ) {
-        coEvery { testimonialController.updateTestimonialById(any(), any()) } throws Exception()
+        val exception = ErrorNotFound
+        coEvery { testimonialController.updateTestimonialById(any(), any()) } throws exception
 
         val body = toJsonBody(givenAValidUpdateTestimonialBody())
-        val exception = assertThrows<Exception> {
-            doCall(HttpMethod.Put, "/testimonials/a63a20c4-14dd-4e11-9e87-5ab361a51f65", body)
-        }
-        assertThat(exception.message).isEqualTo(null)
+        val response = doCall(HttpMethod.Put, "/testimonials/a63a20c4-14dd-4e11-9e87-5ab361a51f65", body)
+
+        assertThat(response.status).isEqualTo(exception.statusCode)
+        assertThat(response.parseBody<ErrorResponse>()).isEqualTo(exception.toErrorResponse())
     }
     // </editor-fold>
 
@@ -165,23 +157,22 @@ class TestimonialRoutingTest: BaseRoutingTest() {
     ) {
         coEvery { testimonialController.deleteTestimonialById(any()) } returns Unit
 
-        val call = doCall(HttpMethod.Delete, "/testimonials/a63a20c4-14dd-4e11-9e87-5ab361a51f65")
+        val response = doCall(HttpMethod.Delete, "/testimonials/a63a20c4-14dd-4e11-9e87-5ab361a51f65")
 
-        call.also {
-            assertThat(HttpStatusCode.OK).isEqualTo(it.response.status())
-        }
+        assertThat(response.status).isEqualTo(HttpStatusCode.OK)
     }
 
     @Test
     fun `when deleting testimonial with wrong testimonialId, we return error`() = withBaseTestApplication(
         AuthenticationInstrumentation()
     ) {
-        coEvery { testimonialController.deleteTestimonialById(any()) } throws Exception()
+        val exception = ErrorFailedDelete
+        coEvery { testimonialController.deleteTestimonialById(any()) } throws exception
 
-        val exception = assertThrows<Exception> {
-            doCall(HttpMethod.Delete, "/testimonials/a63a20c4-14dd-4e11-9e87-5ab361a51f65")
-        }
-        assertThat(exception.message).isEqualTo(null)
+        val response = doCall(HttpMethod.Delete, "/testimonials/a63a20c4-14dd-4e11-9e87-5ab361a51f65")
+
+        assertThat(response.status).isEqualTo(exception.statusCode)
+        assertThat(response.parseBody<ErrorResponse>()).isEqualTo(exception.toErrorResponse())
     }
     // </editor-fold>
 }

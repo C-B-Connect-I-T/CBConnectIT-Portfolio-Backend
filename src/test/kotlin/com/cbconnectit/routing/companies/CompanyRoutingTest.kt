@@ -10,8 +10,11 @@ import com.cbconnectit.routing.companies.CompanyInstrumentation.givenAValidInser
 import com.cbconnectit.routing.companies.CompanyInstrumentation.givenAValidUpdateCompanyBody
 import com.cbconnectit.routing.companies.CompanyInstrumentation.givenCompanyList
 import com.cbconnectit.statuspages.ErrorDuplicateEntity
+import com.cbconnectit.statuspages.ErrorFailedDelete
+import com.cbconnectit.statuspages.ErrorNotFound
+import com.cbconnectit.statuspages.ErrorResponse
+import com.cbconnectit.statuspages.toErrorResponse
 import io.ktor.http.*
-import io.ktor.server.application.*
 import io.ktor.server.routing.*
 import io.mockk.coEvery
 import io.mockk.mockk
@@ -20,7 +23,6 @@ import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
-import org.junit.jupiter.api.assertThrows
 import org.koin.dsl.module
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
@@ -34,8 +36,8 @@ class CompanyRoutingTest : BaseRoutingTest() {
             single { companyController }
         }
         moduleList = {
-            install(Routing) {
-                companyRouting()
+            routing {
+                companyRouting(companyController)
             }
         }
     }
@@ -52,13 +54,10 @@ class CompanyRoutingTest : BaseRoutingTest() {
     ) {
         coEvery { companyController.getCompanies() } returns givenCompanyList()
 
-        val call = doCall(HttpMethod.Get, "/companies")
+        val response = doCall(HttpMethod.Get, "/companies")
 
-        call.also {
-            assertThat(HttpStatusCode.OK).isEqualTo(it.response.status())
-            val responseBody = it.response.parseBody(List::class.java)
-            assertThat(responseBody).hasSize(4)
-        }
+        assertThat(response.status).isEqualTo(HttpStatusCode.OK)
+        assertThat(response.parseBody<List<*>>()).hasSize(4)
     }
     // </editor-fold>
 
@@ -70,26 +69,23 @@ class CompanyRoutingTest : BaseRoutingTest() {
         val companyResponse = givenACompany()
         coEvery { companyController.getCompanyById(any()) } returns companyResponse
 
-        val call = doCall(HttpMethod.Get, "/companies/a63a20c4-14dd-4e11-9e87-5ab361a51f65")
+        val response = doCall(HttpMethod.Get, "/companies/a63a20c4-14dd-4e11-9e87-5ab361a51f65")
 
-        call.also {
-            assertThat(HttpStatusCode.OK).isEqualTo(it.response.status())
-            val responseBody = it.response.parseBody(CompanyDto::class.java)
-            assertThat(companyResponse).isEqualTo(responseBody)
-        }
+        assertThat(response.status).isEqualTo(HttpStatusCode.OK)
+        assertThat(response.parseBody<CompanyDto>()).isEqualTo(companyResponse)
     }
 
     @Test
     fun `when fetching a specific company by id that does not exists, we return error`() = withBaseTestApplication(
         AuthenticationInstrumentation()
     ) {
-        coEvery { companyController.getCompanyById(any()) } throws Exception()
+        val exception = ErrorNotFound
+        coEvery { companyController.getCompanyById(any()) } throws exception
 
-        val exception = assertThrows<Exception> {
-            doCall(HttpMethod.Get, "/companies/a63a20c4-14dd-4e11-9e87-5ab361a51f65")
-        }
+        val response = doCall(HttpMethod.Get, "/companies/a63a20c4-14dd-4e11-9e87-5ab361a51f65")
 
-        assertThat(exception.message).isEqualTo(null)
+        assertThat(response.status).isEqualTo(exception.statusCode)
+        assertThat(response.parseBody<ErrorResponse>()).isEqualTo(exception.toErrorResponse())
     }
     // </editor-fold>
 
@@ -102,26 +98,24 @@ class CompanyRoutingTest : BaseRoutingTest() {
         coEvery { companyController.postCompany(any()) } returns companyResponse
 
         val body = toJsonBody(givenAValidInsertCompany())
-        val call = doCall(HttpMethod.Post, "/companies", body)
+        val response = doCall(HttpMethod.Post, "/companies", body)
 
-        call.also {
-            assertThat(HttpStatusCode.Created).isEqualTo(it.response.status())
-            val responseBody = it.response.parseBody(CompanyDto::class.java)
-            assertThat(companyResponse).isEqualTo(responseBody)
-        }
+        assertThat(response.status).isEqualTo(HttpStatusCode.Created)
+        assertThat(response.parseBody<CompanyDto>()).isEqualTo(companyResponse)
     }
 
     @Test
     fun `when creating company already created, we return 409 error`() = withBaseTestApplication(
         AuthenticationInstrumentation()
     ) {
-        coEvery { companyController.postCompany(any()) } throws ErrorDuplicateEntity
+        val exception = ErrorDuplicateEntity
+        coEvery { companyController.postCompany(any()) } throws exception
 
         val body = toJsonBody(givenAValidInsertCompany())
-        val exception = assertThrows<ErrorDuplicateEntity> {
-            doCall(HttpMethod.Post, "/companies", body)
-        }
-        assertThat(exception.message).isEqualTo(null)
+        val response = doCall(HttpMethod.Post, "/companies", body)
+
+        assertThat(response.status).isEqualTo(exception.statusCode)
+        assertThat(response.parseBody<ErrorResponse>()).isEqualTo(exception.toErrorResponse())
     }
     // </editor-fold>
 
@@ -134,26 +128,24 @@ class CompanyRoutingTest : BaseRoutingTest() {
         coEvery { companyController.updateCompanyById(any(), any()) } returns companyResponse
 
         val body = toJsonBody(givenAValidUpdateCompanyBody())
-        val call = doCall(HttpMethod.Put, "/companies/a63a20c4-14dd-4e11-9e87-5ab361a51f65", body)
+        val response = doCall(HttpMethod.Put, "/companies/a63a20c4-14dd-4e11-9e87-5ab361a51f65", body)
 
-        call.also {
-            assertThat(HttpStatusCode.OK).isEqualTo(it.response.status())
-            val responseBody = it.response.parseBody(CompanyDto::class.java)
-            assertThat(companyResponse).isEqualTo(responseBody)
-        }
+        assertThat(response.status).isEqualTo(HttpStatusCode.OK)
+        assertThat(response.parseBody<CompanyDto>()).isEqualTo(companyResponse)
     }
 
     @Test
     fun `when updating company with wrong companyId, we return error`() = withBaseTestApplication(
         AuthenticationInstrumentation()
     ) {
-        coEvery { companyController.updateCompanyById(any(), any()) } throws Exception()
+        val exception = ErrorNotFound
+        coEvery { companyController.updateCompanyById(any(), any()) } throws exception
 
         val body = toJsonBody(givenAValidUpdateCompanyBody())
-        val exception = assertThrows<Exception> {
-            doCall(HttpMethod.Put, "/companies/a63a20c4-14dd-4e11-9e87-5ab361a51f65", body)
-        }
-        assertThat(exception.message).isEqualTo(null)
+        val response = doCall(HttpMethod.Put, "/companies/a63a20c4-14dd-4e11-9e87-5ab361a51f65", body)
+
+        assertThat(response.status).isEqualTo(exception.statusCode)
+        assertThat(response.parseBody<ErrorResponse>()).isEqualTo(exception.toErrorResponse())
     }
     // </editor-fold>
 
@@ -164,23 +156,22 @@ class CompanyRoutingTest : BaseRoutingTest() {
     ) {
         coEvery { companyController.deleteCompanyById(any()) } returns Unit
 
-        val call = doCall(HttpMethod.Delete, "/companies/a63a20c4-14dd-4e11-9e87-5ab361a51f65")
+        val response = doCall(HttpMethod.Delete, "/companies/a63a20c4-14dd-4e11-9e87-5ab361a51f65")
 
-        call.also {
-            assertThat(HttpStatusCode.OK).isEqualTo(it.response.status())
-        }
+        assertThat(response.status).isEqualTo(HttpStatusCode.OK)
     }
 
     @Test
     fun `when deleting company with wrong companyId, we return error`() = withBaseTestApplication(
         AuthenticationInstrumentation()
     ) {
-        coEvery { companyController.deleteCompanyById(any()) } throws Exception()
+        val exception = ErrorFailedDelete
+        coEvery { companyController.deleteCompanyById(any()) } throws exception
 
-        val exception = assertThrows<Exception> {
-            doCall(HttpMethod.Delete, "/companies/a63a20c4-14dd-4e11-9e87-5ab361a51f65")
-        }
-        assertThat(exception.message).isEqualTo(null)
+        val response = doCall(HttpMethod.Delete, "/companies/a63a20c4-14dd-4e11-9e87-5ab361a51f65")
+
+        assertThat(response.status).isEqualTo(exception.statusCode)
+        assertThat(response.parseBody<ErrorResponse>()).isEqualTo(exception.toErrorResponse())
     }
     // </editor-fold>
 }

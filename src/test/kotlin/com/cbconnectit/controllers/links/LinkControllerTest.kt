@@ -25,7 +25,6 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import org.junit.jupiter.api.assertDoesNotThrow
 import org.junit.jupiter.api.assertThrows
-import org.koin.dsl.module
 import java.util.*
 import kotlin.test.assertNotNull
 
@@ -33,15 +32,7 @@ import kotlin.test.assertNotNull
 class LinkControllerTest : BaseControllerTest() {
 
     private val linkDao: ILinkDao = mockk()
-    private val controller: LinkController by lazy { LinkControllerImpl() }
-
-    init {
-        startInjection(
-            module {
-                single { linkDao }
-            }
-        )
-    }
+    private val controller: LinkController by lazy { LinkControllerImpl(linkDao) }
 
     @BeforeEach
     override fun before() {

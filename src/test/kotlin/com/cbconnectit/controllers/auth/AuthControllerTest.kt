@@ -23,7 +23,6 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import org.junit.jupiter.api.assertThrows
-import org.koin.dsl.module
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class AuthControllerTest : BaseControllerTest() {
@@ -31,17 +30,7 @@ class AuthControllerTest : BaseControllerTest() {
     private val userDao: IUserDao = mockk()
     private val tokenProvider: TokenProvider = mockk()
     private val passwordEncryption: PasswordManagerContract = mockk()
-    private val controller: AuthController by lazy { AuthControllerImpl() }
-
-    init {
-        startInjection(
-            module {
-                single { userDao }
-                single { tokenProvider }
-                single { passwordEncryption }
-            }
-        )
-    }
+    private val controller: AuthController by lazy { AuthControllerImpl(userDao, tokenProvider, passwordEncryption) }
 
     @BeforeEach
     override fun before() {

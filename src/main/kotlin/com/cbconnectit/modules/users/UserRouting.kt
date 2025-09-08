@@ -11,16 +11,12 @@ import com.cbconnectit.utils.getUserId
 import com.cbconnectit.utils.receiveOrRespondWithError
 import com.cbconnectit.utils.sendOk
 import io.ktor.http.*
-import io.ktor.server.application.*
 import io.ktor.server.auth.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
-import org.koin.ktor.ext.inject
 
 // TODO: use DTO for outgoing data, todo everywhere!!!
-fun Route.userRouting() {
-
-    val userController by inject<UserController>()
+fun Route.userRouting(userController: UserController) {
 
     route("users") {
         authenticate {

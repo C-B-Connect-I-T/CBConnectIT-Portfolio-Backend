@@ -32,7 +32,6 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import org.junit.jupiter.api.assertDoesNotThrow
 import org.junit.jupiter.api.assertThrows
-import org.koin.dsl.module
 import java.util.*
 import kotlin.test.assertNotNull
 
@@ -41,16 +40,7 @@ class ServiceControllerTest : BaseControllerTest() {
 
     private val serviceDao: IServiceDao = mockk()
     private val tagDao: ITagDao = mockk()
-    private val controller: ServiceController by lazy { ServiceControllerImpl() }
-
-    init {
-        startInjection(
-            module {
-                single { serviceDao }
-                single { tagDao }
-            }
-        )
-    }
+    private val controller: ServiceController by lazy { ServiceControllerImpl(serviceDao, tagDao) }
 
     @BeforeEach
     override fun before() {

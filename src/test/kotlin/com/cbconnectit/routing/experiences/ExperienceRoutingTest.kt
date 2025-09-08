@@ -10,8 +10,11 @@ import com.cbconnectit.routing.experiences.ExperienceInstrumentation.givenAValid
 import com.cbconnectit.routing.experiences.ExperienceInstrumentation.givenAValidUpdateExperienceBody
 import com.cbconnectit.routing.experiences.ExperienceInstrumentation.givenExperienceList
 import com.cbconnectit.statuspages.ErrorDuplicateEntity
+import com.cbconnectit.statuspages.ErrorFailedDelete
+import com.cbconnectit.statuspages.ErrorNotFound
+import com.cbconnectit.statuspages.ErrorResponse
+import com.cbconnectit.statuspages.toErrorResponse
 import io.ktor.http.*
-import io.ktor.server.application.*
 import io.ktor.server.routing.*
 import io.mockk.clearMocks
 import io.mockk.coEvery
@@ -21,11 +24,10 @@ import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
-import org.junit.jupiter.api.assertThrows
 import org.koin.dsl.module
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-class ExperienceRoutingTest: BaseRoutingTest() {
+class ExperienceRoutingTest : BaseRoutingTest() {
 
     private val experienceController: ExperienceController = mockk()
 
@@ -35,8 +37,8 @@ class ExperienceRoutingTest: BaseRoutingTest() {
             single { experienceController }
         }
         moduleList = {
-            install(Routing) {
-                experienceRouting()
+            routing {
+                experienceRouting(experienceController)
             }
         }
     }
@@ -53,13 +55,10 @@ class ExperienceRoutingTest: BaseRoutingTest() {
     ) {
         coEvery { experienceController.getExperiences() } returns givenExperienceList()
 
-        val call = doCall(HttpMethod.Get, "/experiences")
+        val response = doCall(HttpMethod.Get, "/experiences")
 
-        call.also {
-            assertThat(HttpStatusCode.OK).isEqualTo(it.response.status())
-            val responseBody = it.response.parseBody(List::class.java)
-            assertThat(responseBody).hasSize(4)
-        }
+        assertThat(response.status).isEqualTo(HttpStatusCode.OK)
+        assertThat(response.parseBody<List<*>>()).hasSize(4)
     }
     // </editor-fold>
 
@@ -71,26 +70,23 @@ class ExperienceRoutingTest: BaseRoutingTest() {
         val experienceResponse = givenAExperience()
         coEvery { experienceController.getExperienceById(any()) } returns experienceResponse
 
-        val call = doCall(HttpMethod.Get, "/experiences/a63a20c4-14dd-4e11-9e87-5ab361a51f65")
+        val response = doCall(HttpMethod.Get, "/experiences/a63a20c4-14dd-4e11-9e87-5ab361a51f65")
 
-        call.also {
-            assertThat(HttpStatusCode.OK).isEqualTo(it.response.status())
-            val responseBody = it.response.parseBody(ExperienceDto::class.java)
-            assertThat(experienceResponse).isEqualTo(responseBody)
-        }
+        assertThat(response.status).isEqualTo(HttpStatusCode.OK)
+        assertThat(response.parseBody<ExperienceDto>()).isEqualTo(experienceResponse)
     }
 
     @Test
     fun `when fetching a specific experience by id that does not exists, we return error`() = withBaseTestApplication(
         AuthenticationInstrumentation()
     ) {
-        coEvery { experienceController.getExperienceById(any()) } throws Exception()
+        val exception = ErrorNotFound
+        coEvery { experienceController.getExperienceById(any()) } throws exception
 
-        val exception = assertThrows<Exception>{
-            doCall(HttpMethod.Get, "/experiences/a63a20c4-14dd-4e11-9e87-5ab361a51f65")
-        }
+        val response = doCall(HttpMethod.Get, "/experiences/a63a20c4-14dd-4e11-9e87-5ab361a51f65")
 
-        assertThat(exception.message).isEqualTo(null)
+        assertThat(response.status).isEqualTo(exception.statusCode)
+        assertThat(response.parseBody<ErrorResponse>()).isEqualTo(exception.toErrorResponse())
     }
     // </editor-fold>
 
@@ -103,26 +99,24 @@ class ExperienceRoutingTest: BaseRoutingTest() {
         coEvery { experienceController.postExperience(any()) } returns experienceResponse
 
         val body = toJsonBody(givenAValidInsertExperience())
-        val call = doCall(HttpMethod.Post, "/experiences", body)
+        val response = doCall(HttpMethod.Post, "/experiences", body)
 
-        call.also {
-            assertThat(HttpStatusCode.Created).isEqualTo(it.response.status())
-            val responseBody = it.response.parseBody(ExperienceDto::class.java)
-            assertThat(experienceResponse).isEqualTo(responseBody)
-        }
+        assertThat(response.status).isEqualTo(HttpStatusCode.Created)
+        assertThat(response.parseBody<ExperienceDto>()).isEqualTo(experienceResponse)
     }
 
     @Test
     fun `when creating experience already created, we return 409 error`() = withBaseTestApplication(
         AuthenticationInstrumentation()
     ) {
-        coEvery { experienceController.postExperience(any()) } throws ErrorDuplicateEntity
+        val exception = ErrorDuplicateEntity
+        coEvery { experienceController.postExperience(any()) } throws exception
 
         val body = toJsonBody(givenAValidInsertExperience())
-        val exception = assertThrows<ErrorDuplicateEntity> {
-            doCall(HttpMethod.Post, "/experiences", body)
-        }
-        assertThat(exception.message).isEqualTo(null)
+        val response = doCall(HttpMethod.Post, "/experiences", body)
+
+        assertThat(response.status).isEqualTo(exception.statusCode)
+        assertThat(response.parseBody<ErrorResponse>()).isEqualTo(exception.toErrorResponse())
     }
     // </editor-fold>
 
@@ -135,26 +129,24 @@ class ExperienceRoutingTest: BaseRoutingTest() {
         coEvery { experienceController.updateExperienceById(any(), any()) } returns experienceResponse
 
         val body = toJsonBody(givenAValidUpdateExperienceBody())
-        val call = doCall(HttpMethod.Put, "/experiences/a63a20c4-14dd-4e11-9e87-5ab361a51f65", body)
+        val response = doCall(HttpMethod.Put, "/experiences/a63a20c4-14dd-4e11-9e87-5ab361a51f65", body)
 
-        call.also {
-            assertThat(HttpStatusCode.OK).isEqualTo(it.response.status())
-            val responseBody = it.response.parseBody(ExperienceDto::class.java)
-            assertThat(experienceResponse).isEqualTo(responseBody)
-        }
+        assertThat(response.status).isEqualTo(_root_ide_package_.io.ktor.http.HttpStatusCode.OK)
+        assertThat(response.parseBody<ExperienceDto>()).isEqualTo(experienceResponse)
     }
 
     @Test
     fun `when updating experience with wrong experienceId, we return error`() = withBaseTestApplication(
         AuthenticationInstrumentation()
     ) {
-        coEvery { experienceController.updateExperienceById(any(), any()) } throws Exception()
+        val exception = ErrorNotFound
+        coEvery { experienceController.updateExperienceById(any(), any()) } throws exception
 
         val body = toJsonBody(givenAValidUpdateExperienceBody())
-        val exception = assertThrows<Exception> {
-            doCall(HttpMethod.Put, "/experiences/a63a20c4-14dd-4e11-9e87-5ab361a51f65", body)
-        }
-        assertThat(exception.message).isEqualTo(null)
+        val response = doCall(HttpMethod.Put, "/experiences/a63a20c4-14dd-4e11-9e87-5ab361a51f65", body)
+
+        assertThat(response.status).isEqualTo(exception.statusCode)
+        assertThat(response.parseBody<ErrorResponse>()).isEqualTo(exception.toErrorResponse())
     }
     // </editor-fold>
 
@@ -165,23 +157,22 @@ class ExperienceRoutingTest: BaseRoutingTest() {
     ) {
         coEvery { experienceController.deleteExperienceById(any()) } returns Unit
 
-        val call = doCall(HttpMethod.Delete, "/experiences/a63a20c4-14dd-4e11-9e87-5ab361a51f65")
+        val response = doCall(HttpMethod.Delete, "/experiences/a63a20c4-14dd-4e11-9e87-5ab361a51f65")
 
-        call.also {
-            assertThat(HttpStatusCode.OK).isEqualTo(it.response.status())
-        }
+        assertThat(response.status).isEqualTo(HttpStatusCode.OK)
     }
 
     @Test
     fun `when deleting experience with wrong experienceId, we return error`() = withBaseTestApplication(
         AuthenticationInstrumentation()
     ) {
-        coEvery { experienceController.deleteExperienceById(any()) } throws Exception()
+        val exception = ErrorFailedDelete
+        coEvery { experienceController.deleteExperienceById(any()) } throws exception
 
-        val exception = assertThrows<Exception> {
-            doCall(HttpMethod.Delete, "/experiences/a63a20c4-14dd-4e11-9e87-5ab361a51f65")
-        }
-        assertThat(exception.message).isEqualTo(null)
+        val response = doCall(HttpMethod.Delete, "/experiences/a63a20c4-14dd-4e11-9e87-5ab361a51f65")
+
+        assertThat(response.status).isEqualTo(exception.statusCode)
+        assertThat(response.parseBody<ErrorResponse>()).isEqualTo(exception.toErrorResponse())
     }
     // </editor-fold>
 }

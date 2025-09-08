@@ -6,7 +6,6 @@ import com.cbconnectit.data.dto.requests.company.UpdateCompany
 import com.cbconnectit.domain.interfaces.ICompanyDao
 import com.cbconnectit.domain.interfaces.ILinkDao
 import com.cbconnectit.domain.models.company.toDto
-import com.cbconnectit.modules.BaseController
 import com.cbconnectit.plugins.dbQuery
 import com.cbconnectit.statuspages.ErrorDuplicateEntity
 import com.cbconnectit.statuspages.ErrorFailedCreate
@@ -16,13 +15,12 @@ import com.cbconnectit.statuspages.ErrorInvalidParameters
 import com.cbconnectit.statuspages.ErrorNotFound
 import com.cbconnectit.statuspages.ErrorUnknownLinkIdsForCreateCompany
 import com.cbconnectit.statuspages.ErrorUnknownLinkIdsForUpdateCompany
-import org.koin.core.component.inject
 import java.util.*
 
-class CompanyControllerImpl : BaseController(), CompanyController {
-
-    private val companyDao by inject<ICompanyDao>()
-    private val linkDao by inject<ILinkDao>()
+class CompanyControllerImpl(
+    private val companyDao: ICompanyDao,
+    private val linkDao: ILinkDao,
+) : CompanyController {
 
     override suspend fun getCompanies(): List<CompanyDto> = dbQuery {
         companyDao.getCompanies().map { it.toDto() }

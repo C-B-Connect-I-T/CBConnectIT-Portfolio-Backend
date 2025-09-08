@@ -7,7 +7,6 @@ import com.cbconnectit.domain.interfaces.ICompanyDao
 import com.cbconnectit.domain.interfaces.IJobPositionDao
 import com.cbconnectit.domain.interfaces.ITestimonialDao
 import com.cbconnectit.domain.models.testimonial.toDto
-import com.cbconnectit.modules.BaseController
 import com.cbconnectit.plugins.dbQuery
 import com.cbconnectit.statuspages.ErrorFailedCreate
 import com.cbconnectit.statuspages.ErrorFailedDelete
@@ -18,14 +17,13 @@ import com.cbconnectit.statuspages.ErrorUnknownCompanyIdsForCreateTestimonial
 import com.cbconnectit.statuspages.ErrorUnknownCompanyIdsForUpdateTestimonial
 import com.cbconnectit.statuspages.ErrorUnknownJobPositionIdsForCreateTestimonial
 import com.cbconnectit.statuspages.ErrorUnknownJobPositionIdsForUpdateTestimonial
-import org.koin.core.component.inject
 import java.util.*
 
-class TestimonialControllerImpl : BaseController(), TestimonialController {
-
-    private val testimonialDao by inject<ITestimonialDao>()
-    private val companyDao by inject<ICompanyDao>()
-    private val jobPositionDao by inject<IJobPositionDao>()
+class TestimonialControllerImpl(
+    private val testimonialDao: ITestimonialDao,
+    private val companyDao: ICompanyDao,
+    private val jobPositionDao: IJobPositionDao
+) : TestimonialController {
 
     override suspend fun getTestimonials(): List<TestimonialDto> = dbQuery {
         testimonialDao.getTestimonials().map { it.toDto() }

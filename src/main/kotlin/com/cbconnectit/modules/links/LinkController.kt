@@ -6,7 +6,6 @@ import com.cbconnectit.data.dto.requests.link.UpdateLink
 import com.cbconnectit.domain.interfaces.ILinkDao
 import com.cbconnectit.domain.models.link.LinkType
 import com.cbconnectit.domain.models.link.toDto
-import com.cbconnectit.modules.BaseController
 import com.cbconnectit.plugins.dbQuery
 import com.cbconnectit.statuspages.ErrorFailedCreate
 import com.cbconnectit.statuspages.ErrorFailedDelete
@@ -14,12 +13,11 @@ import com.cbconnectit.statuspages.ErrorFailedUpdate
 import com.cbconnectit.statuspages.ErrorInvalidParameters
 import com.cbconnectit.statuspages.ErrorNotFound
 import io.ktor.http.*
-import org.koin.core.component.inject
 import java.util.*
 
-class LinkControllerImpl : BaseController(), LinkController {
-
-    private val linkDao by inject<ILinkDao>()
+class LinkControllerImpl(
+    private val linkDao: ILinkDao
+) : LinkController {
 
     override suspend fun getLinks(): List<LinkDto> = dbQuery {
         linkDao.getLinks().map { it.toDto() }

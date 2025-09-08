@@ -26,7 +26,6 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import org.junit.jupiter.api.assertDoesNotThrow
 import org.junit.jupiter.api.assertThrows
-import org.koin.dsl.module
 import java.util.*
 import kotlin.test.assertNotNull
 
@@ -34,15 +33,7 @@ import kotlin.test.assertNotNull
 class JobPositionControllerTest : BaseControllerTest() {
 
     private val jobPositionDao: IJobPositionDao = mockk()
-    private val controller: JobPositionController by lazy { JobPositionControllerImpl() }
-
-    init {
-        startInjection(
-            module {
-                single { jobPositionDao }
-            }
-        )
-    }
+    private val controller: JobPositionController by lazy { JobPositionControllerImpl(jobPositionDao) }
 
     @BeforeEach
     override fun before() {

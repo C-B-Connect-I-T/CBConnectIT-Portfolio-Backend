@@ -10,7 +10,7 @@ import io.ktor.server.application.*
 import io.ktor.server.auth.*
 import io.ktor.server.request.*
 import io.ktor.server.response.*
-import io.ktor.util.pipeline.*
+import io.ktor.server.routing.*
 import java.net.URL
 import java.util.*
 
@@ -40,7 +40,7 @@ fun ApplicationCall.getProjectId(): UUID = parameters[ParamConstants.PROJECT_ID_
 fun ApplicationCall.getTagIdentifier(): String = parameters[ParamConstants.TAG_IDENTIFIER_KEY] ?: throw ErrorInvalidParameters
 // fun ApplicationCall.getProjectId(): UUID = parameters[ParamConstants.PROJECT_ID_KEY]?.toIntOrNull() ?: throw ErrorInvalidUUID
 
-suspend fun PipelineContext<Unit, ApplicationCall>.sendOk() {
+suspend fun RoutingContext.sendOk() {
     call.respond(HttpStatusCode.OK)
 }
 

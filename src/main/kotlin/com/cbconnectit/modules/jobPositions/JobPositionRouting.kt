@@ -7,15 +7,11 @@ import com.cbconnectit.utils.getJobPositionId
 import com.cbconnectit.utils.receiveOrRespondWithError
 import com.cbconnectit.utils.sendOk
 import io.ktor.http.*
-import io.ktor.server.application.*
 import io.ktor.server.auth.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
-import org.koin.ktor.ext.inject
 
-fun Route.jobPositionRouting() {
-
-    val jobPositionController by inject<JobPositionController>()
+fun Route.jobPositionRouting(jobPositionController: JobPositionController) {
 
     route("job_positions") {
         get {

@@ -16,7 +16,6 @@ import org.jetbrains.exposed.sql.Query
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
 import org.jetbrains.exposed.sql.deleteWhere
 import org.jetbrains.exposed.sql.insertAndGetId
-import org.jetbrains.exposed.sql.select
 import org.jetbrains.exposed.sql.selectAll
 import org.jetbrains.exposed.sql.update
 import java.time.LocalDateTime
@@ -28,7 +27,7 @@ class TestimonialDaoImpl : ITestimonialDao {
 
         val testimonialWithRelations = TestimonialsTable leftJoin JobPositionsTable leftJoin CompaniesTable leftJoin CompaniesLinksPivotTable leftJoin LinksTable
 
-        val results = testimonialWithRelations.select { TestimonialsTable.id eq id }
+        val results = testimonialWithRelations.selectAll().where { TestimonialsTable.id eq id }
         val links = parseLinks(results)
 
         return results
