@@ -5,16 +5,13 @@ import com.cbconnectit.data.database.tables.LinksTable
 import com.cbconnectit.data.database.tables.ProjectsTable
 import com.cbconnectit.data.database.tables.TagsProjectsPivotTable
 import com.cbconnectit.data.database.tables.TagsTable
-import com.cbconnectit.data.database.tables.parseLinks
-import com.cbconnectit.data.database.tables.parseTags
+import com.cbconnectit.data.database.tables.toLink
 import com.cbconnectit.data.database.tables.toProject
+import com.cbconnectit.data.database.tables.toTag
 import com.cbconnectit.data.dto.requests.project.InsertNewProject
 import com.cbconnectit.data.dto.requests.project.UpdateProject
 import com.cbconnectit.domain.interfaces.IProjectDao
-import com.cbconnectit.domain.models.link.Link
 import com.cbconnectit.domain.models.project.Project
-import com.cbconnectit.domain.models.tag.Tag
-import org.jetbrains.exposed.sql.Query
 import org.jetbrains.exposed.sql.SortOrder
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.notInList
@@ -29,55 +26,64 @@ import java.util.*
 
 class ProjectDaoImpl : IProjectDao {
     override fun getProjectById(id: UUID): Project? {
-        val projectWithRelations = (ProjectsTable leftJoin TagsProjectsPivotTable leftJoin TagsTable leftJoin LinksProjectsPivotTable leftJoin LinksTable)
-
-        val results = projectWithRelations.selectAll().where { ProjectsTable.id eq id }
+        val results = ProjectsTable
+            .selectAll()
+            .where { ProjectsTable.id eq id }
             .orderBy(ProjectsTable.createdAt to SortOrder.DESC)
-
-        val tags = parseTags(results)
-        val links = parseLinks(results)
-
-        return results
-            .distinctBy { it[ProjectsTable.id].value }
-            .map { row ->
-                row.toProject().copy(
-                    tags = tags[id]?.distinctBy { it.id } ?: emptyList(),
-                    links = links[id]?.distinctBy { it.id } ?: emptyList()
-                )
-            }
+            .toList()
             .firstOrNull()
+
+        if (results == null) return null
+
+        val projectIds = results[ProjectsTable.id].value
+
+        val tags = TagsProjectsPivotTable.innerJoin(TagsTable)
+            .selectAll()
+            .where { TagsProjectsPivotTable.projectId eq projectIds }
+            .groupBy { it[TagsProjectsPivotTable.projectId].value }
+
+        val links = LinksProjectsPivotTable.innerJoin(LinksTable)
+            .selectAll()
+            .where { LinksProjectsPivotTable.projectId eq projectIds }
+            .groupBy { it[LinksProjectsPivotTable.projectId].value }
+
+        return results.toProject().copy(
+            tags = tags[id]?.map { it.toTag() } ?: emptyList(),
+            links = links[id]?.map { it.toLink() } ?: emptyList()
+        )
     }
 
     override fun getProjects(): List<Project> {
-        val projectWithRelations = (ProjectsTable leftJoin TagsProjectsPivotTable leftJoin TagsTable leftJoin LinksProjectsPivotTable leftJoin LinksTable)
-
-        val results = projectWithRelations.selectAll()
+        // Don't join all tables at once to avoid row multiplication
+        // e.g. if a project has 3 tags and 2 links, joining all tables would produce 6 rows for that project
+        // instead, fetch projects first, then fetch tags and links separately and map them back to projects
+        val results = ProjectsTable
+            .selectAll()
             .orderBy(ProjectsTable.updatedAt to SortOrder.DESC)
+            .toList()
 
-        val tags = parseTags(results)
-        val links = parseLinks(results)
+        val projectIds = results.map { it[ProjectsTable.id].value }
+
+        // Fetch tags and links in bulk to avoid N+1 query problem
+        val tags = TagsProjectsPivotTable.innerJoin(TagsTable)
+            .selectAll()
+            .where { TagsProjectsPivotTable.projectId inList projectIds }
+            .groupBy { it[TagsProjectsPivotTable.projectId].value }
+
+        val links = LinksProjectsPivotTable.innerJoin(LinksTable)
+            .selectAll()
+            .where { LinksProjectsPivotTable.projectId inList projectIds }
+            .groupBy { it[LinksProjectsPivotTable.projectId].value }
 
         return results
             .distinctBy { it[ProjectsTable.id].value }
             .map { row ->
                 val id = row[ProjectsTable.id].value
                 row.toProject().copy(
-                    tags = tags[id]?.distinctBy { it.id } ?: emptyList(),
-                    links = links[id]?.distinctBy { it.id } ?: emptyList()
+                    tags = tags[id]?.map { it.toTag() } ?: emptyList(),
+                    links = links[id]?.map { it.toLink() } ?: emptyList()
                 )
             }
-    }
-
-    private fun parseTags(results: Query): MutableMap<UUID, List<Tag>> {
-        return parseTags(results) {
-            it[ProjectsTable.id].value
-        }
-    }
-
-    private fun parseLinks(results: Query): MutableMap<UUID, List<Link>> {
-        return parseLinks(results) {
-            it[ProjectsTable.id].value
-        }
     }
 
     override fun insertProject(insertNewProject: InsertNewProject): Project? {

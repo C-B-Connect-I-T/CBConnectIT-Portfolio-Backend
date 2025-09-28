@@ -6,4 +6,9 @@ import org.jetbrains.exposed.sql.Table
 object TagsProjectsPivotTable: Table() {
     val tagId = reference("tag_id", TagsTable, ReferenceOption.CASCADE)
     val projectId = reference("project_id", ProjectsTable, ReferenceOption.CASCADE)
+
+    init {
+        // Only a single pair can exist, duplicates are not allowed/necessary
+        uniqueIndex(projectId, tagId)
+    }
 }
