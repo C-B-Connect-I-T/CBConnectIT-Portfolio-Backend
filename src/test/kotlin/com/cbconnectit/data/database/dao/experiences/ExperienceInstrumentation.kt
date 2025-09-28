@@ -33,7 +33,7 @@ object ExperienceInstrumentation {
         to = LocalDateTime.now().toDatabaseString(),
         jobPositionId = "00000000-0000-0000-0000-000000000001",
         companyId = "00000000-0000-0000-0000-000000000001",
-        tags = listOf("00000000-0000-0000-0000-000000000002")
+        tags = listOf("00000000-0000-0000-0000-000000000003")
     )
 
     fun givenAnEmptyUpdateExperienceBody() = UpdateExperience(
