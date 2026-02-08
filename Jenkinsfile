@@ -1,18 +1,21 @@
-// TODO: remove the secret and environment variables from this file and use .env files. Also expose the .env files to docker
-
 pipeline {
     agent any
 
     environment {
-        IMAGE_NAME = "portfolio-backend"
+        PROJECT_NAME = "portfolio-backend"
+        DOCKER_NETWORK = "infrastructure_app-network"
     }
 
     stages {
+        stage('Checkout') {
+            steps {
+                checkout scm
+            }
+        }
+
         stage('Determine Environment') {
             steps {
                 script {
-                    sh 'git fetch --tags'
-
                     def tag = sh(script: "git describe --exact-match --tags HEAD || echo ''", returnStdout: true).trim()
                     def branch = env.GIT_BRANCH?.replaceFirst(/^origin\//, '') ?: 'main'
 
@@ -34,6 +37,7 @@ pipeline {
                         }
                     } else if (branch == 'main' || branch == 'master') {
                         environment = 'develop'
+                        version = 'latest'
                     } else {
                         echo "Skipping build: Not a relevant branch or tag"
                         currentBuild.result = 'SUCCESS'
@@ -42,46 +46,121 @@ pipeline {
 
                     env.ENVIRONMENT = environment
                     env.VERSION = version
-                    env.CONTAINER_NAME = "${IMAGE_NAME}-${environment}"
+                    env.CONTAINER_NAME = "${PROJECT_NAME}-${environment}"
 
+                    // Port mapping (adjust per project)
                     def ports = [develop: '2025', staging: '2026', production: '2027']
                     env.EXPOSED_PORT = ports[environment]
 
-                    echo "Version: ${VERSION}"
-                    echo "Exposed port: ${EXPOSED_PORT}"
                     echo "Environment: ${ENVIRONMENT}"
+                    echo "Version: ${VERSION}"
+                    echo "Container: ${CONTAINER_NAME}"
+                    echo "Port: ${EXPOSED_PORT}"
+                }
+            }
+        }
+
+        stage('Run Unit Tests') {
+            steps {
+                script {
+                    sh './gradlew test --no-daemon --stacktrace'
+                }
+            }
+            post {
+                always {
+                    junit '**/build/test-results/test/*.xml'
+                }
+            }
+        }
+
+        stage('Run Detekt Analysis') {
+            steps {
+                script {
+                    sh './gradlew detekt --no-daemon'
+                }
+            }
+            post {
+                always {
+                    recordIssues(
+                        tools: [detekt(pattern: '**/build/reports/detekt/detekt.xml')]
+                    )
                 }
             }
         }
 
         stage('Build Docker Image') {
             steps {
-                sh "docker build -t ${IMAGE_NAME}-${ENVIRONMENT}:${VERSION} ."
+                script {
+                    // Now build the image with that file present
+                    sh "docker build -t ${PROJECT_NAME}-${ENVIRONMENT}:${VERSION} ."
+
+                    // Tag as latest for the environment
+                    sh "docker tag ${PROJECT_NAME}-${ENVIRONMENT}:${VERSION} ${PROJECT_NAME}-${ENVIRONMENT}:latest"
+                }
             }
         }
 
-        stage('Deploy to Docker') {
+        stage('Stop Old Container') {
             steps {
                 script {
-                    // Match Secret File ID in Jenkins to format: env-file-develop, env-file-staging, env-file-production
+                    sh """
+                        docker stop ${CONTAINER_NAME} || true
+                        docker rm ${CONTAINER_NAME} || true
+                    """
+                }
+            }
+        }
+
+        stage('Deploy Container') {
+            steps {
+                script {
                     def envFileCredentialId = "env-file-${ENVIRONMENT}"
 
                     withCredentials([file(credentialsId: envFileCredentialId, variable: 'ENV_FILE')]) {
                         sh """
-                            docker stop ${CONTAINER_NAME} || true
-                            docker rm ${CONTAINER_NAME} || true
-
                             docker run -d \\
-                              --env-file $ENV_FILE \\
+                              --env-file \$ENV_FILE \\
                               --name ${CONTAINER_NAME} \\
+                              --network ${DOCKER_NETWORK} \\
                               -p ${EXPOSED_PORT}:8080 \\
-                              ${IMAGE_NAME}-${ENVIRONMENT}:${VERSION}
+                              --restart unless-stopped \\
+                              ${PROJECT_NAME}-${ENVIRONMENT}:${VERSION}
                         """
                     }
                 }
             }
         }
+
+        stage('Cleanup Old Images') {
+            steps {
+                script {
+                    // Keep only the last 3 images per environment
+                    sh """
+                        docker images ${PROJECT_NAME}-${ENVIRONMENT} --format '{{.ID}} {{.CreatedAt}}' | \\
+                        sort -k2 -r | \\
+                        tail -n +4 | \\
+                        awk '{print \$1}' | \\
+                        xargs -r docker rmi || true
+                    """
+                }
+            }
+        }
+    }
+
+    post {
+        success {
+            echo "✓ Deployment successful for ${PROJECT_NAME}-${ENVIRONMENT}:${VERSION}"
+            echo "Access at: http://localhost:${EXPOSED_PORT}"
+        }
+        failure {
+            echo "✗ Deployment failed for ${PROJECT_NAME}-${ENVIRONMENT}:${VERSION}"
+            // TODO: Implement rollback logic
+            // sh "docker start ${CONTAINER_NAME}-previous || true"
+        }
+        always {
+            // Clean workspace
+            cleanWs()
+        }
     }
 }
-
 
