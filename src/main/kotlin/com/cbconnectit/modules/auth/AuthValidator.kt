@@ -2,7 +2,7 @@ package com.cbconnectit.modules.auth
 
 import com.auth0.jwt.interfaces.JWTVerifier
 import com.cbconnectit.domain.interfaces.IUserDao
-import com.cbconnectit.plugins.dbQuery
+import com.cbconnectit.plugins.dbTransactionalQuery
 import io.ktor.server.auth.*
 import io.ktor.server.auth.jwt.*
 import java.util.*
@@ -25,7 +25,7 @@ suspend fun JWTCredential.validateUser(userDao: IUserDao): Principal? {
     val userId = payload.claims[JwtConfig.TOKEN_CLAIM_USER_ID_KEY]?.asString() ?: return null
     val userUUID = UUID.fromString(userId)
 
-    val user = dbQuery {
+    val user = dbTransactionalQuery {
         userDao.getUser(userUUID)
     }
 
@@ -39,7 +39,7 @@ suspend fun JWTCredential.validateUser(userDao: IUserDao): Principal? {
 suspend fun JWTCredential.validateUserIsAdmin(userDao: IUserDao): Principal? {
     val userId = payload.claims[JwtConfig.TOKEN_CLAIM_USER_ID_KEY]?.asString() ?: return null
     val userUUID = UUID.fromString(userId)
-    val (isUserRoleAdmin, user) = dbQuery {
+    val (isUserRoleAdmin, user) = dbTransactionalQuery {
         val isUserRoleAdmin = userDao.isUserRoleAdmin(userUUID)
         val user = userDao.getUser(userUUID)
 

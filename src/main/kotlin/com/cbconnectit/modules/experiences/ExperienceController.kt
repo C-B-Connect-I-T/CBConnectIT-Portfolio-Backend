@@ -8,7 +8,7 @@ import com.cbconnectit.domain.interfaces.IExperienceDao
 import com.cbconnectit.domain.interfaces.IJobPositionDao
 import com.cbconnectit.domain.interfaces.ITagDao
 import com.cbconnectit.domain.models.experience.toDto
-import com.cbconnectit.plugins.dbQuery
+import com.cbconnectit.plugins.dbTransactionalQuery
 import com.cbconnectit.statuspages.ErrorFailedCreate
 import com.cbconnectit.statuspages.ErrorFailedDelete
 import com.cbconnectit.statuspages.ErrorFailedUpdate
@@ -29,15 +29,15 @@ class ExperienceControllerImpl(
     private val tagDao: ITagDao
 ) : ExperienceController {
 
-    override suspend fun getExperiences(): List<ExperienceDto> = dbQuery {
+    override suspend fun getExperiences(): List<ExperienceDto> = dbTransactionalQuery {
         experienceDao.getExperiences().map { it.toDto() }
     }
 
-    override suspend fun getExperienceById(experienceId: UUID): ExperienceDto = dbQuery {
+    override suspend fun getExperienceById(experienceId: UUID): ExperienceDto = dbTransactionalQuery {
         experienceDao.getExperienceById(experienceId)?.toDto() ?: throw ErrorNotFound
     }
 
-    override suspend fun postExperience(insertNewExperience: InsertNewExperience): ExperienceDto = dbQuery {
+    override suspend fun postExperience(insertNewExperience: InsertNewExperience): ExperienceDto = dbTransactionalQuery {
         if (!insertNewExperience.isValid) throw ErrorInvalidParameters
 
         val companyIds = insertNewExperience.companyUuid.let { companyDao.getListOfExistingCompanyIds(listOf(it)) }
@@ -65,7 +65,7 @@ class ExperienceControllerImpl(
         experienceDao.insertExperience(insertNewExperience)?.toDto() ?: throw ErrorFailedCreate
     }
 
-    override suspend fun updateExperienceById(experienceId: UUID, updateExperience: UpdateExperience): ExperienceDto = dbQuery {
+    override suspend fun updateExperienceById(experienceId: UUID, updateExperience: UpdateExperience): ExperienceDto = dbTransactionalQuery {
         if (!updateExperience.isValid) throw ErrorInvalidParameters
 
         val companyIds = updateExperience.companyUuid.let { companyDao.getListOfExistingCompanyIds(listOf(it)) }
@@ -93,7 +93,7 @@ class ExperienceControllerImpl(
         experienceDao.updateExperience(experienceId, updateExperience)?.toDto() ?: throw ErrorFailedUpdate
     }
 
-    override suspend fun deleteExperienceById(experienceId: UUID) = dbQuery {
+    override suspend fun deleteExperienceById(experienceId: UUID) = dbTransactionalQuery {
         val deleted = experienceDao.deleteExperience(experienceId)
         if (!deleted) throw ErrorFailedDelete
     }

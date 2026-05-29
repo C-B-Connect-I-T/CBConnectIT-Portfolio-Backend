@@ -5,7 +5,7 @@ import com.cbconnectit.data.dto.requests.jobPosition.JobPositionDto
 import com.cbconnectit.data.dto.requests.jobPosition.UpdateJobPosition
 import com.cbconnectit.domain.interfaces.IJobPositionDao
 import com.cbconnectit.domain.models.jobPosition.toDto
-import com.cbconnectit.plugins.dbQuery
+import com.cbconnectit.plugins.dbTransactionalQuery
 import com.cbconnectit.statuspages.ErrorDuplicateEntity
 import com.cbconnectit.statuspages.ErrorFailedCreate
 import com.cbconnectit.statuspages.ErrorFailedDelete
@@ -18,15 +18,15 @@ class JobPositionControllerImpl(
     private val jobPositionDao: IJobPositionDao
 ) : JobPositionController {
 
-    override suspend fun getJobPositions(): List<JobPositionDto> = dbQuery {
+    override suspend fun getJobPositions(): List<JobPositionDto> = dbTransactionalQuery {
         jobPositionDao.getJobPositions().map { it.toDto() }
     }
 
-    override suspend fun getJobPositionById(jobPositionId: UUID): JobPositionDto = dbQuery {
+    override suspend fun getJobPositionById(jobPositionId: UUID): JobPositionDto = dbTransactionalQuery {
         jobPositionDao.getJobPositionById(jobPositionId)?.toDto() ?: throw ErrorNotFound
     }
 
-    override suspend fun postJobPosition(insertNewJobPosition: InsertNewJobPosition): JobPositionDto = dbQuery {
+    override suspend fun postJobPosition(insertNewJobPosition: InsertNewJobPosition): JobPositionDto = dbTransactionalQuery {
         if (!insertNewJobPosition.isValid) throw ErrorInvalidParameters
 
         val positionUnique = jobPositionDao.jobPositionUnique(insertNewJobPosition.name)
@@ -35,7 +35,7 @@ class JobPositionControllerImpl(
         jobPositionDao.insertJobPosition(insertNewJobPosition)?.toDto() ?: throw ErrorFailedCreate
     }
 
-    override suspend fun updateJobPositionById(jobPositionId: UUID, updateJobPosition: UpdateJobPosition): JobPositionDto = dbQuery {
+    override suspend fun updateJobPositionById(jobPositionId: UUID, updateJobPosition: UpdateJobPosition): JobPositionDto = dbTransactionalQuery {
         if (!updateJobPosition.isValid) throw ErrorInvalidParameters
 
         val positionUnique = jobPositionDao.jobPositionUnique(updateJobPosition.name)
@@ -44,7 +44,7 @@ class JobPositionControllerImpl(
         jobPositionDao.updateJobPosition(jobPositionId, updateJobPosition)?.toDto() ?: throw ErrorFailedUpdate
     }
 
-    override suspend fun deleteJobPositionById(jobPositionId: UUID) = dbQuery {
+    override suspend fun deleteJobPositionById(jobPositionId: UUID) = dbTransactionalQuery {
         val deleted = jobPositionDao.deleteJobPosition(jobPositionId)
         if (!deleted) throw ErrorFailedDelete
     }

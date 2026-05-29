@@ -7,7 +7,7 @@ import com.cbconnectit.domain.interfaces.ILinkDao
 import com.cbconnectit.domain.interfaces.IProjectDao
 import com.cbconnectit.domain.interfaces.ITagDao
 import com.cbconnectit.domain.models.project.toDto
-import com.cbconnectit.plugins.dbQuery
+import com.cbconnectit.plugins.dbTransactionalQuery
 import com.cbconnectit.statuspages.ErrorFailedCreate
 import com.cbconnectit.statuspages.ErrorFailedDelete
 import com.cbconnectit.statuspages.ErrorFailedUpdate
@@ -25,15 +25,15 @@ class ProjectControllerImpl(
     private val linkDao: ILinkDao
 ) : ProjectController {
 
-    override suspend fun getProjects(): List<ProjectDto> = dbQuery {
+    override suspend fun getProjects(): List<ProjectDto> = dbTransactionalQuery {
         projectDao.getProjects().map { it.toDto() }
     }
 
-    override suspend fun getProjectById(projectId: UUID): ProjectDto = dbQuery {
+    override suspend fun getProjectById(projectId: UUID): ProjectDto = dbTransactionalQuery {
         projectDao.getProjectById(projectId)?.toDto() ?: throw ErrorNotFound
     }
 
-    override suspend fun postProject(insertNewProject: InsertNewProject): ProjectDto = dbQuery {
+    override suspend fun postProject(insertNewProject: InsertNewProject): ProjectDto = dbTransactionalQuery {
         if (!insertNewProject.isValid) throw ErrorInvalidParameters
 
         val tagUUIDs = insertNewProject.tags?.map { UUID.fromString(it) } ?: emptyList()
@@ -57,7 +57,7 @@ class ProjectControllerImpl(
         projectDao.insertProject(insertNewProject)?.toDto() ?: throw ErrorFailedCreate
     }
 
-    override suspend fun updateProjectById(projectId: UUID, updateProject: UpdateProject): ProjectDto = dbQuery {
+    override suspend fun updateProjectById(projectId: UUID, updateProject: UpdateProject): ProjectDto = dbTransactionalQuery {
         if (!updateProject.isValid) throw ErrorInvalidParameters
 
         val tagUUIDs = updateProject.tags?.map { UUID.fromString(it) } ?: emptyList()
@@ -81,7 +81,7 @@ class ProjectControllerImpl(
         projectDao.updateProject(projectId, updateProject)?.toDto() ?: throw ErrorFailedUpdate
     }
 
-    override suspend fun deleteProjectById(projectId: UUID) = dbQuery {
+    override suspend fun deleteProjectById(projectId: UUID) = dbTransactionalQuery {
         val deleted = projectDao.deleteProject(projectId)
         if (!deleted) throw ErrorFailedDelete
     }

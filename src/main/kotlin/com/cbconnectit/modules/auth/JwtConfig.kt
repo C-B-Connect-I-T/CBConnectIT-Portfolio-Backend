@@ -4,6 +4,7 @@ import com.auth0.jwt.JWT
 import com.auth0.jwt.JWTVerifier
 import com.auth0.jwt.algorithms.Algorithm
 import com.cbconnectit.data.dto.responses.CredentialsResponse
+import com.cbconnectit.domain.models.Environment
 import com.cbconnectit.domain.models.user.User
 import io.ktor.server.config.*
 import java.util.*
@@ -21,6 +22,7 @@ class JwtConfig(
     private val algorithm = Algorithm.HMAC256(secret)
 
     companion object {
+        const val TOKEN_CLAIM_USER_NAME = "username"
         const val TOKEN_CLAIM_USER_ID_KEY = "userId"
         const val USERS_AUDIENCE = "users"
     }
@@ -29,6 +31,10 @@ class JwtConfig(
         config.property("jwt.issuer").getString(),
         config.property("jwt.audience").getString(),
         secret
+    )
+
+    constructor(issuer: String, audience: String, environment: Environment) : this(
+        issuer, audience, environment.jwtSecret
     )
 
     override val verifier: JWTVerifier = JWT
@@ -42,7 +48,7 @@ class JwtConfig(
         .withAudience(audience)
         .withIssuer(issuer)
         .withClaim(TOKEN_CLAIM_USER_ID_KEY, user.id.toString())
-        .withClaim("username", user.username)
+        .withClaim(TOKEN_CLAIM_USER_NAME, user.username)
         .withExpiresAt(expiration)
         .sign(algorithm)
 

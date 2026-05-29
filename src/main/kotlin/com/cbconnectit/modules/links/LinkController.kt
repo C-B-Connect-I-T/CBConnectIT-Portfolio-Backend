@@ -6,7 +6,7 @@ import com.cbconnectit.data.dto.requests.link.UpdateLink
 import com.cbconnectit.domain.interfaces.ILinkDao
 import com.cbconnectit.domain.models.link.LinkType
 import com.cbconnectit.domain.models.link.toDto
-import com.cbconnectit.plugins.dbQuery
+import com.cbconnectit.plugins.dbTransactionalQuery
 import com.cbconnectit.statuspages.ErrorFailedCreate
 import com.cbconnectit.statuspages.ErrorFailedDelete
 import com.cbconnectit.statuspages.ErrorFailedUpdate
@@ -19,15 +19,15 @@ class LinkControllerImpl(
     private val linkDao: ILinkDao
 ) : LinkController {
 
-    override suspend fun getLinks(): List<LinkDto> = dbQuery {
+    override suspend fun getLinks(): List<LinkDto> = dbTransactionalQuery {
         linkDao.getLinks().map { it.toDto() }
     }
 
-    override suspend fun getLinkById(linkId: UUID): LinkDto = dbQuery {
+    override suspend fun getLinkById(linkId: UUID): LinkDto = dbTransactionalQuery {
         linkDao.getLinkById(linkId)?.toDto() ?: throw ErrorNotFound
     }
 
-    override suspend fun postLink(insertNewLink: InsertNewLink): LinkDto = dbQuery {
+    override suspend fun postLink(insertNewLink: InsertNewLink): LinkDto = dbTransactionalQuery {
         if (!insertNewLink.isValid) throw ErrorInvalidParameters
 
         val url = Url(insertNewLink.url)
@@ -36,7 +36,7 @@ class LinkControllerImpl(
         linkDao.insertLink(insertNewLink, linkType)?.toDto() ?: throw ErrorFailedCreate
     }
 
-    override suspend fun updateLinkById(linkId: UUID, updateLink: UpdateLink): LinkDto = dbQuery {
+    override suspend fun updateLinkById(linkId: UUID, updateLink: UpdateLink): LinkDto = dbTransactionalQuery {
         if (!updateLink.isValid) throw ErrorInvalidParameters
 
         val url = Url(updateLink.url)
@@ -45,7 +45,7 @@ class LinkControllerImpl(
         linkDao.updateLink(linkId, updateLink, linkType)?.toDto() ?: throw ErrorFailedUpdate
     }
 
-    override suspend fun deleteLinkById(linkId: UUID) = dbQuery {
+    override suspend fun deleteLinkById(linkId: UUID) = dbTransactionalQuery {
         val deleted = linkDao.deleteLink(linkId)
         if (!deleted) throw ErrorFailedDelete
     }
