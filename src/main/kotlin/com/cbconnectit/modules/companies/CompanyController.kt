@@ -6,7 +6,7 @@ import com.cbconnectit.data.dto.requests.company.UpdateCompany
 import com.cbconnectit.domain.interfaces.ICompanyDao
 import com.cbconnectit.domain.interfaces.ILinkDao
 import com.cbconnectit.domain.models.company.toDto
-import com.cbconnectit.plugins.dbQuery
+import com.cbconnectit.plugins.dbTransactionalQuery
 import com.cbconnectit.statuspages.ErrorDuplicateEntity
 import com.cbconnectit.statuspages.ErrorFailedCreate
 import com.cbconnectit.statuspages.ErrorFailedDelete
@@ -22,15 +22,15 @@ class CompanyControllerImpl(
     private val linkDao: ILinkDao,
 ) : CompanyController {
 
-    override suspend fun getCompanies(): List<CompanyDto> = dbQuery {
+    override suspend fun getCompanies(): List<CompanyDto> = dbTransactionalQuery {
         companyDao.getCompanies().map { it.toDto() }
     }
 
-    override suspend fun getCompanyById(companyId: UUID): CompanyDto = dbQuery {
+    override suspend fun getCompanyById(companyId: UUID): CompanyDto = dbTransactionalQuery {
         companyDao.getCompanyById(companyId)?.toDto() ?: throw ErrorNotFound
     }
 
-    override suspend fun postCompany(insertNewCompany: InsertNewCompany): CompanyDto = dbQuery {
+    override suspend fun postCompany(insertNewCompany: InsertNewCompany): CompanyDto = dbTransactionalQuery {
         if (!insertNewCompany.isValid) throw ErrorInvalidParameters
 
         val positionUnique = companyDao.companyUnique(insertNewCompany.name)
@@ -49,7 +49,7 @@ class CompanyControllerImpl(
         companyDao.insertCompany(insertNewCompany)?.toDto() ?: throw ErrorFailedCreate
     }
 
-    override suspend fun updateCompanyById(companyId: UUID, updateCompany: UpdateCompany): CompanyDto = dbQuery {
+    override suspend fun updateCompanyById(companyId: UUID, updateCompany: UpdateCompany): CompanyDto = dbTransactionalQuery {
         if (!updateCompany.isValid) throw ErrorInvalidParameters
 
         val positionUnique = companyDao.companyUnique(updateCompany.name)
@@ -68,7 +68,7 @@ class CompanyControllerImpl(
         companyDao.updateCompany(companyId, updateCompany)?.toDto() ?: throw ErrorFailedUpdate
     }
 
-    override suspend fun deleteCompanyById(companyId: UUID) = dbQuery {
+    override suspend fun deleteCompanyById(companyId: UUID) = dbTransactionalQuery {
         val deleted = companyDao.deleteCompany(companyId)
         if (!deleted) throw ErrorFailedDelete
     }

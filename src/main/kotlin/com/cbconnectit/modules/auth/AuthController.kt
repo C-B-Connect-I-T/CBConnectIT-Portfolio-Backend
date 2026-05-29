@@ -4,7 +4,7 @@ import com.cbconnectit.data.dto.requests.CreateTokenDto
 import com.cbconnectit.data.dto.requests.hasData
 import com.cbconnectit.data.dto.responses.CredentialsResponse
 import com.cbconnectit.domain.interfaces.IUserDao
-import com.cbconnectit.plugins.dbQuery
+import com.cbconnectit.plugins.dbTransactionalQuery
 import com.cbconnectit.statuspages.ErrorInvalidCredentials
 import com.cbconnectit.statuspages.ErrorInvalidParameters
 import com.cbconnectit.utils.PasswordManagerContract
@@ -15,7 +15,7 @@ class AuthControllerImpl(
     private val passwordManager: PasswordManagerContract
 ) : AuthController {
 
-    override suspend fun authorizeUser(tokenDto: CreateTokenDto): CredentialsResponse = dbQuery {
+    override suspend fun authorizeUser(tokenDto: CreateTokenDto): CredentialsResponse = dbTransactionalQuery {
         if (!tokenDto.hasData()) throw ErrorInvalidParameters
 
         val userHashable = userDao.getUserHashableByUsername(tokenDto.username) ?: throw ErrorInvalidCredentials

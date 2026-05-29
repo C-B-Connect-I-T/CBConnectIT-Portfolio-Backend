@@ -13,6 +13,7 @@ import com.cbconnectit.data.database.tables.TagsProjectsPivotTable
 import com.cbconnectit.data.database.tables.TagsTable
 import com.cbconnectit.data.database.tables.TestimonialsTable
 import com.cbconnectit.data.database.tables.UsersTable
+import com.cbconnectit.domain.models.Environment
 import com.cbconnectit.domain.models.company.Company
 import com.cbconnectit.domain.models.experience.Experience
 import com.cbconnectit.domain.models.jobPosition.JobPosition
@@ -22,27 +23,29 @@ import com.cbconnectit.domain.models.project.Project
 import com.cbconnectit.domain.models.service.Service
 import com.cbconnectit.domain.models.tag.Tag
 import com.cbconnectit.domain.models.testimonial.Testimonial
-import com.cbconnectit.domain.models.user.UserRoles
-import com.cbconnectit.utils.PasswordManagerContract
+import com.cbconnectit.services.seeders.AdminSeeder
 import com.github.slugify.Slugify
 import io.ktor.server.application.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.jetbrains.exposed.sql.Database
 import org.jetbrains.exposed.sql.SchemaUtils
+import org.jetbrains.exposed.sql.Transaction
 import org.jetbrains.exposed.sql.insertIgnore
+import org.jetbrains.exposed.sql.transactions.experimental.newSuspendedTransaction
 import org.jetbrains.exposed.sql.transactions.transaction
 import org.koin.ktor.ext.inject
 import java.time.LocalDateTime
 import java.util.*
 
 fun Application.configureDatabase() {
-    val passwordEncryption by inject<PasswordManagerContract>()
+    val environment by inject<Environment>()
+    val adminSeeder by inject<AdminSeeder>()
 
     Database.connect(
-        url = System.getenv("DATABASE_URL"),
-        user = System.getenv("DATABASE_USERNAME"),
-        password = System.getenv("DATABASE_PASSWORD")
+        url = environment.databaseUrl,
+        user = environment.databaseUsername,
+        password = environment.databasePassword
     )
 
     transaction {
@@ -62,20 +65,13 @@ fun Application.configureDatabase() {
             UsersTable
         )
 
-        seedDatabase(passwordEncryption)
+        adminSeeder.seed()
+        seedDatabase()
     }
 }
 
 @SuppressWarnings("LongMethod", "MaximumLineLength", "MagicNumber")
-private fun seedDatabase(passwordEncryption: PasswordManagerContract) {
-
-    UsersTable.insertIgnore {
-        it[fullName] = "Christiano Bolla"
-        it[username] = "bollachristiano@gmail.com"
-        it[password] = passwordEncryption.encryptPassword(System.getenv("ADMIN_SEED_PASSWORD"))
-        it[role] = UserRoles.Admin
-    }
-
+private fun seedDatabase() {
     // Tags
     listOf(
         Tag(id = UUID.fromString("00000000-0000-0000-0000-000000000001"), name = "Library"),
@@ -601,6 +597,6 @@ private fun seedDatabase(passwordEncryption: PasswordManagerContract) {
     }
 }
 
-suspend fun <T> dbQuery(block: () -> T): T = withContext(Dispatchers.IO) {
-    transaction { block() }
+suspend fun <T> dbTransactionalQuery(block: suspend Transaction.() -> T): T = withContext(Dispatchers.IO) {
+    newSuspendedTransaction { block() }
 }

@@ -5,7 +5,7 @@ import com.cbconnectit.data.dto.requests.tag.TagDto
 import com.cbconnectit.data.dto.requests.tag.UpdateTag
 import com.cbconnectit.domain.interfaces.ITagDao
 import com.cbconnectit.domain.models.tag.toDto
-import com.cbconnectit.plugins.dbQuery
+import com.cbconnectit.plugins.dbTransactionalQuery
 import com.cbconnectit.statuspages.ErrorDuplicateEntity
 import com.cbconnectit.statuspages.ErrorFailedCreate
 import com.cbconnectit.statuspages.ErrorFailedDelete
@@ -18,11 +18,11 @@ class TagControllerImpl(
     private val tagDao: ITagDao
 ) : TagController {
 
-    override suspend fun getTags(query: String): List<TagDto> = dbQuery {
+    override suspend fun getTags(query: String): List<TagDto> = dbTransactionalQuery {
         tagDao.getTags(query).map { it.toDto() }
     }
 
-    override suspend fun getTagByIdentifier(tagIdentifier: String): TagDto = dbQuery {
+    override suspend fun getTagByIdentifier(tagIdentifier: String): TagDto = dbTransactionalQuery {
 
         val tagUUID = try {
             UUID.fromString(tagIdentifier)
@@ -40,7 +40,7 @@ class TagControllerImpl(
         tag?.toDto() ?: throw ErrorNotFound
     }
 
-    override suspend fun postTag(insertNewTag: InsertNewTag): TagDto = dbQuery {
+    override suspend fun postTag(insertNewTag: InsertNewTag): TagDto = dbTransactionalQuery {
         if (!insertNewTag.isValid) throw ErrorInvalidParameters
 
         val tagUnique = tagDao.tagUnique(insertNewTag.name)
@@ -49,7 +49,7 @@ class TagControllerImpl(
         tagDao.insertTag(insertNewTag)?.toDto() ?: throw ErrorFailedCreate
     }
 
-    override suspend fun updateTagById(tagId: UUID, updateTag: UpdateTag): TagDto = dbQuery {
+    override suspend fun updateTagById(tagId: UUID, updateTag: UpdateTag): TagDto = dbTransactionalQuery {
         if (!updateTag.isValid) throw ErrorInvalidParameters
 
         val tagUnique = tagDao.tagUnique(updateTag.name)
@@ -58,7 +58,7 @@ class TagControllerImpl(
         tagDao.updateTag(tagId, updateTag)?.toDto() ?: throw ErrorFailedUpdate
     }
 
-    override suspend fun deleteTagById(tagId: UUID) = dbQuery {
+    override suspend fun deleteTagById(tagId: UUID) = dbTransactionalQuery {
         val deleted = tagDao.deleteTag(tagId)
         if (!deleted) throw ErrorFailedDelete
     }

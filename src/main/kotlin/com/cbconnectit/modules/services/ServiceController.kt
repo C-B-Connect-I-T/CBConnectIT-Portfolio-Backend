@@ -6,7 +6,7 @@ import com.cbconnectit.data.dto.requests.service.UpdateService
 import com.cbconnectit.domain.interfaces.IServiceDao
 import com.cbconnectit.domain.interfaces.ITagDao
 import com.cbconnectit.domain.models.service.toDto
-import com.cbconnectit.plugins.dbQuery
+import com.cbconnectit.plugins.dbTransactionalQuery
 import com.cbconnectit.statuspages.ErrorFailedCreate
 import com.cbconnectit.statuspages.ErrorFailedDelete
 import com.cbconnectit.statuspages.ErrorFailedUpdate
@@ -23,15 +23,15 @@ class ServiceControllerImpl(
     private val tagDao: ITagDao
 ) : ServiceController {
 
-    override suspend fun getServices(): List<ServiceDto> = dbQuery {
+    override suspend fun getServices(): List<ServiceDto> = dbTransactionalQuery {
         serviceDao.getServices().map { it.toDto() }
     }
 
-    override suspend fun getServiceById(serviceId: UUID): ServiceDto = dbQuery {
+    override suspend fun getServiceById(serviceId: UUID): ServiceDto = dbTransactionalQuery {
         serviceDao.getServiceById(serviceId)?.toDto() ?: throw ErrorNotFound
     }
 
-    override suspend fun postService(insertNewService: InsertNewService): ServiceDto = dbQuery {
+    override suspend fun postService(insertNewService: InsertNewService): ServiceDto = dbTransactionalQuery {
         if (!insertNewService.isValid) throw ErrorInvalidParameters
 
         val parentServiceIds = insertNewService.parentServiceUuid?.let { serviceDao.getListOfExistingServiceIds(listOf(it)) }
@@ -47,7 +47,7 @@ class ServiceControllerImpl(
         serviceDao.insertService(insertNewService)?.toDto() ?: throw ErrorFailedCreate
     }
 
-    override suspend fun updateServiceById(serviceId: UUID, updateService: UpdateService): ServiceDto = dbQuery {
+    override suspend fun updateServiceById(serviceId: UUID, updateService: UpdateService): ServiceDto = dbTransactionalQuery {
         if (!updateService.isValid) throw ErrorInvalidParameters
 
         val parentServiceIds = updateService.parentServiceUuid?.let { serviceDao.getListOfExistingServiceIds(listOf(it)) }
@@ -63,7 +63,7 @@ class ServiceControllerImpl(
         serviceDao.updateService(serviceId, updateService)?.toDto() ?: throw ErrorFailedUpdate
     }
 
-    override suspend fun deleteServiceById(serviceId: UUID) = dbQuery {
+    override suspend fun deleteServiceById(serviceId: UUID) = dbTransactionalQuery {
         val deleted = serviceDao.deleteService(serviceId)
         if (!deleted) throw ErrorFailedDelete
     }

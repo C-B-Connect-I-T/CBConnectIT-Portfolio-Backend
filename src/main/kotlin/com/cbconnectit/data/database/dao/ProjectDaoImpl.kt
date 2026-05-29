@@ -29,7 +29,8 @@ class ProjectDaoImpl : IProjectDao {
         val results = ProjectsTable
             .selectAll()
             .where { ProjectsTable.id eq id }
-            .orderBy(ProjectsTable.createdAt to SortOrder.DESC)
+            // TODO: not needed if we select by id?
+//            .orderBy(ProjectsTable.createdAt to SortOrder.DESC)
             .toList()
             .firstOrNull()
 

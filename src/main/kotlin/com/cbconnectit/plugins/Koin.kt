@@ -19,6 +19,8 @@ import com.cbconnectit.domain.interfaces.IServiceDao
 import com.cbconnectit.domain.interfaces.ITagDao
 import com.cbconnectit.domain.interfaces.ITestimonialDao
 import com.cbconnectit.domain.interfaces.IUserDao
+import com.cbconnectit.domain.models.Environment
+import com.cbconnectit.domain.models.parseEnvironment
 import com.cbconnectit.modules.auth.AuthController
 import com.cbconnectit.modules.auth.AuthControllerImpl
 import com.cbconnectit.modules.auth.JwtConfig
@@ -41,9 +43,13 @@ import com.cbconnectit.modules.testimonials.TestimonialController
 import com.cbconnectit.modules.testimonials.TestimonialControllerImpl
 import com.cbconnectit.modules.users.UserController
 import com.cbconnectit.modules.users.UserControllerImpl
+import com.cbconnectit.services.LocalMediaStorageService
+import com.cbconnectit.services.MediaStorageService
+import com.cbconnectit.services.seeders.AdminSeeder
 import com.cbconnectit.utils.PasswordManager
 import com.cbconnectit.utils.PasswordManagerContract
 import io.ktor.server.application.*
+import kotlinx.serialization.json.Json
 import org.koin.core.module.dsl.bind
 import org.koin.core.module.dsl.singleOf
 import org.koin.dsl.module
@@ -53,14 +59,25 @@ fun Application.configureKoin() {
         install(Koin) {
             modules(
                 module {
+                    single {
+                        Json {
+                            ignoreUnknownKeys = true
+                            encodeDefaults = true
+                            isLenient = false
+                        }
+                    }
+                    singleOf(::parseEnvironment)
+                    single<MediaStorageService> { LocalMediaStorageService(environment = get()) }
                     single<PasswordManagerContract> { PasswordManager }
                     single<TokenProvider> {
-                        JwtConfig("https://jwt-provider-domain/", JwtConfig.USERS_AUDIENCE, System.getenv("JWT_SECRET"))
+                        val environment = get<Environment>()
+                        JwtConfig("https://cb-connect-it.com/", JwtConfig.USERS_AUDIENCE, environment)
                     }
                     single<JWTVerifier> {
                         val tokenProvider = get<TokenProvider>()
                         tokenProvider.verifier
                     }
+                    singleOf(::AdminSeeder)
                 },
                 controllerModule(),
                 daoModule()

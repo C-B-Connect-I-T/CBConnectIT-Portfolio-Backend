@@ -25,10 +25,12 @@ import com.cbconnectit.statuspages.InternalServerException
 import com.cbconnectit.statuspages.generalStatusPages
 import com.cbconnectit.statuspages.toErrorResponse
 import io.ktor.server.application.*
+import io.ktor.server.http.content.*
 import io.ktor.server.plugins.statuspages.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import org.koin.ktor.ext.inject
+import java.io.File
 
 fun Application.configureRouting() {
     val authController by inject<AuthController>()
@@ -64,6 +66,9 @@ fun Application.configureRouting() {
         }
     }
     routing {
+        // Serve uploaded media files
+        staticFiles("/api/uploads", File("uploads"))
+
         authRouting(authController)
 
         route("api/v1") {

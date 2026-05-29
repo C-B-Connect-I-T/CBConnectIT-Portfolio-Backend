@@ -7,7 +7,7 @@ import com.cbconnectit.domain.interfaces.ICompanyDao
 import com.cbconnectit.domain.interfaces.IJobPositionDao
 import com.cbconnectit.domain.interfaces.ITestimonialDao
 import com.cbconnectit.domain.models.testimonial.toDto
-import com.cbconnectit.plugins.dbQuery
+import com.cbconnectit.plugins.dbTransactionalQuery
 import com.cbconnectit.statuspages.ErrorFailedCreate
 import com.cbconnectit.statuspages.ErrorFailedDelete
 import com.cbconnectit.statuspages.ErrorFailedUpdate
@@ -25,15 +25,15 @@ class TestimonialControllerImpl(
     private val jobPositionDao: IJobPositionDao
 ) : TestimonialController {
 
-    override suspend fun getTestimonials(): List<TestimonialDto> = dbQuery {
+    override suspend fun getTestimonials(): List<TestimonialDto> = dbTransactionalQuery {
         testimonialDao.getTestimonials().map { it.toDto() }
     }
 
-    override suspend fun getTestimonialById(testimonialId: UUID): TestimonialDto = dbQuery {
+    override suspend fun getTestimonialById(testimonialId: UUID): TestimonialDto = dbTransactionalQuery {
         testimonialDao.getTestimonialById(testimonialId)?.toDto() ?: throw ErrorNotFound
     }
 
-    override suspend fun postTestimonial(insertNewTestimonial: InsertNewTestimonial): TestimonialDto = dbQuery {
+    override suspend fun postTestimonial(insertNewTestimonial: InsertNewTestimonial): TestimonialDto = dbTransactionalQuery {
         if (!insertNewTestimonial.isValid) throw ErrorInvalidParameters
 
         val companyIds = insertNewTestimonial.companyUuid.let { companyDao.getListOfExistingCompanyIds(listOf(it)) }
@@ -51,7 +51,7 @@ class TestimonialControllerImpl(
         testimonialDao.insertTestimonial(insertNewTestimonial)?.toDto() ?: throw ErrorFailedCreate
     }
 
-    override suspend fun updateTestimonialById(testimonialId: UUID, updateTestimonial: UpdateTestimonial): TestimonialDto = dbQuery {
+    override suspend fun updateTestimonialById(testimonialId: UUID, updateTestimonial: UpdateTestimonial): TestimonialDto = dbTransactionalQuery {
         if (!updateTestimonial.isValid) throw ErrorInvalidParameters
 
         val companyIds = updateTestimonial.companyUuid.let { companyDao.getListOfExistingCompanyIds(listOf(it)) }
@@ -69,7 +69,7 @@ class TestimonialControllerImpl(
         testimonialDao.updateTestimonial(testimonialId, updateTestimonial)?.toDto() ?: throw ErrorFailedUpdate
     }
 
-    override suspend fun deleteTestimonialById(testimonialId: UUID) = dbQuery {
+    override suspend fun deleteTestimonialById(testimonialId: UUID) = dbTransactionalQuery {
         val deleted = testimonialDao.deleteTestimonial(testimonialId)
         if (!deleted) throw ErrorFailedDelete
     }

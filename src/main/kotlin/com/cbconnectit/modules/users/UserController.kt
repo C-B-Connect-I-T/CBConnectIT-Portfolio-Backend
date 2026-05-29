@@ -6,7 +6,7 @@ import com.cbconnectit.data.dto.requests.user.UpdateUser
 import com.cbconnectit.data.dto.requests.user.UserDto
 import com.cbconnectit.domain.interfaces.IUserDao
 import com.cbconnectit.domain.models.user.toDto
-import com.cbconnectit.plugins.dbQuery
+import com.cbconnectit.plugins.dbTransactionalQuery
 import com.cbconnectit.statuspages.ErrorFailedCreate
 import com.cbconnectit.statuspages.ErrorFailedDelete
 import com.cbconnectit.statuspages.ErrorFailedUpdate
@@ -25,7 +25,7 @@ class UserControllerImpl(
     private val passwordEncryption: PasswordManagerContract
 ) : UserController {
 
-    override suspend fun postUser(insertNewUser: InsertNewUser): UserDto = dbQuery {
+    override suspend fun postUser(insertNewUser: InsertNewUser): UserDto = dbTransactionalQuery {
         if (!insertNewUser.isValid) throw ErrorInvalidParameters
 
         val userUnique = userDao.userUnique(insertNewUser.username)
@@ -40,11 +40,11 @@ class UserControllerImpl(
         userDao.insertUser(insertNewUser.copy(password = encryptedPassword, repeatPassword = null))?.toDto() ?: throw ErrorFailedCreate
     }
 
-    override suspend fun getUserById(userId: UUID): UserDto = dbQuery {
+    override suspend fun getUserById(userId: UUID): UserDto = dbTransactionalQuery {
         userDao.getUser(userId)?.toDto() ?: throw ErrorNotFound
     }
 
-    override suspend fun updateUserById(userId: UUID, updateUser: UpdateUser): UserDto = dbQuery {
+    override suspend fun updateUserById(userId: UUID, updateUser: UpdateUser): UserDto = dbTransactionalQuery {
         // TODO: should we check for Admin or logged in user here as well?
 
         if (!updateUser.isValid) throw ErrorInvalidParameters
@@ -52,7 +52,7 @@ class UserControllerImpl(
         userDao.updateUser(userId, updateUser)?.toDto() ?: throw ErrorFailedUpdate
     }
 
-    override suspend fun updateUserPasswordById(userId: UUID, updatePassword: UpdatePassword): UserDto = dbQuery {
+    override suspend fun updateUserPasswordById(userId: UUID, updatePassword: UpdatePassword): UserDto = dbTransactionalQuery {
         // TODO: should we check for Admin or logged in user here as well?
 
         val userHashable = userDao.getUserHashableById(userId) ?: throw ErrorNotFound
@@ -74,7 +74,7 @@ class UserControllerImpl(
     override suspend fun deleteUserById(userId: UUID) {
         // TODO: should we check for Admin or logged in user here as well?
 
-        return dbQuery {
+        return dbTransactionalQuery {
             val deleted = userDao.deleteUser(userId)
             if (!deleted) throw ErrorFailedDelete
         }
