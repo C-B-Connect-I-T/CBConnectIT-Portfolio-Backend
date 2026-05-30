@@ -3,17 +3,17 @@ package com.cbconnectit.routing.testimonials
 import com.cbconnectit.data.dto.requests.testimonial.TestimonialDto
 import com.cbconnectit.modules.testimonials.TestimonialController
 import com.cbconnectit.modules.testimonials.testimonialRouting
+import com.cbconnectit.plugins.statuspages.ErrorDuplicateEntity
+import com.cbconnectit.plugins.statuspages.ErrorFailedDelete
+import com.cbconnectit.plugins.statuspages.ErrorNotFound
+import com.cbconnectit.plugins.statuspages.ErrorResponse
+import com.cbconnectit.plugins.statuspages.toErrorResponse
 import com.cbconnectit.routing.AuthenticationInstrumentation
 import com.cbconnectit.routing.BaseRoutingTest
 import com.cbconnectit.routing.testimonials.TestimonialInstrumentation.givenATestimonial
 import com.cbconnectit.routing.testimonials.TestimonialInstrumentation.givenAValidInsertTestimonial
 import com.cbconnectit.routing.testimonials.TestimonialInstrumentation.givenAValidUpdateTestimonialBody
 import com.cbconnectit.routing.testimonials.TestimonialInstrumentation.givenTestimonialList
-import com.cbconnectit.statuspages.ErrorDuplicateEntity
-import com.cbconnectit.statuspages.ErrorFailedDelete
-import com.cbconnectit.statuspages.ErrorNotFound
-import com.cbconnectit.statuspages.ErrorResponse
-import com.cbconnectit.statuspages.toErrorResponse
 import io.ktor.http.*
 import io.ktor.server.routing.*
 import io.mockk.clearMocks
@@ -58,7 +58,7 @@ class TestimonialRoutingTest : BaseRoutingTest() {
         val response = doCall(HttpMethod.Get, "/testimonials")
 
         assertThat(response.status).isEqualTo(HttpStatusCode.OK)
-        assertThat(response.parseBody<List<*>>()).hasSize(4)
+        assertThat(response.parseBody<List<TestimonialDto>>()).hasSize(4)
     }
     // </editor-fold>
 

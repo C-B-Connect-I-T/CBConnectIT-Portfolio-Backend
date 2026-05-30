@@ -7,6 +7,7 @@ import com.cbconnectit.plugins.configureMonitoring
 import com.cbconnectit.plugins.configureRouting
 import com.cbconnectit.plugins.configureSecurity
 import com.cbconnectit.plugins.configureSerialization
+import com.cbconnectit.plugins.statuspages.configureStatusPages
 import io.ktor.server.application.*
 import io.ktor.server.engine.*
 import io.ktor.server.netty.*
@@ -27,6 +28,7 @@ fun Application.module() {
     configureDatabase()
     configureMonitoring() // callLogging
     configureSerialization() // contentNegotiation
+    configureStatusPages() // Install StatusPages before Security AND Routing
     configureSecurity()
     configureRouting() // routing + statusPages
 }

@@ -2,6 +2,7 @@ package com.cbconnectit.routing.users
 
 import com.cbconnectit.data.dto.requests.user.InsertNewUser
 import com.cbconnectit.data.dto.requests.user.UpdatePassword
+import com.cbconnectit.data.dto.requests.user.UpdateUser
 import com.cbconnectit.data.dto.requests.user.UserDto
 import com.cbconnectit.domain.models.user.User
 import com.cbconnectit.domain.models.user.UserRoles
@@ -9,12 +10,12 @@ import com.cbconnectit.domain.models.user.toDto
 import com.cbconnectit.modules.auth.ADMIN_ONLY
 import com.cbconnectit.modules.users.UserController
 import com.cbconnectit.modules.users.userRouting
+import com.cbconnectit.plugins.statuspages.ErrorMissingBody
+import com.cbconnectit.plugins.statuspages.ErrorResponse
+import com.cbconnectit.plugins.statuspages.InternalServerException
+import com.cbconnectit.plugins.statuspages.toErrorResponse
 import com.cbconnectit.routing.AuthenticationInstrumentation
 import com.cbconnectit.routing.BaseRoutingTest
-import com.cbconnectit.statuspages.ErrorMissingBody
-import com.cbconnectit.statuspages.ErrorResponse
-import com.cbconnectit.statuspages.InternalServerException
-import com.cbconnectit.statuspages.toErrorResponse
 import com.cbconnectit.utils.toDatabaseString
 import io.ktor.http.*
 import io.ktor.server.routing.*
@@ -135,7 +136,7 @@ class UserRoutingTest : BaseRoutingTest() {
         val userDto = UserDto(UUID.randomUUID().toString(), "Chri Bol", "chri.bol@example.com", time, time, UserRoles.User)
         coEvery { userController.updateUserById(any(), any()) } returns userDto
 
-        val body = toJsonBody(InsertNewUser("", "", "", ""))
+        val body = toJsonBody(UpdateUser("", ""))
         val response = doCall(HttpMethod.Put, "/users/me", body)
 
         assertThat(response.status).isEqualTo(HttpStatusCode.OK)
@@ -149,7 +150,7 @@ class UserRoutingTest : BaseRoutingTest() {
     ) {
         coEvery { userController.updateUserById(any(), any()) } throws Exception()
 
-        val body = toJsonBody(InsertNewUser("", "", "", ""))
+        val body = toJsonBody(UpdateUser("", ""))
         val response = doCall(HttpMethod.Put, "/users/me", body)
 
         assertThat(response.status).isEqualTo(InternalServerException().statusCode)
@@ -179,7 +180,7 @@ class UserRoutingTest : BaseRoutingTest() {
     ) {
         coEvery { userController.updateUserPasswordById(any(), any()) } throws Exception()
 
-        val body = toJsonBody(InsertNewUser("", "", "", ""))
+        val body = toJsonBody(UpdatePassword("", "", ""))
         val response = doCall(HttpMethod.Put, "/users/me/password", body)
 
         assertThat(response.status).isEqualTo(InternalServerException().statusCode)
@@ -234,7 +235,7 @@ class UserRoutingTest : BaseRoutingTest() {
         val userDto = UserDto(UUID.randomUUID().toString(), "Chri Bol", "chri.bol@example.com", time, time, UserRoles.User)
         coEvery { userController.updateUserById(any(), any()) } returns userDto
 
-        val body = toJsonBody(InsertNewUser("", "", "", ""))
+        val body = toJsonBody(UpdateUser("", ""))
         val response = doCall(HttpMethod.Put, "/users/a63a20c4-14dd-4e11-9e87-5ab361a51f65", body)
 
         assertThat(response.status).isEqualTo(HttpStatusCode.OK)
@@ -248,7 +249,7 @@ class UserRoutingTest : BaseRoutingTest() {
     ) {
         coEvery { userController.updateUserById(any(), any()) } throws Exception()
 
-        val body = toJsonBody(InsertNewUser("", "", "", ""))
+        val body = toJsonBody(UpdateUser("", ""))
         val response = doCall(HttpMethod.Put, "/users/00000000-0000-0000-0000-000000000001", body)
 
         assertThat(response.status).isEqualTo(InternalServerException().statusCode)
@@ -289,7 +290,7 @@ class UserRoutingTest : BaseRoutingTest() {
     ) {
         coEvery { userController.updateUserPasswordById(any(), any()) } throws Exception()
 
-        val body = toJsonBody(InsertNewUser("", "", "", ""))
+        val body = toJsonBody(UpdatePassword("", "", ""))
         val response = doCall(HttpMethod.Put, "/users/00000000-0000-0000-0000-000000000001/password", body)
 
         assertThat(response.status).isEqualTo(InternalServerException().statusCode)

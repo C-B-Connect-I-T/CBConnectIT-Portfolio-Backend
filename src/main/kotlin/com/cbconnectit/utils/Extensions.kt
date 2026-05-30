@@ -1,10 +1,10 @@
 package com.cbconnectit.utils
 
 import com.cbconnectit.domain.models.user.User
-import com.cbconnectit.statuspages.ApiException
-import com.cbconnectit.statuspages.ErrorInvalidParameters
-import com.cbconnectit.statuspages.ErrorInvalidUUID
-import com.cbconnectit.statuspages.ErrorMissingBody
+import com.cbconnectit.plugins.statuspages.ApiException
+import com.cbconnectit.plugins.statuspages.ErrorInvalidParameters
+import com.cbconnectit.plugins.statuspages.ErrorInvalidUUID
+import com.cbconnectit.plugins.statuspages.ErrorMissingBody
 import io.ktor.http.*
 import io.ktor.server.application.*
 import io.ktor.server.auth.*
@@ -29,16 +29,22 @@ suspend inline fun <reified T> ApplicationCall.receiveOrRespondWithError(): T {
     }
 }
 
-fun ApplicationCall.getUserId(): UUID = parameters[ParamConstants.USER_ID_KEY]?.let(UUID::fromString) ?: throw ErrorInvalidUUID
-fun ApplicationCall.getLinkId(): UUID = parameters[ParamConstants.LINK_ID_KEY]?.let(UUID::fromString) ?: throw ErrorInvalidUUID
-fun ApplicationCall.getJobPositionId(): UUID = parameters[ParamConstants.JOB_POSITION_ID_KEY]?.let(UUID::fromString) ?: throw ErrorInvalidUUID
-fun ApplicationCall.getCompanyId(): UUID = parameters[ParamConstants.COMPANY_ID_KEY]?.let(UUID::fromString) ?: throw ErrorInvalidUUID
-fun ApplicationCall.getServiceId(): UUID = parameters[ParamConstants.SERVICE_ID_KEY]?.let(UUID::fromString) ?: throw ErrorInvalidUUID
-fun ApplicationCall.getTestimonialId(): UUID = parameters[ParamConstants.TESTIMONIAL_ID_KEY]?.let(UUID::fromString) ?: throw ErrorInvalidUUID
-fun ApplicationCall.getExperienceId(): UUID = parameters[ParamConstants.EXPERIENCE_ID_KEY]?.let(UUID::fromString) ?: throw ErrorInvalidUUID
-fun ApplicationCall.getProjectId(): UUID = parameters[ParamConstants.PROJECT_ID_KEY]?.let(UUID::fromString) ?: throw ErrorInvalidUUID
+fun ApplicationCall.getUserId(): UUID = getParameterUUID(ParamConstants.USER_ID_KEY)
+fun ApplicationCall.getLinkId(): UUID = getParameterUUID(ParamConstants.LINK_ID_KEY)
+fun ApplicationCall.getJobPositionId(): UUID = getParameterUUID(ParamConstants.JOB_POSITION_ID_KEY)
+fun ApplicationCall.getCompanyId(): UUID = getParameterUUID(ParamConstants.COMPANY_ID_KEY)
+fun ApplicationCall.getServiceId(): UUID = getParameterUUID(ParamConstants.SERVICE_ID_KEY)
+fun ApplicationCall.getTestimonialId(): UUID = getParameterUUID(ParamConstants.TESTIMONIAL_ID_KEY)
+fun ApplicationCall.getExperienceId(): UUID = getParameterUUID(ParamConstants.EXPERIENCE_ID_KEY)
+fun ApplicationCall.getProjectId(): UUID = getParameterUUID(ParamConstants.PROJECT_ID_KEY)
+
 fun ApplicationCall.getTagIdentifier(): String = parameters[ParamConstants.TAG_IDENTIFIER_KEY] ?: throw ErrorInvalidParameters
-// fun ApplicationCall.getProjectId(): UUID = parameters[ParamConstants.PROJECT_ID_KEY]?.toIntOrNull() ?: throw ErrorInvalidUUID
+// fun ApplicationCall.getProjectId(): UUID = getParameterUUID(ParamConstants.PROJECT_ID_KEY)
+
+private fun ApplicationCall.getParameterUUID(key: String): UUID =
+    parameters[key]
+        ?.let { runCatching { UUID.fromString(it) }.getOrNull() }
+        ?: throw ErrorInvalidUUID
 
 suspend fun RoutingContext.sendOk() {
     call.respond(HttpStatusCode.OK)

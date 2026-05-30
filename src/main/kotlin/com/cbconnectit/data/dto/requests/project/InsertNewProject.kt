@@ -1,15 +1,17 @@
 package com.cbconnectit.data.dto.requests.project
 
 import com.cbconnectit.utils.isValidUrl
-import com.google.gson.annotations.SerializedName
+import kotlinx.serialization.SerialName
+import kotlinx.serialization.Serializable
 
+@Serializable
 data class InsertNewProject(
-    @SerializedName("banner_image_url")
+    @SerialName("banner_image_url")
     val bannerImageUrl: String? = null,
-    @SerializedName("image_url")
+    @SerialName("image_url")
     val imageUrl: String? = null,
     val title: String,
-    @SerializedName("short_description")
+    @SerialName("short_description")
     val shortDescription: String,
     val description: String,
     val tags: List<String>? = null,
@@ -23,13 +25,14 @@ data class InsertNewProject(
                 (imageUrl == null || imageUrl.isValidUrl)
 }
 
+@Serializable
 data class UpdateProject(
-    @SerializedName("banner_image_url")
+    @SerialName("banner_image_url")
     val bannerImageUrl: String? = null,
-    @SerializedName("image_url")
+    @SerialName("image_url")
     val imageUrl: String? = null,
     val title: String,
-    @SerializedName("short_description")
+    @SerialName("short_description")
     val shortDescription: String,
     val description: String,
     val tags: List<String>? = null,

@@ -3,17 +3,17 @@ package com.cbconnectit.routing.tags
 import com.cbconnectit.data.dto.requests.tag.TagDto
 import com.cbconnectit.modules.tags.TagController
 import com.cbconnectit.modules.tags.tagRouting
+import com.cbconnectit.plugins.statuspages.ErrorDuplicateEntity
+import com.cbconnectit.plugins.statuspages.ErrorFailedDelete
+import com.cbconnectit.plugins.statuspages.ErrorNotFound
+import com.cbconnectit.plugins.statuspages.ErrorResponse
+import com.cbconnectit.plugins.statuspages.toErrorResponse
 import com.cbconnectit.routing.AuthenticationInstrumentation
 import com.cbconnectit.routing.BaseRoutingTest
 import com.cbconnectit.routing.tags.TagInstrumentation.givenATag
 import com.cbconnectit.routing.tags.TagInstrumentation.givenAValidInsertTag
 import com.cbconnectit.routing.tags.TagInstrumentation.givenAValidUpdateTagBody
 import com.cbconnectit.routing.tags.TagInstrumentation.givenTagList
-import com.cbconnectit.statuspages.ErrorDuplicateEntity
-import com.cbconnectit.statuspages.ErrorFailedDelete
-import com.cbconnectit.statuspages.ErrorNotFound
-import com.cbconnectit.statuspages.ErrorResponse
-import com.cbconnectit.statuspages.toErrorResponse
 import io.ktor.http.*
 import io.ktor.server.routing.*
 import io.mockk.coEvery
@@ -57,7 +57,7 @@ class TagRoutingTest : BaseRoutingTest() {
         val response = doCall(HttpMethod.Get, "/tags")
 
         assertThat(response.status).isEqualTo(HttpStatusCode.OK)
-        assertThat(response.parseBody<List<*>>()).hasSize(4)
+        assertThat(response.parseBody<List<TagDto>>()).hasSize(4)
     }
 
     @Test
@@ -71,7 +71,7 @@ class TagRoutingTest : BaseRoutingTest() {
         val response = doCall(HttpMethod.Get, "/tags?query=tag")
 
         assertThat(response.status).isEqualTo(HttpStatusCode.OK)
-        assertThat(response.parseBody<List<*>>()).hasSize(3)
+        assertThat(response.parseBody<List<TagDto>>()).hasSize(3)
     }
     // </editor-fold>
 

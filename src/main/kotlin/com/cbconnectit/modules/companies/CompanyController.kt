@@ -7,14 +7,14 @@ import com.cbconnectit.domain.interfaces.ICompanyDao
 import com.cbconnectit.domain.interfaces.ILinkDao
 import com.cbconnectit.domain.models.company.toDto
 import com.cbconnectit.plugins.dbTransactionalQuery
-import com.cbconnectit.statuspages.ErrorDuplicateEntity
-import com.cbconnectit.statuspages.ErrorFailedCreate
-import com.cbconnectit.statuspages.ErrorFailedDelete
-import com.cbconnectit.statuspages.ErrorFailedUpdate
-import com.cbconnectit.statuspages.ErrorInvalidParameters
-import com.cbconnectit.statuspages.ErrorNotFound
-import com.cbconnectit.statuspages.ErrorUnknownLinkIdsForCreateCompany
-import com.cbconnectit.statuspages.ErrorUnknownLinkIdsForUpdateCompany
+import com.cbconnectit.plugins.statuspages.ErrorDuplicateEntity
+import com.cbconnectit.plugins.statuspages.ErrorFailedCreate
+import com.cbconnectit.plugins.statuspages.ErrorFailedDelete
+import com.cbconnectit.plugins.statuspages.ErrorFailedUpdate
+import com.cbconnectit.plugins.statuspages.ErrorInvalidParameters
+import com.cbconnectit.plugins.statuspages.ErrorNotFound
+import com.cbconnectit.plugins.statuspages.ErrorUnknownLinkIdsForCreateCompany
+import com.cbconnectit.plugins.statuspages.ErrorUnknownLinkIdsForUpdateCompany
 import java.util.*
 
 class CompanyControllerImpl(

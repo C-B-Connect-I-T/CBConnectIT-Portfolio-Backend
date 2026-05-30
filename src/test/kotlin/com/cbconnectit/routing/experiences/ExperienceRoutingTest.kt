@@ -3,17 +3,17 @@ package com.cbconnectit.routing.experiences
 import com.cbconnectit.data.dto.requests.experience.ExperienceDto
 import com.cbconnectit.modules.experiences.ExperienceController
 import com.cbconnectit.modules.experiences.experienceRouting
+import com.cbconnectit.plugins.statuspages.ErrorDuplicateEntity
+import com.cbconnectit.plugins.statuspages.ErrorFailedDelete
+import com.cbconnectit.plugins.statuspages.ErrorNotFound
+import com.cbconnectit.plugins.statuspages.ErrorResponse
+import com.cbconnectit.plugins.statuspages.toErrorResponse
 import com.cbconnectit.routing.AuthenticationInstrumentation
 import com.cbconnectit.routing.BaseRoutingTest
 import com.cbconnectit.routing.experiences.ExperienceInstrumentation.givenAExperience
 import com.cbconnectit.routing.experiences.ExperienceInstrumentation.givenAValidInsertExperience
 import com.cbconnectit.routing.experiences.ExperienceInstrumentation.givenAValidUpdateExperienceBody
 import com.cbconnectit.routing.experiences.ExperienceInstrumentation.givenExperienceList
-import com.cbconnectit.statuspages.ErrorDuplicateEntity
-import com.cbconnectit.statuspages.ErrorFailedDelete
-import com.cbconnectit.statuspages.ErrorNotFound
-import com.cbconnectit.statuspages.ErrorResponse
-import com.cbconnectit.statuspages.toErrorResponse
 import io.ktor.http.*
 import io.ktor.server.routing.*
 import io.mockk.clearMocks
@@ -58,7 +58,7 @@ class ExperienceRoutingTest : BaseRoutingTest() {
         val response = doCall(HttpMethod.Get, "/experiences")
 
         assertThat(response.status).isEqualTo(HttpStatusCode.OK)
-        assertThat(response.parseBody<List<*>>()).hasSize(4)
+        assertThat(response.parseBody<List<ExperienceDto>>()).hasSize(4)
     }
     // </editor-fold>
 

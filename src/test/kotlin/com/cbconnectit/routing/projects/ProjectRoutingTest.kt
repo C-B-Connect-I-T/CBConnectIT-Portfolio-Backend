@@ -3,17 +3,17 @@ package com.cbconnectit.routing.projects
 import com.cbconnectit.data.dto.requests.project.ProjectDto
 import com.cbconnectit.modules.projects.ProjectController
 import com.cbconnectit.modules.projects.projectRouting
+import com.cbconnectit.plugins.statuspages.ErrorDuplicateEntity
+import com.cbconnectit.plugins.statuspages.ErrorFailedDelete
+import com.cbconnectit.plugins.statuspages.ErrorNotFound
+import com.cbconnectit.plugins.statuspages.ErrorResponse
+import com.cbconnectit.plugins.statuspages.toErrorResponse
 import com.cbconnectit.routing.AuthenticationInstrumentation
 import com.cbconnectit.routing.BaseRoutingTest
 import com.cbconnectit.routing.projects.ProjectInstrumentation.givenAProject
 import com.cbconnectit.routing.projects.ProjectInstrumentation.givenAValidInsertProject
 import com.cbconnectit.routing.projects.ProjectInstrumentation.givenAValidUpdateProjectBody
 import com.cbconnectit.routing.projects.ProjectInstrumentation.givenProjectList
-import com.cbconnectit.statuspages.ErrorDuplicateEntity
-import com.cbconnectit.statuspages.ErrorFailedDelete
-import com.cbconnectit.statuspages.ErrorNotFound
-import com.cbconnectit.statuspages.ErrorResponse
-import com.cbconnectit.statuspages.toErrorResponse
 import io.ktor.http.*
 import io.ktor.server.routing.*
 import io.mockk.coEvery
@@ -57,7 +57,7 @@ class ProjectRoutingTest : BaseRoutingTest() {
         val response = doCall(HttpMethod.Get, "/projects")
 
         assertThat(response.status).isEqualTo(HttpStatusCode.OK)
-        assertThat(response.parseBody<List<*>>()).hasSize(4)
+        assertThat(response.parseBody<List<ProjectDto>>()).hasSize(4)
     }
     // </editor-fold>
 

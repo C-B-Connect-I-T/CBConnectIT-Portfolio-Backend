@@ -3,17 +3,17 @@ package com.cbconnectit.routing.links
 import com.cbconnectit.data.dto.requests.link.LinkDto
 import com.cbconnectit.modules.links.LinkController
 import com.cbconnectit.modules.links.linkRouting
+import com.cbconnectit.plugins.statuspages.ErrorDuplicateEntity
+import com.cbconnectit.plugins.statuspages.ErrorFailedDelete
+import com.cbconnectit.plugins.statuspages.ErrorNotFound
+import com.cbconnectit.plugins.statuspages.ErrorResponse
+import com.cbconnectit.plugins.statuspages.toErrorResponse
 import com.cbconnectit.routing.AuthenticationInstrumentation
 import com.cbconnectit.routing.BaseRoutingTest
 import com.cbconnectit.routing.links.LinkInstrumentation.givenALink
 import com.cbconnectit.routing.links.LinkInstrumentation.givenAValidInsertLink
 import com.cbconnectit.routing.links.LinkInstrumentation.givenAValidUpdateLinkBody
 import com.cbconnectit.routing.links.LinkInstrumentation.givenLinkList
-import com.cbconnectit.statuspages.ErrorDuplicateEntity
-import com.cbconnectit.statuspages.ErrorFailedDelete
-import com.cbconnectit.statuspages.ErrorNotFound
-import com.cbconnectit.statuspages.ErrorResponse
-import com.cbconnectit.statuspages.toErrorResponse
 import io.ktor.http.*
 import io.ktor.server.routing.*
 import io.mockk.coEvery
@@ -57,7 +57,7 @@ class LinkRoutingTest : BaseRoutingTest() {
         val response = doCall(HttpMethod.Get, "/links")
 
         assertThat(response.status).isEqualTo(HttpStatusCode.OK)
-        assertThat(response.parseBody<List<*>>()).hasSize(4)
+        assertThat(response.parseBody<List<LinkDto>>()).hasSize(4)
     }
     // </editor-fold>
 

@@ -11,8 +11,8 @@ import com.cbconnectit.domain.models.user.User
 import com.cbconnectit.modules.auth.AuthController
 import com.cbconnectit.modules.auth.AuthControllerImpl
 import com.cbconnectit.modules.auth.TokenProvider
-import com.cbconnectit.statuspages.ErrorInvalidCredentials
-import com.cbconnectit.statuspages.ErrorInvalidParameters
+import com.cbconnectit.plugins.statuspages.ErrorInvalidCredentials
+import com.cbconnectit.plugins.statuspages.ErrorInvalidParameters
 import com.cbconnectit.utils.PasswordManagerContract
 import io.mockk.clearMocks
 import io.mockk.coEvery

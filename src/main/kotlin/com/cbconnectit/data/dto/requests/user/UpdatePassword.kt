@@ -1,11 +1,13 @@
 package com.cbconnectit.data.dto.requests.user
 
-import com.google.gson.annotations.SerializedName
+import kotlinx.serialization.SerialName
+import kotlinx.serialization.Serializable
 
+@Serializable
 data class UpdatePassword(
-    @SerializedName("old_password")
+    @SerialName("old_password")
     val oldPassword: String,
     override val password: String,
-    @SerializedName("repeat_password")
+    @SerialName("repeat_password")
     override val repeatPassword: String?
 ) : PasswordAble

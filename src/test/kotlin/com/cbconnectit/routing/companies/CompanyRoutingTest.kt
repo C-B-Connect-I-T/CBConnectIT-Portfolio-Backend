@@ -3,17 +3,17 @@ package com.cbconnectit.routing.companies
 import com.cbconnectit.data.dto.requests.company.CompanyDto
 import com.cbconnectit.modules.companies.CompanyController
 import com.cbconnectit.modules.companies.companyRouting
+import com.cbconnectit.plugins.statuspages.ErrorDuplicateEntity
+import com.cbconnectit.plugins.statuspages.ErrorFailedDelete
+import com.cbconnectit.plugins.statuspages.ErrorNotFound
+import com.cbconnectit.plugins.statuspages.ErrorResponse
+import com.cbconnectit.plugins.statuspages.toErrorResponse
 import com.cbconnectit.routing.AuthenticationInstrumentation
 import com.cbconnectit.routing.BaseRoutingTest
 import com.cbconnectit.routing.companies.CompanyInstrumentation.givenACompany
 import com.cbconnectit.routing.companies.CompanyInstrumentation.givenAValidInsertCompany
 import com.cbconnectit.routing.companies.CompanyInstrumentation.givenAValidUpdateCompanyBody
 import com.cbconnectit.routing.companies.CompanyInstrumentation.givenCompanyList
-import com.cbconnectit.statuspages.ErrorDuplicateEntity
-import com.cbconnectit.statuspages.ErrorFailedDelete
-import com.cbconnectit.statuspages.ErrorNotFound
-import com.cbconnectit.statuspages.ErrorResponse
-import com.cbconnectit.statuspages.toErrorResponse
 import io.ktor.http.*
 import io.ktor.server.routing.*
 import io.mockk.coEvery
@@ -57,7 +57,7 @@ class CompanyRoutingTest : BaseRoutingTest() {
         val response = doCall(HttpMethod.Get, "/companies")
 
         assertThat(response.status).isEqualTo(HttpStatusCode.OK)
-        assertThat(response.parseBody<List<*>>()).hasSize(4)
+        assertThat(response.parseBody<List<CompanyDto>>()).hasSize(4)
     }
     // </editor-fold>
 

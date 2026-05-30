@@ -8,15 +8,15 @@ import com.cbconnectit.domain.interfaces.IJobPositionDao
 import com.cbconnectit.domain.interfaces.ITestimonialDao
 import com.cbconnectit.domain.models.testimonial.toDto
 import com.cbconnectit.plugins.dbTransactionalQuery
-import com.cbconnectit.statuspages.ErrorFailedCreate
-import com.cbconnectit.statuspages.ErrorFailedDelete
-import com.cbconnectit.statuspages.ErrorFailedUpdate
-import com.cbconnectit.statuspages.ErrorInvalidParameters
-import com.cbconnectit.statuspages.ErrorNotFound
-import com.cbconnectit.statuspages.ErrorUnknownCompanyIdsForCreateTestimonial
-import com.cbconnectit.statuspages.ErrorUnknownCompanyIdsForUpdateTestimonial
-import com.cbconnectit.statuspages.ErrorUnknownJobPositionIdsForCreateTestimonial
-import com.cbconnectit.statuspages.ErrorUnknownJobPositionIdsForUpdateTestimonial
+import com.cbconnectit.plugins.statuspages.ErrorFailedCreate
+import com.cbconnectit.plugins.statuspages.ErrorFailedDelete
+import com.cbconnectit.plugins.statuspages.ErrorFailedUpdate
+import com.cbconnectit.plugins.statuspages.ErrorInvalidParameters
+import com.cbconnectit.plugins.statuspages.ErrorNotFound
+import com.cbconnectit.plugins.statuspages.ErrorUnknownCompanyIdsForCreateTestimonial
+import com.cbconnectit.plugins.statuspages.ErrorUnknownCompanyIdsForUpdateTestimonial
+import com.cbconnectit.plugins.statuspages.ErrorUnknownJobPositionIdsForCreateTestimonial
+import com.cbconnectit.plugins.statuspages.ErrorUnknownJobPositionIdsForUpdateTestimonial
 import java.util.*
 
 class TestimonialControllerImpl(

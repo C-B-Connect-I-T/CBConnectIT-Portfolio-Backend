@@ -56,33 +56,35 @@ import org.koin.dsl.module
 import org.koin.ktor.plugin.Koin
 
 fun Application.configureKoin() {
-        install(Koin) {
-            modules(
-                module {
-                    single {
-                        Json {
-                            ignoreUnknownKeys = true
-                            encodeDefaults = true
-                            isLenient = false
-                        }
-                    }
-                    singleOf(::parseEnvironment)
-                    single<MediaStorageService> { LocalMediaStorageService(environment = get()) }
-                    single<PasswordManagerContract> { PasswordManager }
-                    single<TokenProvider> {
-                        val environment = get<Environment>()
-                        JwtConfig("https://cb-connect-it.com/", JwtConfig.USERS_AUDIENCE, environment)
-                    }
-                    single<JWTVerifier> {
-                        val tokenProvider = get<TokenProvider>()
-                        tokenProvider.verifier
-                    }
-                    singleOf(::AdminSeeder)
-                },
-                controllerModule(),
-                daoModule()
-            )
+    install(Koin) {
+        modules(
+            applicationModule(),
+            controllerModule(),
+            daoModule()
+        )
+    }
+}
+
+fun applicationModule() = module {
+    single {
+        Json {
+            ignoreUnknownKeys = true
+            encodeDefaults = true
+            isLenient = false
         }
+    }
+    singleOf(::parseEnvironment)
+    single<MediaStorageService> { LocalMediaStorageService(environment = get()) }
+    single<PasswordManagerContract> { PasswordManager }
+    single<TokenProvider> {
+        val environment = get<Environment>()
+        JwtConfig("https://cb-connect-it.com/", JwtConfig.USERS_AUDIENCE, environment)
+    }
+    single<JWTVerifier> {
+        val tokenProvider = get<TokenProvider>()
+        tokenProvider.verifier
+    }
+    singleOf(::AdminSeeder)
 }
 
 fun controllerModule() = module {

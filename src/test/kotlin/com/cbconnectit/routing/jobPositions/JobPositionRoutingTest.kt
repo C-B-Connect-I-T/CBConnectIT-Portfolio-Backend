@@ -3,17 +3,17 @@ package com.cbconnectit.routing.jobPositions
 import com.cbconnectit.data.dto.requests.jobPosition.JobPositionDto
 import com.cbconnectit.modules.jobPositions.JobPositionController
 import com.cbconnectit.modules.jobPositions.jobPositionRouting
+import com.cbconnectit.plugins.statuspages.ErrorDuplicateEntity
+import com.cbconnectit.plugins.statuspages.ErrorFailedDelete
+import com.cbconnectit.plugins.statuspages.ErrorNotFound
+import com.cbconnectit.plugins.statuspages.ErrorResponse
+import com.cbconnectit.plugins.statuspages.toErrorResponse
 import com.cbconnectit.routing.AuthenticationInstrumentation
 import com.cbconnectit.routing.BaseRoutingTest
 import com.cbconnectit.routing.jobPositions.JobPositionInstrumentation.givenAJobPosition
 import com.cbconnectit.routing.jobPositions.JobPositionInstrumentation.givenAValidInsertJobPosition
 import com.cbconnectit.routing.jobPositions.JobPositionInstrumentation.givenAValidUpdateJobPositionBody
 import com.cbconnectit.routing.jobPositions.JobPositionInstrumentation.givenJobPositionList
-import com.cbconnectit.statuspages.ErrorDuplicateEntity
-import com.cbconnectit.statuspages.ErrorFailedDelete
-import com.cbconnectit.statuspages.ErrorNotFound
-import com.cbconnectit.statuspages.ErrorResponse
-import com.cbconnectit.statuspages.toErrorResponse
 import io.ktor.http.*
 import io.ktor.server.routing.*
 import io.mockk.coEvery
@@ -57,7 +57,7 @@ class JobPositionRoutingTest : BaseRoutingTest() {
         val response = doCall(HttpMethod.Get, "/job_positions")
 
         assertThat(response.status).isEqualTo(HttpStatusCode.OK)
-        assertThat(response.parseBody<List<*>>()).hasSize(4)
+        assertThat(response.parseBody<List<JobPositionDto>>()).hasSize(4)
     }
     // </editor-fold>
 

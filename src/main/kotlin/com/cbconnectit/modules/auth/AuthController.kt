@@ -5,8 +5,8 @@ import com.cbconnectit.data.dto.requests.hasData
 import com.cbconnectit.data.dto.responses.CredentialsResponse
 import com.cbconnectit.domain.interfaces.IUserDao
 import com.cbconnectit.plugins.dbTransactionalQuery
-import com.cbconnectit.statuspages.ErrorInvalidCredentials
-import com.cbconnectit.statuspages.ErrorInvalidParameters
+import com.cbconnectit.plugins.statuspages.ErrorInvalidCredentials
+import com.cbconnectit.plugins.statuspages.ErrorInvalidParameters
 import com.cbconnectit.utils.PasswordManagerContract
 
 class AuthControllerImpl(
