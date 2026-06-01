@@ -98,10 +98,7 @@ class CompanyDaoImpl : ICompanyDao {
     }
 
     override fun deleteCompany(id: UUID): Boolean {
-        val result = CompaniesTable.deleteWhere { CompaniesTable.id eq id } > 0
-        val result2 = CompaniesLinksPivotTable.deleteWhere { companyId eq id } > 0
-
-        return result && result2
+        return CompaniesTable.deleteWhere { CompaniesTable.id eq id } > 0
     }
 
     override fun companyUnique(name: String): Boolean =

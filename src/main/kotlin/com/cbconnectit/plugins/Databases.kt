@@ -28,8 +28,8 @@ import com.github.slugify.Slugify
 import io.ktor.server.application.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import org.flywaydb.core.Flyway
 import org.jetbrains.exposed.sql.Database
-import org.jetbrains.exposed.sql.SchemaUtils
 import org.jetbrains.exposed.sql.Transaction
 import org.jetbrains.exposed.sql.insertIgnore
 import org.jetbrains.exposed.sql.transactions.experimental.newSuspendedTransaction
@@ -42,6 +42,12 @@ fun Application.configureDatabase() {
     val environment by inject<Environment>()
     val adminSeeder by inject<AdminSeeder>()
 
+    Flyway.configure()
+        .dataSource(environment.databaseUrl, environment.databaseUsername, environment.databasePassword)
+        .locations("classpath:db/migration")
+        .load()
+        .migrate()
+
     Database.connect(
         url = environment.databaseUrl,
         user = environment.databaseUsername,
@@ -49,22 +55,6 @@ fun Application.configureDatabase() {
     )
 
     transaction {
-        SchemaUtils.createMissingTablesAndColumns(
-            CompaniesLinksPivotTable,
-            CompaniesTable,
-            ExperiencesTable,
-            JobPositionsTable,
-            LinksProjectsPivotTable,
-            LinksTable,
-            ProjectsTable,
-            ServicesTable,
-            TagsExperiencesPivotTable,
-            TagsProjectsPivotTable,
-            TagsTable,
-            TestimonialsTable,
-            UsersTable
-        )
-
         adminSeeder.seed()
         seedDatabase()
     }

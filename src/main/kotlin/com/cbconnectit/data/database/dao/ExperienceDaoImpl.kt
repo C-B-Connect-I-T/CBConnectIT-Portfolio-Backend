@@ -112,7 +112,7 @@ class ExperienceDaoImpl : IExperienceDao {
     }
 
     override fun updateExperience(id: UUID, updateExperience: UpdateExperience): Experience? {
-        ExperiencesTable.update({ ExperiencesTable.id eq id }) {
+        val updateCount = ExperiencesTable.update({ ExperiencesTable.id eq id }) {
             it[shortDescription] = updateExperience.shortDescription
             it[description] = updateExperience.description
             it[from] = updateExperience.from.toLocalDateTime()
@@ -123,6 +123,8 @@ class ExperienceDaoImpl : IExperienceDao {
 
             it[updatedAt] = LocalDateTime.now()
         }
+
+        if (updateCount == 0) return null
 
         TagsExperiencesPivotTable.deleteWhere {
             experienceId eq id and (tagId notInList (updateExperience.tags?.map { tagId -> UUID.fromString(tagId) } ?: emptyList()))
@@ -139,9 +141,6 @@ class ExperienceDaoImpl : IExperienceDao {
     }
 
     override fun deleteExperience(id: UUID): Boolean {
-        val result = ExperiencesTable.deleteWhere { ExperiencesTable.id eq id } > 0
-        val result2 = TagsExperiencesPivotTable.deleteWhere { experienceId eq id } > 0
-
-        return result && result2
+        return ExperiencesTable.deleteWhere { ExperiencesTable.id eq id } > 0
     }
 }

@@ -114,7 +114,7 @@ class ProjectDaoImpl : IProjectDao {
     }
 
     override fun updateProject(id: UUID, updateProject: UpdateProject): Project? {
-        ProjectsTable.update({ ProjectsTable.id eq id }) { body ->
+        val updateCount = ProjectsTable.update({ ProjectsTable.id eq id }) { body ->
             body[title] = updateProject.title
             body[shortDescription] = updateProject.shortDescription
             body[description] = updateProject.description
@@ -123,6 +123,8 @@ class ProjectDaoImpl : IProjectDao {
 
             body[updatedAt] = LocalDateTime.now()
         }
+
+        if (updateCount == 0) return null
 
         TagsProjectsPivotTable.deleteWhere {
             projectId eq id and (tagId notInList (updateProject.tags?.map { stringId -> UUID.fromString(stringId) } ?: emptyList()))
@@ -148,10 +150,6 @@ class ProjectDaoImpl : IProjectDao {
     }
 
     override fun deleteProject(id: UUID): Boolean {
-        val result = ProjectsTable.deleteWhere { ProjectsTable.id eq id }
-        val result2 = TagsProjectsPivotTable.deleteWhere { projectId eq id }
-        val result3 = LinksProjectsPivotTable.deleteWhere { projectId eq id }
-
-        return result > 0 && result2 > 0 && result3 > 0
+        return ProjectsTable.deleteWhere { ProjectsTable.id eq id } > 0
     }
 }
