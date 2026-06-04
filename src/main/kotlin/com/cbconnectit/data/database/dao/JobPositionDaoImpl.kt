@@ -35,7 +35,7 @@ class JobPositionDaoImpl : IJobPositionDao {
         JobPositionsTable.update({ JobPositionsTable.id eq id }) {
             it[name] = updateJobPosition.name
 
-            it[LinksTable.updatedAt] = CurrentDateTime
+            it[updatedAt] = CurrentDateTime
         }
 
         return getJobPositionById(id)

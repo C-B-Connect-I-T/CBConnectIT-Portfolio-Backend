@@ -19,6 +19,7 @@ import org.jetbrains.exposed.sql.and
 import org.jetbrains.exposed.sql.deleteWhere
 import org.jetbrains.exposed.sql.insert
 import org.jetbrains.exposed.sql.insertAndGetId
+import org.jetbrains.exposed.sql.insertIgnore
 import org.jetbrains.exposed.sql.selectAll
 import org.jetbrains.exposed.sql.update
 import java.time.LocalDateTime
@@ -97,14 +98,14 @@ class ProjectDaoImpl : IProjectDao {
         }.value
 
         insertNewProject.tags?.forEach { tagId ->
-            TagsProjectsPivotTable.insert {
+            TagsProjectsPivotTable.insertIgnore {
                 it[projectId] = id
                 it[this.tagId] = UUID.fromString(tagId)
             }
         }
 
         insertNewProject.links?.forEach { linkId ->
-            LinksProjectsPivotTable.insert {
+            LinksProjectsPivotTable.insertIgnore {
                 it[projectId] = id
                 it[this.linkId] = UUID.fromString(linkId)
             }
@@ -130,7 +131,7 @@ class ProjectDaoImpl : IProjectDao {
             projectId eq id and (tagId notInList (updateProject.tags?.map { stringId -> UUID.fromString(stringId) } ?: emptyList()))
         }
         updateProject.tags?.forEach { tagId ->
-            TagsProjectsPivotTable.insert {
+            TagsProjectsPivotTable.insertIgnore {
                 it[projectId] = id
                 it[this.tagId] = UUID.fromString(tagId)
             }
@@ -140,7 +141,7 @@ class ProjectDaoImpl : IProjectDao {
             projectId eq id and (linkId notInList (updateProject.links?.map { stringId -> UUID.fromString(stringId) } ?: emptyList()))
         }
         updateProject.links?.forEach { linkId ->
-            LinksProjectsPivotTable.insert {
+            LinksProjectsPivotTable.insertIgnore {
                 it[projectId] = id
                 it[this.linkId] = UUID.fromString(linkId)
             }

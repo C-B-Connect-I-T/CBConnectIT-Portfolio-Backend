@@ -25,6 +25,7 @@ import org.jetbrains.exposed.sql.and
 import org.jetbrains.exposed.sql.deleteWhere
 import org.jetbrains.exposed.sql.insert
 import org.jetbrains.exposed.sql.insertAndGetId
+import org.jetbrains.exposed.sql.insertIgnore
 import org.jetbrains.exposed.sql.selectAll
 import org.jetbrains.exposed.sql.update
 import java.time.LocalDateTime
@@ -102,7 +103,7 @@ class ExperienceDaoImpl : IExperienceDao {
         }.value
 
         insertNewExperience.tags?.forEach { tagId ->
-            TagsExperiencesPivotTable.insert {
+            TagsExperiencesPivotTable.insertIgnore {
                 it[this.tagId] = UUID.fromString(tagId)
                 it[experienceId] = id
             }
@@ -131,7 +132,7 @@ class ExperienceDaoImpl : IExperienceDao {
         }
 
         updateExperience.tags?.forEach { tagId ->
-            TagsExperiencesPivotTable.insert {
+            TagsExperiencesPivotTable.insertIgnore {
                 it[this.tagId] = UUID.fromString(tagId)
                 it[experienceId] = id
             }
