@@ -4,7 +4,6 @@ import com.cbconnectit.data.dto.requests.user.InsertNewUser
 import com.cbconnectit.data.dto.requests.user.UpdatePassword
 import com.cbconnectit.data.dto.requests.user.UpdateUser
 import com.cbconnectit.domain.models.user.User
-import com.cbconnectit.domain.models.user.UserRoles
 import java.time.LocalDateTime
 import java.util.*
 
@@ -56,7 +55,7 @@ object UserInstrumentation {
         fullName: String = "John Doe",
         username: String = "john.doe@example.be",
         password: String = "ValidPass123",
-        role: UserRoles = UserRoles.User
+        role: User.Role = User.Role.User
     ) = User(
         id = id,
         fullName = fullName,

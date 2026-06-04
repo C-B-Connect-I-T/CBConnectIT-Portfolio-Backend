@@ -3,7 +3,6 @@ package com.cbconnectit.domain.models.user
 import com.cbconnectit.data.dto.requests.user.NameAble
 import com.cbconnectit.data.dto.requests.user.UserDto
 import com.cbconnectit.utils.toDatabaseString
-import io.ktor.server.auth.*
 import java.time.LocalDateTime
 import java.util.*
 
@@ -13,9 +12,18 @@ data class User(
     val username: String = "",
     val createdAt: LocalDateTime = LocalDateTime.now(),
     val updatedAt: LocalDateTime = LocalDateTime.now(),
-    val role: UserRoles = UserRoles.User,
+    val role: Role = Role.User,
     @Transient val password: String? = null,
-) : NameAble, Principal
+) : NameAble {
+
+    enum class Role {
+        User,
+        Admin
+    }
+
+    val isAdmin: Boolean
+        get() = role == Role.Admin
+}
 
 fun User.toDto() = UserDto(
     id = this.id.toString(),
@@ -25,8 +33,3 @@ fun User.toDto() = UserDto(
     updatedAt = this.updatedAt.toDatabaseString(),
     role = this.role
 )
-
-enum class UserRoles {
-    User,
-    Admin
-}

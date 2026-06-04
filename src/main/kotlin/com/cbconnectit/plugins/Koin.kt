@@ -6,6 +6,7 @@ import com.cbconnectit.data.database.dao.ExperienceDaoImpl
 import com.cbconnectit.data.database.dao.JobPositionDaoImpl
 import com.cbconnectit.data.database.dao.LinkDaoImpl
 import com.cbconnectit.data.database.dao.ProjectDaoImpl
+import com.cbconnectit.data.database.dao.RefreshTokenDaoImpl
 import com.cbconnectit.data.database.dao.ServiceDaoImpl
 import com.cbconnectit.data.database.dao.TagDaoImpl
 import com.cbconnectit.data.database.dao.TestimonialDaoImpl
@@ -15,6 +16,7 @@ import com.cbconnectit.domain.interfaces.IExperienceDao
 import com.cbconnectit.domain.interfaces.IJobPositionDao
 import com.cbconnectit.domain.interfaces.ILinkDao
 import com.cbconnectit.domain.interfaces.IProjectDao
+import com.cbconnectit.domain.interfaces.IRefreshTokenDao
 import com.cbconnectit.domain.interfaces.IServiceDao
 import com.cbconnectit.domain.interfaces.ITagDao
 import com.cbconnectit.domain.interfaces.ITestimonialDao
@@ -102,6 +104,7 @@ fun controllerModule() = module {
 
 fun daoModule() = module {
     singleOf(::UserDaoImpl) { bind<IUserDao>() }
+    singleOf(::RefreshTokenDaoImpl) { bind<IRefreshTokenDao>() }
     singleOf(::TagDaoImpl) { bind<ITagDao>() }
     singleOf(::ServiceDaoImpl) { bind<IServiceDao>() }
     singleOf(::LinkDaoImpl) { bind<ILinkDao>() }

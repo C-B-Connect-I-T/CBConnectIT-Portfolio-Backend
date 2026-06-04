@@ -39,9 +39,3 @@ fun ResultRow.toService() = Service(
 
 fun Iterable<ResultRow>.toServices() = this.map { it.toService() }
 fun Iterable<ResultRow>.toService() = this.firstOrNull()?.toService()
-
-object Constants {
-    const val smallerTextSize = 100
-    const val normalTextSize = 255
-    const val bigTextSize = 1000
-}

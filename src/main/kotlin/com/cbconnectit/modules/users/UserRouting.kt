@@ -4,8 +4,8 @@ import com.cbconnectit.data.dto.requests.user.InsertNewUser
 import com.cbconnectit.data.dto.requests.user.UpdatePassword
 import com.cbconnectit.data.dto.requests.user.UpdateUser
 import com.cbconnectit.domain.models.user.toDto
-import com.cbconnectit.modules.auth.ADMIN_ONLY
 import com.cbconnectit.utils.ParamConstants
+import com.cbconnectit.utils.ParamConstants.ADMIN_AUTHENTICATE_KEY
 import com.cbconnectit.utils.authenticatedUser
 import com.cbconnectit.utils.getUserId
 import com.cbconnectit.utils.receiveOrRespondWithError
@@ -39,7 +39,7 @@ fun Route.userRouting(userController: UserController) {
             }
         }
 
-        authenticate(ADMIN_ONLY) {
+        authenticate(ADMIN_AUTHENTICATE_KEY) {
             post {
                 val insertNewUser = call.receiveOrRespondWithError<InsertNewUser>()
                 val user = userController.postUser(insertNewUser)

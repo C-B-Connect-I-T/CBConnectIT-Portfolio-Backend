@@ -1,6 +1,8 @@
 package com.cbconnectit.controllers
 
+import com.auth0.jwt.interfaces.DecodedJWT
 import com.cbconnectit.data.dto.responses.CredentialsResponse
+import com.cbconnectit.domain.interfaces.IRefreshTokenDao
 import com.cbconnectit.domain.interfaces.IUserDao
 import com.cbconnectit.domain.models.user.User
 import com.cbconnectit.instrumentation.AuthInstrumentation.givenAValidEmailCreateToken
@@ -27,9 +29,12 @@ import org.junit.jupiter.api.assertThrows
 class AuthControllerTest : BaseControllerTest() {
 
     private val userDao: IUserDao = mockk()
+    private val refreshTokenDao: IRefreshTokenDao = mockk()
     private val tokenProvider: TokenProvider = mockk()
     private val passwordEncryption: PasswordManagerContract = mockk()
-    private val controller: AuthController by lazy { AuthControllerImpl(userDao, tokenProvider, passwordEncryption) }
+    private val decodedJwt: DecodedJWT = mockk()
+
+    private val controller: AuthController by lazy { AuthControllerImpl(userDao, refreshTokenDao, tokenProvider, passwordEncryption) }
 
     @BeforeEach
     override fun before() {

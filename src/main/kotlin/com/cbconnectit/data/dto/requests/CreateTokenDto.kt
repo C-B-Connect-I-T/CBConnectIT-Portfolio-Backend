@@ -1,5 +1,6 @@
 package com.cbconnectit.data.dto.requests
 
+import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
@@ -9,3 +10,11 @@ data class CreateTokenDto(
 )
 
 fun CreateTokenDto.hasData() = username.isNotBlank() && password.isNotBlank()
+
+@Serializable
+data class RefreshTokenDto(
+    @SerialName("refresh_token")
+    val refreshToken: String
+)
+
+fun RefreshTokenDto.hasData() = refreshToken.isNotBlank()

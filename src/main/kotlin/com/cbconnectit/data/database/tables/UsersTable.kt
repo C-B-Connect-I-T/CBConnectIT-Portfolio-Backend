@@ -3,7 +3,6 @@ package com.cbconnectit.data.database.tables
 import com.cbconnectit.data.database.tables.Constants.normalTextSize
 import com.cbconnectit.data.database.tables.Constants.smallerTextSize
 import com.cbconnectit.domain.models.user.User
-import com.cbconnectit.domain.models.user.UserRoles
 import org.jetbrains.exposed.dao.id.UUIDTable
 import org.jetbrains.exposed.sql.ResultRow
 import org.jetbrains.exposed.sql.javatime.CurrentDateTime
@@ -15,7 +14,7 @@ object UsersTable : UUIDTable() {
     val password = varchar("password", normalTextSize)
     val createdAt = datetime("created_at").defaultExpression(CurrentDateTime)
     val updatedAt = datetime("updated_at").defaultExpression(CurrentDateTime)
-    val role = enumeration<UserRoles>("role").default(UserRoles.User)
+    val role = enumeration<User.Role>("role").default(User.Role.User)
 }
 
 fun ResultRow.toUser() = User(

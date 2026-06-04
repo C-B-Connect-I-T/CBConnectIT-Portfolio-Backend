@@ -3,9 +3,8 @@ package com.cbconnectit.routing
 import com.auth0.jwt.JWT
 import com.auth0.jwt.algorithms.Algorithm
 import com.cbconnectit.domain.models.user.User
-import com.cbconnectit.domain.models.user.UserRoles
-import com.cbconnectit.modules.auth.ADMIN_ONLY
 import com.cbconnectit.plugins.statuspages.generalStatusPages
+import com.cbconnectit.utils.ParamConstants.ADMIN_AUTHENTICATE_KEY
 import com.cbconnectit.utils.toDatabaseString
 import io.ktor.client.request.*
 import io.ktor.client.statement.*
@@ -88,8 +87,8 @@ abstract class BaseRoutingTest {
             val time = LocalDateTime.now().toDatabaseString()
 
             return@validate when (authenticationTest.name) {
-                ADMIN_ONLY -> {
-                    if (authenticationTest.userRole != UserRoles.Admin) return@validate null
+                ADMIN_AUTHENTICATE_KEY -> {
+                    if (authenticationTest.userRole != User.Role.Admin) return@validate null
 
                     User(UUID.fromString("00000000-0000-0000-0000-000000000001"), "Chris Bol", "chris.bol@example.com", LocalDateTime.now(), LocalDateTime.now(), authenticationTest.userRole)
                 }
@@ -127,4 +126,4 @@ abstract class BaseRoutingTest {
     }
 }
 
-data class AuthenticationInstrumentation(val name: String? = null, val userRole: UserRoles = UserRoles.User)
+data class AuthenticationInstrumentation(val name: String? = null, val userRole: User.Role = User.Role.User)

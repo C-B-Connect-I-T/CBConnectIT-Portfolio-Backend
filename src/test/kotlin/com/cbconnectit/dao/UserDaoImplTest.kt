@@ -2,7 +2,7 @@ package com.cbconnectit.dao
 
 import com.cbconnectit.data.database.dao.UserDaoImpl
 import com.cbconnectit.data.database.tables.UsersTable
-import com.cbconnectit.domain.models.user.UserRoles
+import com.cbconnectit.domain.models.user.User
 import com.cbconnectit.instrumentation.UserInstrumentation
 import com.cbconnectit.instrumentation.UserInstrumentation.givenAValidInsertUser
 import com.cbconnectit.instrumentation.UserInstrumentation.givenAValidUpdateUser
@@ -61,7 +61,7 @@ internal class UserDaoImplTest : BaseDaoTest() {
         assertThat(user).matches {
             it?.username == validUser.username &&
                     it.fullName == validUser.fullName &&
-                    it.role == UserRoles.User &&
+                    it.role == User.Role.User &&
                     it.createdAt == it.updatedAt
         }
     }
@@ -87,7 +87,7 @@ internal class UserDaoImplTest : BaseDaoTest() {
         assertThat(user).matches {
             it?.username == validUpdateUser.username &&
                     it?.fullName == validUpdateUser.fullName &&
-                    it?.role == UserRoles.User &&
+                    it?.role == User.Role.User &&
                     it.createdAt != it.updatedAt
         }
     }

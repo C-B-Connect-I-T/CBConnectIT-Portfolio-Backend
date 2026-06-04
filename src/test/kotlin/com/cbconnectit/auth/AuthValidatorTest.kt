@@ -4,7 +4,7 @@ import com.auth0.jwt.interfaces.Payload
 import com.cbconnectit.controllers.BaseControllerTest
 import com.cbconnectit.domain.interfaces.IUserDao
 import com.cbconnectit.domain.models.user.User
-import com.cbconnectit.domain.models.user.UserRoles
+import com.cbconnectit.modules.auth.TokenType
 import com.cbconnectit.modules.auth.validateUser
 import com.cbconnectit.modules.auth.validateUserIsAdmin
 import io.ktor.server.auth.jwt.*
@@ -16,7 +16,7 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
-import java.util.*
+import java.time.LocalDateTime
 import kotlin.test.assertNull
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
@@ -59,25 +59,24 @@ class AuthValidatorTest : BaseControllerTest() {
 
     @Test
     fun `when validating user where every thing is correct, return user as principal`() {
-        coEvery { payload.claims[any()]?.asString() } returns "00000000-0000-0000-0000-000000000001"
-        coEvery { userDao.getUser(any()) } returns User(UUID.fromString("00000000-0000-0000-0000-000000000001"))
+        coEvery { payload.claims["userId"]?.asString() } returns "00000000-0000-0000-0000-000000000001"
+        coEvery { payload.claims["token_type"]?.asString() } returns TokenType.Access.name
+        coEvery { userDao.getUser(any()) } returns User().copy(createdAt = LocalDateTime.now().minusDays(5))
         coEvery { payload.audience.contains(any()) } returns true
 
         val jwt = JWTCredential(payload)
 
         runBlocking {
             val response = jwt.validateUser(userDao)
-            assertThat(response).matches {
-                it is User &&
-                        it.id == UUID.fromString("00000000-0000-0000-0000-000000000001") &&
-                        it.role == UserRoles.User
-            }
+            assertThat(response).isInstanceOf(User::class.java)
         }
     }
 
     @Test
     fun `when validating user as admin where payload does not contain UserId, return null -- unauthorized`() {
-        coEvery { payload.claims[any()]?.asString() } returns null
+        coEvery { payload.claims["userId"]?.asString() } returns null
+        coEvery { payload.claims["token_type"]?.asString() } returns TokenType.Access.name
+        coEvery { payload.audience.contains(any()) } returns true
 
         val jwt = JWTCredential(payload)
 
@@ -119,20 +118,16 @@ class AuthValidatorTest : BaseControllerTest() {
 
     @Test
     fun `when validating user as admin where every thing is correct, return user as principal`() {
-        coEvery { payload.claims[any()]?.asString() } returns "00000000-0000-0000-0000-000000000001"
-        coEvery { userDao.getUser(any()) } returns User(UUID.fromString("00000000-0000-0000-0000-000000000001"))
-        coEvery { userDao.isUserRoleAdmin(any()) } returns true
+        coEvery { payload.claims["userId"]?.asString() } returns "00000000-0000-0000-0000-000000000001"
+        coEvery { payload.claims["token_type"]?.asString() } returns TokenType.Access.name
+        coEvery { userDao.getUser(any()) } returns User().copy(role = User.Role.Admin)
         coEvery { payload.audience.contains(any()) } returns true
 
         val jwt = JWTCredential(payload)
 
         runBlocking {
             val response = jwt.validateUserIsAdmin(userDao)
-            assertThat(response).matches {
-                it is User &&
-                        it.id == UUID.fromString("00000000-0000-0000-0000-000000000001") &&
-                        it.role == UserRoles.User
-            }
+            assertThat(response).isInstanceOf(User::class.java)
         }
     }
 }

@@ -55,8 +55,22 @@ CREATE TABLE Users (
     password   VARCHAR(255) NOT NULL,
     created_at DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    role       INT          NOT NULL DEFAULT 0, -- UserRoles ordinal: User = 0
+    role       INT          NOT NULL DEFAULT 0,
     CONSTRAINT uq_Users_username UNIQUE (username)
+);
+
+-- Refresh tokens table
+CREATE TABLE RefreshTokens (
+    id                BINARY(16)   NOT NULL PRIMARY KEY,
+    user_id           BINARY(16)   NOT NULL,
+    token             VARCHAR(500) NOT NULL,
+    created_at        DATETIME     NOT NULL,
+    expires_at        DATETIME     NOT NULL,
+    invalidated       BOOLEAN      NOT NULL DEFAULT FALSE,
+    replaced_by_token TEXT         NULL,
+    replaced_at       DATETIME     NULL,
+    CONSTRAINT RefreshTokens_token_unique UNIQUE (token),
+    CONSTRAINT fk_RefreshTokens_user_id FOREIGN KEY (user_id) REFERENCES Users(id)
 );
 
 -- Services references Tags (tag_id) and itself (parent_service_id)
