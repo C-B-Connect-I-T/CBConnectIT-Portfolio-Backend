@@ -6,11 +6,11 @@ import com.cbconnectit.data.database.tables.LinksTable
 import com.cbconnectit.data.database.tables.ProjectsTable
 import com.cbconnectit.data.database.tables.TagsProjectsPivotTable
 import com.cbconnectit.data.database.tables.TagsTable
-import com.cbconnectit.domain.models.link.Link
-import com.cbconnectit.domain.models.project.Project
-import com.cbconnectit.domain.models.tag.Tag
+import com.cbconnectit.instrumentation.LinkInstrumentation
+import com.cbconnectit.instrumentation.ProjectInstrumentation
 import com.cbconnectit.instrumentation.ProjectInstrumentation.givenAValidInsertProject
 import com.cbconnectit.instrumentation.ProjectInstrumentation.givenAValidUpdateProject
+import com.cbconnectit.instrumentation.TagInstrumentation
 import kotlinx.coroutines.delay
 import org.assertj.core.api.Assertions.assertThat
 import org.jetbrains.exposed.sql.insert
@@ -26,35 +26,30 @@ internal class ProjectDaoImplTest : BaseDaoTest() {
     private val dao = ProjectDaoImpl()
 
     override suspend fun seedData() {
-        listOf(
-            Tag(UUID.fromString("00000000-0000-0000-0000-000000000001"), name = "First tag", slug = "first-tag"),
-            Tag(UUID.fromString("00000000-0000-0000-0000-000000000002"), name = "Second tag", slug = "second-tag"),
-            Tag(UUID.fromString("00000000-0000-0000-0000-000000000003"), name = "Third tag", slug = "third-tag"),
-        ).forEach { data ->
+        // Seed tags first (foreign key dependency)
+        TagInstrumentation.givenTagList().take(3).forEachIndexed { index, data ->
             TagsTable.insert {
-                it[id] = data.id
+                it[id] = UUID.fromString("00000000-0000-0000-0000-00000000000${index + 1}")
                 it[name] = data.name
                 it[slug] = data.slug
+                it[createdAt] = data.createdAt
+                it[updatedAt] = data.updatedAt
             }
         }
 
-        listOf(
-            Link(UUID.fromString("00000000-0000-0000-0000-000000000001"), url = "https://www.google.be"),
-            Link(UUID.fromString("00000000-0000-0000-0000-000000000002"), url = "https://www.google.be/second"),
-            Link(UUID.fromString("00000000-0000-0000-0000-000000000003"), url = "https://www.google.be/third"),
-        ).forEach { data ->
+        // Seed links
+        LinkInstrumentation.givenLinkList().take(3).forEachIndexed { index, data ->
             LinksTable.insert {
-                it[id] = data.id
+                it[id] = UUID.fromString("00000000-0000-0000-0000-00000000000${index + 1}")
                 it[url] = data.url
+                it[type] = data.type
+                it[createdAt] = data.createdAt
+                it[updatedAt] = data.updatedAt
             }
         }
 
-        listOf(
-            Project(id = UUID.fromString("00000000-0000-0000-0000-000000000001"), title = "First parent project"),
-            Project(id = UUID.fromString("00000000-0000-0000-0000-000000000002"), title = "Sub project of First parent project"),
-            Project(id = UUID.fromString("00000000-0000-0000-0000-000000000003"), title = "Second parent project"),
-            Project(id = UUID.fromString("00000000-0000-0000-0000-000000000004"), title = "Sub project of Sub project of First parent project")
-        ).forEach { data ->
+        // Seed projects
+        ProjectInstrumentation.givenProjectList().forEachIndexed { index, data ->
             ProjectsTable.insert {
                 it[id] = data.id
                 it[title] = data.title
@@ -62,9 +57,12 @@ internal class ProjectDaoImplTest : BaseDaoTest() {
                 it[shortDescription] = data.shortDescription
                 it[imageUrl] = data.imageUrl
                 it[bannerImageUrl] = data.bannerImageUrl
+                it[createdAt] = data.createdAt
+                it[updatedAt] = data.updatedAt
             }
         }
 
+        // Seed project-link relationships
         listOf(
             Pair("00000000-0000-0000-0000-000000000001", "00000000-0000-0000-0000-000000000001"),
             Pair("00000000-0000-0000-0000-000000000001", "00000000-0000-0000-0000-000000000002"),
@@ -78,6 +76,7 @@ internal class ProjectDaoImplTest : BaseDaoTest() {
             }
         }
 
+        // Seed project-tag relationships
         listOf(
             Pair("00000000-0000-0000-0000-000000000001", "00000000-0000-0000-0000-000000000001"),
             Pair("00000000-0000-0000-0000-000000000002", "00000000-0000-0000-0000-000000000002"),
@@ -112,7 +111,7 @@ internal class ProjectDaoImplTest : BaseDaoTest() {
         val project = dao.getProjectById(UUID.fromString("00000000-0000-0000-0000-000000000001"))
 
         assertThat(project).matches {
-            it?.title == "First parent project" &&
+            it?.title == ProjectInstrumentation.givenProjectList()[0].title &&
                     it.links.count() == 2
         }
     }

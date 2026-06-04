@@ -1,10 +1,13 @@
 package com.cbconnectit.dao
 
 import com.cbconnectit.data.database.dao.JobPositionDaoImpl
+import com.cbconnectit.data.database.tables.JobPositionsTable
+import com.cbconnectit.instrumentation.JobPositionInstrumentation
 import com.cbconnectit.instrumentation.JobPositionInstrumentation.givenAValidInsertJobPosition
 import com.cbconnectit.instrumentation.JobPositionInstrumentation.givenAValidUpdateJobPosition
 import kotlinx.coroutines.delay
 import org.assertj.core.api.Assertions.assertThat
+import org.jetbrains.exposed.sql.insert
 import org.junit.jupiter.api.Test
 import java.util.*
 import kotlin.test.assertFalse
@@ -15,6 +18,17 @@ internal class JobPositionDaoImplTest : BaseDaoTest() {
 
     private val dao = JobPositionDaoImpl()
 
+    override suspend fun seedData() {
+        JobPositionInstrumentation.givenJobPositionList().forEach { data ->
+            JobPositionsTable.insert {
+                it[id] = data.id
+                it[name] = data.name
+                it[createdAt] = data.createdAt
+                it[updatedAt] = data.updatedAt
+            }
+        }
+    }
+
     // <editor-fold desc="Get all jobPositions">
     @Test
     fun `getJobPositions but none exists, return empty list`() = runTest(shouldSeedData = false) {
@@ -23,28 +37,24 @@ internal class JobPositionDaoImplTest : BaseDaoTest() {
     }
 
     @Test
-    fun `getJobPositions return the list`() = runTest(shouldSeedData = false) {
-        dao.insertJobPosition(givenAValidInsertJobPosition())
-        dao.insertJobPosition(givenAValidInsertJobPosition())
+    fun `getJobPositions return the list`() = runTest {
         val list = dao.getJobPositions()
-        assertThat(list).hasSize(2)
+        assertThat(list).hasSize(4)
     }
     // </editor-fold>
 
     // <editor-fold desc="Get specific jobPosition by id">
     @Test
-    fun `getJobPosition where item exists, return correct jobPosition`() = runTest(shouldSeedData = false) {
-        val validJobPosition = givenAValidInsertJobPosition()
-        val jobPositionId = dao.insertJobPosition(validJobPosition)?.id
-        val jobPosition = dao.getJobPositionById(jobPositionId!!)
+    fun `getJobPosition where item exists, return correct jobPosition`() = runTest {
+        val jobPosition = dao.getJobPositionById(JobPositionInstrumentation.givenJobPositionList()[0].id)
 
         assertThat(jobPosition).matches {
-            it?.name == validJobPosition.name
+            it?.name == JobPositionInstrumentation.givenJobPositionList()[0].name
         }
     }
 
     @Test
-    fun `getJobPosition where item does not exists, return 'null'`() = runTest(shouldSeedData = false) {
+    fun `getJobPosition where item does not exists, return 'null'`() = runTest {
         val jobPosition = dao.getJobPositionById(UUID.randomUUID())
 
         assertNull(jobPosition)
@@ -66,25 +76,21 @@ internal class JobPositionDaoImplTest : BaseDaoTest() {
 
     // <editor-fold desc="Update jobPosition">
     @Test
-    fun `updateJobPosition where information is correct, database is storing information and returning the correct content`() = runTest(shouldSeedData = false) {
-        val validJobPosition = givenAValidInsertJobPosition()
-        val jobPositionId = dao.insertJobPosition(validJobPosition)?.id
-
+    fun `updateJobPosition where information is correct, database is storing information and returning the correct content`() = runTest {
         // adding a delay so there is a clear difference between `updatedAt` and `createdAt`
         delay(1000)
 
         val validUpdateJobPosition = givenAValidUpdateJobPosition()
-        val jobPosition = dao.updateJobPosition(jobPositionId!!, validUpdateJobPosition)
+        val jobPosition = dao.updateJobPosition(JobPositionInstrumentation.givenJobPositionList()[0].id, validUpdateJobPosition)
 
         assertThat(jobPosition).matches {
-            it?.name != validJobPosition.name &&
-                    it?.name == validUpdateJobPosition.name &&
+            it?.name == validUpdateJobPosition.name &&
                     it.createdAt != it.updatedAt
         }
     }
 
     @Test
-    fun `updateJobPosition where information is correct but jobPosition with id does not exist, database does nothing and returns 'null'`() = runTest(shouldSeedData = false) {
+    fun `updateJobPosition where information is correct but jobPosition with id does not exist, database does nothing and returns 'null'`() = runTest {
         val validJobPosition = givenAValidUpdateJobPosition()
         val jobPosition = dao.updateJobPosition(UUID.randomUUID(), validJobPosition)
 
@@ -94,14 +100,13 @@ internal class JobPositionDaoImplTest : BaseDaoTest() {
 
     // <editor-fold desc="Delete jobPosition">
     @Test
-    fun `deleteJobPosition for id that exists, return true`() = runTest(shouldSeedData = false) {
-        val id = dao.insertJobPosition(givenAValidInsertJobPosition())?.id
-        val deleted = dao.deleteJobPosition(id!!)
+    fun `deleteJobPosition for id that exists, return true`() = runTest {
+        val deleted = dao.deleteJobPosition(JobPositionInstrumentation.givenJobPositionList()[0].id)
         assertTrue(deleted)
     }
 
     @Test
-    fun `deleteJobPosition for id that does not exist, return false`() = runTest(shouldSeedData = false) {
+    fun `deleteJobPosition for id that does not exist, return false`() = runTest {
         val deleted = dao.deleteJobPosition(UUID.randomUUID())
         assertFalse(deleted)
     }
@@ -109,15 +114,13 @@ internal class JobPositionDaoImplTest : BaseDaoTest() {
 
     // <editor-fold desc="Check if position is unique">
     @Test
-    fun `jobPositionUnique() for id that exists, return false`() = runTest(shouldSeedData = false) {
-        dao.insertJobPosition(givenAValidInsertJobPosition())
-        val unique = dao.jobPositionUnique(givenAValidInsertJobPosition().name)
+    fun `jobPositionUnique() for id that exists, return false`() = runTest {
+        val unique = dao.jobPositionUnique(JobPositionInstrumentation.givenJobPositionList()[0].name)
         assertFalse(unique)
     }
 
     @Test
-    fun `jobPositionUnique() for id that does not exist, return true`() = runTest(shouldSeedData = false) {
-        dao.insertJobPosition(givenAValidInsertJobPosition("Android Developer"))
+    fun `jobPositionUnique() for id that does not exist, return true`() = runTest {
         val unique = dao.jobPositionUnique("iOS Developer")
         assertTrue(unique)
     }
@@ -132,7 +135,7 @@ internal class JobPositionDaoImplTest : BaseDaoTest() {
     }
 
     @Test
-    fun `getListOfExistingJobPositionIds where some ids exist, should return list of existing items`() = runTest(shouldSeedData = false) {
+    fun `getListOfExistingJobPositionIds where some ids exist, should return list of existing items`() = runTest {
         val id = dao.insertJobPosition(givenAValidInsertJobPosition())?.id
         val list = dao.getListOfExistingJobPositionIds(listOf(id!!, UUID.fromString("20000000-0000-0000-0000-000000000000")))
         assertThat(list).hasSize(1)

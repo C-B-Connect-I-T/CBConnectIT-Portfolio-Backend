@@ -14,10 +14,10 @@ object JobPositionInstrumentation {
     fun givenAValidUpdateJobPosition(name: String = "Updated Job Position") = UpdateJobPosition(name)
 
     fun givenJobPositionList() = listOf(
-        givenAJobPosition(name = "First Job Position"),
-        givenAJobPosition(name = "Second Job Position"),
-        givenAJobPosition(name = "Third Job Position"),
-        givenAJobPosition(name = "Fourth Job Position"),
+        givenAJobPosition(UUID.fromString("00000000-0000-0000-0000-000000000001"), name = "First Job Position"),
+        givenAJobPosition(UUID.fromString("00000000-0000-0000-0000-000000000002"), name = "Second Job Position"),
+        givenAJobPosition(UUID.fromString("00000000-0000-0000-0000-000000000003"), name = "Third Job Position"),
+        givenAJobPosition(UUID.fromString("00000000-0000-0000-0000-000000000004"), name = "Fourth Job Position"),
     )
 
     fun givenAJobPosition(

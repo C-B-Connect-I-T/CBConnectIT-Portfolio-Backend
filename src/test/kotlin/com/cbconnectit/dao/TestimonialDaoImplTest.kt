@@ -4,9 +4,9 @@ import com.cbconnectit.data.database.dao.TestimonialDaoImpl
 import com.cbconnectit.data.database.tables.CompaniesTable
 import com.cbconnectit.data.database.tables.JobPositionsTable
 import com.cbconnectit.data.database.tables.TestimonialsTable
-import com.cbconnectit.domain.models.company.Company
-import com.cbconnectit.domain.models.jobPosition.JobPosition
-import com.cbconnectit.domain.models.testimonial.Testimonial
+import com.cbconnectit.instrumentation.CompanyInstrumentation
+import com.cbconnectit.instrumentation.JobPositionInstrumentation
+import com.cbconnectit.instrumentation.TestimonialInstrumentation
 import com.cbconnectit.instrumentation.TestimonialInstrumentation.givenAValidInsertTestimonial
 import com.cbconnectit.instrumentation.TestimonialInstrumentation.givenAValidUpdateTestimonial
 import kotlinx.coroutines.delay
@@ -23,66 +23,57 @@ internal class TestimonialDaoImplTest : BaseDaoTest() {
     private val dao = TestimonialDaoImpl()
 
     override suspend fun seedData() {
-        listOf(
-            Company(UUID.fromString("00000000-0000-0000-0000-000000000001"), name = "First company"),
-            Company(UUID.fromString("00000000-0000-0000-0000-000000000002"), name = "Second company"),
-        ).forEach { data ->
+        // Seed companies first (foreign key dependency)
+        CompanyInstrumentation.givenCompanyList().take(2).forEachIndexed { index, data ->
             CompaniesTable.insert {
-                it[id] = data.id
+                it[id] = UUID.fromString("00000000-0000-0000-0000-00000000000${index + 1}")
                 it[name] = data.name
+                it[createdAt] = data.createdAt
+                it[updatedAt] = data.updatedAt
             }
         }
 
-        listOf(
-            JobPosition(UUID.fromString("00000000-0000-0000-0000-000000000001"), name = "First jobPosition"),
-            JobPosition(UUID.fromString("00000000-0000-0000-0000-000000000002"), name = "Second jobPosition"),
-        ).forEach { data ->
+        // Seed job positions
+        JobPositionInstrumentation.givenJobPositionList().take(2).forEachIndexed { index, data ->
             JobPositionsTable.insert {
-                it[id] = data.id
+                it[id] = UUID.fromString("00000000-0000-0000-0000-00000000000${index + 1}")
                 it[name] = data.name
+                it[createdAt] = data.createdAt
+                it[updatedAt] = data.updatedAt
             }
         }
 
+        // Seed testimonials with specific company/job position combinations
+        // Note: fifth testimonial has null company
+        val testimonials = TestimonialInstrumentation.givenTestimonialList()
         listOf(
-            Testimonial(
-                id = UUID.fromString("00000000-0000-0000-0000-000000000001"),
-                review = "First Testimonial",
-                company = Company(UUID.fromString("00000000-0000-0000-0000-000000000001")),
-                jobPosition = JobPosition(UUID.fromString("00000000-0000-0000-0000-000000000002"))
-            ),
-            Testimonial(
-                id = UUID.fromString("00000000-0000-0000-0000-000000000002"),
-                review = "Second Testimonial",
-                company = Company(UUID.fromString("00000000-0000-0000-0000-000000000002")),
-                jobPosition = JobPosition(UUID.fromString("00000000-0000-0000-0000-000000000001"))
-            ),
-            Testimonial(
-                id = UUID.fromString("00000000-0000-0000-0000-000000000003"),
-                review = "Third Testimonial",
-                company = Company(UUID.fromString("00000000-0000-0000-0000-000000000001")),
-                jobPosition = JobPosition(UUID.fromString("00000000-0000-0000-0000-000000000002"))
-            ),
-            Testimonial(
-                id = UUID.fromString("00000000-0000-0000-0000-000000000004"),
-                review = "Fourth Testimonial",
-                company = Company(UUID.fromString("00000000-0000-0000-0000-000000000002")),
-                jobPosition = JobPosition(UUID.fromString("00000000-0000-0000-0000-000000000001"))
-            ),
-            Testimonial(
-                id = UUID.fromString("00000000-0000-0000-0000-000000000005"),
-                review = "Fifth Testimonial",
-                company = null,
-                jobPosition = JobPosition(UUID.fromString("00000000-0000-0000-0000-000000000001"))
-            )
-        ).forEach { data ->
+            Triple(UUID.fromString("00000000-0000-0000-0000-000000000001"), UUID.fromString("00000000-0000-0000-0000-000000000001"), UUID.fromString("00000000-0000-0000-0000-000000000002")),
+            Triple(UUID.fromString("00000000-0000-0000-0000-000000000002"), UUID.fromString("00000000-0000-0000-0000-000000000002"), UUID.fromString("00000000-0000-0000-0000-000000000001")),
+            Triple(UUID.fromString("00000000-0000-0000-0000-000000000003"), UUID.fromString("00000000-0000-0000-0000-000000000001"), UUID.fromString("00000000-0000-0000-0000-000000000002")),
+            Triple(UUID.fromString("00000000-0000-0000-0000-000000000004"), UUID.fromString("00000000-0000-0000-0000-000000000002"), UUID.fromString("00000000-0000-0000-0000-000000000001")),
+        ).forEachIndexed { index, (testimonialId, compId, jobPosId) ->
             TestimonialsTable.insert {
-                it[id] = data.id
-                it[review] = data.review
-                it[companyId] = data.company?.id
-                it[jobPositionId] = data.jobPosition.id
+                it[id] = testimonialId
+                it[review] = testimonials[index].review
+                it[companyId] = compId
+                it[jobPositionId] = jobPosId
                 it[imageUrl] = ""
                 it[fullName] = ""
+                it[createdAt] = testimonials[index].createdAt
+                it[updatedAt] = testimonials[index].updatedAt
             }
+        }
+
+        // Add fifth testimonial with null company
+        TestimonialsTable.insert {
+            it[id] = UUID.fromString("00000000-0000-0000-0000-000000000005")
+            it[review] = "Fifth Testimonial"
+            it[companyId] = null
+            it[jobPositionId] = UUID.fromString("00000000-0000-0000-0000-000000000001")
+            it[imageUrl] = ""
+            it[fullName] = ""
+            it[createdAt] = testimonials[0].createdAt
+            it[updatedAt] = testimonials[0].updatedAt
         }
     }
 

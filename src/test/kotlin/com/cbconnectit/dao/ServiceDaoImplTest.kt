@@ -3,10 +3,10 @@ package com.cbconnectit.dao
 import com.cbconnectit.data.database.dao.ServiceDaoImpl
 import com.cbconnectit.data.database.tables.ServicesTable
 import com.cbconnectit.data.database.tables.TagsTable
-import com.cbconnectit.domain.models.service.Service
-import com.cbconnectit.domain.models.tag.Tag
+import com.cbconnectit.instrumentation.ServiceInstrumentation
 import com.cbconnectit.instrumentation.ServiceInstrumentation.givenAValidInsertService
 import com.cbconnectit.instrumentation.ServiceInstrumentation.givenAValidUpdateService
+import com.cbconnectit.instrumentation.TagInstrumentation
 import kotlinx.coroutines.delay
 import org.assertj.core.api.Assertions.assertThat
 import org.jetbrains.exposed.exceptions.ExposedSQLException
@@ -23,53 +23,34 @@ internal class ServiceDaoImplTest : BaseDaoTest() {
     private val dao = ServiceDaoImpl()
 
     override suspend fun seedData() {
-        listOf(
-            Tag(UUID.fromString("00000000-0000-0000-0000-000000000001"), name = "First tag", slug = "first-tag")
-        ).forEach { data ->
+        // Seed tag first (foreign key dependency)
+        TagInstrumentation.givenTagList().take(1).forEach { data ->
             TagsTable.insert {
-                it[id] = data.id
+                it[id] = UUID.fromString("00000000-0000-0000-0000-000000000001")
                 it[name] = data.name
                 it[slug] = data.slug
+                it[createdAt] = data.createdAt
+                it[updatedAt] = data.updatedAt
             }
         }
 
+        // Seed services with parent-child relationships
         listOf(
-            Service(
-                id = UUID.fromString("00000000-0000-0000-0000-000000000001"),
-                title = "First parent service",
-                imageUrl = "https://www.google.be/image",
-                description = "Description",
-                tag = Tag(UUID.fromString("00000000-0000-0000-0000-000000000001"))
-            ) to null,
-            Service(
-                id = UUID.fromString("00000000-0000-0000-0000-000000000002"),
-                title = "Sub service of First parent service",
-                imageUrl = "https://www.google.be/image",
-                description = "Description",
-                tag = Tag(UUID.fromString("00000000-0000-0000-0000-000000000001"))
-            ) to UUID.fromString("00000000-0000-0000-0000-000000000001"),
-            Service(
-                id = UUID.fromString("00000000-0000-0000-0000-000000000003"),
-                title = "Second parent service",
-                imageUrl = "https://www.google.be/image",
-                description = "Description",
-                tag = Tag(UUID.fromString("00000000-0000-0000-0000-000000000001"))
-            ) to null,
-            Service(
-                id = UUID.fromString("00000000-0000-0000-0000-000000000004"),
-                title = "Sub service of Sub service of First parent service",
-                imageUrl = "https://www.google.be/image",
-                description = "Description",
-                tag = Tag(UUID.fromString("00000000-0000-0000-0000-000000000001"))
-            ) to UUID.fromString("00000000-0000-0000-0000-000000000002")
-        ).forEach { data ->
+            Pair(UUID.fromString("00000000-0000-0000-0000-000000000001"), null),
+            Pair(UUID.fromString("00000000-0000-0000-0000-000000000002"), UUID.fromString("00000000-0000-0000-0000-000000000001")),
+            Pair(UUID.fromString("00000000-0000-0000-0000-000000000003"), null),
+            Pair(UUID.fromString("00000000-0000-0000-0000-000000000004"), UUID.fromString("00000000-0000-0000-0000-000000000002"))
+        ).forEachIndexed { index, (serviceId, parentId) ->
+            val service = ServiceInstrumentation.givenServiceList()[index]
             ServicesTable.insert {
-                it[id] = data.first.id
-                it[title] = data.first.title
-                it[imageUrl] = data.first.imageUrl
-                it[description] = data.first.description
-                it[tagId] = data.first.tag?.id
-                it[parentServiceId] = data.second
+                it[id] = serviceId
+                it[title] = service.title
+                it[imageUrl] = service.imageUrl ?: "https://www.google.be/image"
+                it[description] = service.description
+                it[tagId] = UUID.fromString("00000000-0000-0000-0000-000000000001")
+                it[parentServiceId] = parentId
+                it[createdAt] = service.createdAt
+                it[updatedAt] = service.updatedAt
             }
         }
     }
@@ -94,7 +75,7 @@ internal class ServiceDaoImplTest : BaseDaoTest() {
         val service = dao.getServiceById(UUID.fromString("00000000-0000-0000-0000-000000000001"))
 
         assertThat(service).matches {
-            it?.title == "First parent service"
+            it?.title == ServiceInstrumentation.givenServiceList()[0].title
         }
     }
 

@@ -6,12 +6,12 @@ import com.cbconnectit.data.database.tables.ExperiencesTable
 import com.cbconnectit.data.database.tables.JobPositionsTable
 import com.cbconnectit.data.database.tables.TagsExperiencesPivotTable
 import com.cbconnectit.data.database.tables.TagsTable
-import com.cbconnectit.domain.models.company.Company
-import com.cbconnectit.domain.models.experience.Experience
-import com.cbconnectit.domain.models.jobPosition.JobPosition
-import com.cbconnectit.domain.models.tag.Tag
+import com.cbconnectit.instrumentation.CompanyInstrumentation
+import com.cbconnectit.instrumentation.ExperienceInstrumentation
 import com.cbconnectit.instrumentation.ExperienceInstrumentation.givenAValidInsertExperience
 import com.cbconnectit.instrumentation.ExperienceInstrumentation.givenAValidUpdateExperience
+import com.cbconnectit.instrumentation.JobPositionInstrumentation
+import com.cbconnectit.instrumentation.TagInstrumentation
 import kotlinx.coroutines.delay
 import org.assertj.core.api.Assertions.assertThat
 import org.jetbrains.exposed.sql.insert
@@ -27,75 +27,59 @@ internal class ExperienceDaoImplTest : BaseDaoTest() {
     private val dao = ExperienceDaoImpl()
 
     override suspend fun seedData() {
-        listOf(
-            Company(UUID.fromString("00000000-0000-0000-0000-000000000001"), name = "First company"),
-            Company(UUID.fromString("00000000-0000-0000-0000-000000000002"), name = "Second company"),
-        ).forEach { data ->
+        // Seed companies first (foreign key dependency)
+        CompanyInstrumentation.givenCompanyList().take(2).forEachIndexed { index, data ->
             CompaniesTable.insert {
-                it[id] = data.id
+                it[id] = UUID.fromString("00000000-0000-0000-0000-00000000000${index + 1}")
                 it[name] = data.name
+                it[createdAt] = data.createdAt
+                it[updatedAt] = data.updatedAt
             }
         }
 
-        listOf(
-            JobPosition(UUID.fromString("00000000-0000-0000-0000-000000000001"), name = "First jobPosition"),
-            JobPosition(UUID.fromString("00000000-0000-0000-0000-000000000002"), name = "Second jobPosition"),
-        ).forEach { data ->
+        // Seed job positions
+        JobPositionInstrumentation.givenJobPositionList().take(2).forEachIndexed { index, data ->
             JobPositionsTable.insert {
-                it[id] = data.id
+                it[id] = UUID.fromString("00000000-0000-0000-0000-00000000000${index + 1}")
                 it[name] = data.name
+                it[createdAt] = data.createdAt
+                it[updatedAt] = data.updatedAt
             }
         }
 
-        listOf(
-            Tag(UUID.fromString("00000000-0000-0000-0000-000000000001"), name = "First Tag", "first-tag"),
-            Tag(UUID.fromString("00000000-0000-0000-0000-000000000002"), name = "Second Tag", "second-tag"),
-            Tag(UUID.fromString("00000000-0000-0000-0000-000000000003"), name = "Third Tag", "third-tag"),
-        ).forEach { data ->
+        // Seed tags
+        TagInstrumentation.givenTagList().take(3).forEachIndexed { index, data ->
             TagsTable.insert {
-                it[id] = data.id
+                it[id] = UUID.fromString("00000000-0000-0000-0000-00000000000${index + 1}")
                 it[name] = data.name
                 it[slug] = data.slug
+                it[createdAt] = data.createdAt
+                it[updatedAt] = data.updatedAt
             }
         }
 
+        // Seed experiences with specific company/job position combinations
         listOf(
-            Experience(
-                id = UUID.fromString("00000000-0000-0000-0000-000000000001"),
-                shortDescription = "First Experience",
-                company = Company(UUID.fromString("00000000-0000-0000-0000-000000000001")),
-                jobPosition = JobPosition(UUID.fromString("00000000-0000-0000-0000-000000000002"))
-            ),
-            Experience(
-                id = UUID.fromString("00000000-0000-0000-0000-000000000002"),
-                shortDescription = "Second Experience",
-                company = Company(UUID.fromString("00000000-0000-0000-0000-000000000002")),
-                jobPosition = JobPosition(UUID.fromString("00000000-0000-0000-0000-000000000001"))
-            ),
-            Experience(
-                id = UUID.fromString("00000000-0000-0000-0000-000000000003"),
-                shortDescription = "Third Experience",
-                company = Company(UUID.fromString("00000000-0000-0000-0000-000000000001")),
-                jobPosition = JobPosition(UUID.fromString("00000000-0000-0000-0000-000000000002"))
-            ),
-            Experience(
-                id = UUID.fromString("00000000-0000-0000-0000-000000000004"),
-                shortDescription = "Fourth Experience",
-                company = Company(UUID.fromString("00000000-0000-0000-0000-000000000002")),
-                jobPosition = JobPosition(UUID.fromString("00000000-0000-0000-0000-000000000001"))
-            )
-        ).forEach { data ->
+            Triple(UUID.fromString("00000000-0000-0000-0000-000000000001"), UUID.fromString("00000000-0000-0000-0000-000000000001"), UUID.fromString("00000000-0000-0000-0000-000000000002")),
+            Triple(UUID.fromString("00000000-0000-0000-0000-000000000002"), UUID.fromString("00000000-0000-0000-0000-000000000002"), UUID.fromString("00000000-0000-0000-0000-000000000001")),
+            Triple(UUID.fromString("00000000-0000-0000-0000-000000000003"), UUID.fromString("00000000-0000-0000-0000-000000000001"), UUID.fromString("00000000-0000-0000-0000-000000000002")),
+            Triple(UUID.fromString("00000000-0000-0000-0000-000000000004"), UUID.fromString("00000000-0000-0000-0000-000000000002"), UUID.fromString("00000000-0000-0000-0000-000000000001")),
+        ).forEachIndexed { index, (experienceId, compId, jobPosId) ->
             ExperiencesTable.insert {
-                it[id] = data.id
-                it[shortDescription] = data.shortDescription
-                it[companyId] = data.company.id
-                it[jobPositionId] = data.jobPosition.id
+                it[id] = experienceId
+                it[shortDescription] = ExperienceInstrumentation.givenExperienceList()[index].shortDescription
+                it[companyId] = compId
+                it[jobPositionId] = jobPosId
                 it[description] = ""
                 it[to] = LocalDateTime.now()
                 it[from] = LocalDateTime.now()
+                it[asFreelance] = false
+                it[createdAt] = LocalDateTime.now()
+                it[updatedAt] = LocalDateTime.now()
             }
         }
 
+        // Seed experience-tag relationships
         listOf(
             Pair(UUID.fromString("00000000-0000-0000-0000-000000000001"), UUID.fromString("00000000-0000-0000-0000-000000000001")),
             Pair(UUID.fromString("00000000-0000-0000-0000-000000000002"), UUID.fromString("00000000-0000-0000-0000-000000000001")),

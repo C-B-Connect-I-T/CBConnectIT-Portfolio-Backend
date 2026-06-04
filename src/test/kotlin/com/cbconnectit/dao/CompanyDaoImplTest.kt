@@ -4,12 +4,11 @@ import com.cbconnectit.data.database.dao.CompanyDaoImpl
 import com.cbconnectit.data.database.tables.CompaniesLinksPivotTable
 import com.cbconnectit.data.database.tables.CompaniesTable
 import com.cbconnectit.data.database.tables.LinksTable
-import com.cbconnectit.domain.models.company.Company
-import com.cbconnectit.domain.models.link.Link
-import com.cbconnectit.domain.models.link.LinkType
+import com.cbconnectit.instrumentation.CompanyInstrumentation
 import com.cbconnectit.instrumentation.CompanyInstrumentation.givenAValidInsertCompany
 import com.cbconnectit.instrumentation.CompanyInstrumentation.givenAValidUpdateCompany
 import com.cbconnectit.instrumentation.CompanyInstrumentation.givenAnUnknownCompany
+import com.cbconnectit.instrumentation.LinkInstrumentation
 import kotlinx.coroutines.delay
 import org.assertj.core.api.Assertions.assertThat
 import org.jetbrains.exposed.sql.insert
@@ -24,31 +23,42 @@ internal class CompanyDaoImplTest : BaseDaoTest() {
     private val dao = CompanyDaoImpl()
 
     override suspend fun seedData() {
+        // Seed links first (foreign key dependency)
+        LinkInstrumentation.givenLinkList().forEach { data ->
+            LinksTable.insert {
+                it[id] = data.id
+                it[url] = data.url
+                it[type] = data.type
+                it[createdAt] = data.createdAt
+                it[updatedAt] = data.updatedAt
+            }
+        }
+
+        // Seed additional links needed for company tests
         listOf(
-            Link(UUID.fromString("00000000-0000-0000-0000-000000000001"), url = "https://www.first_company.be"),
-            Link(UUID.fromString("00000000-0000-0000-0000-000000000002"), url = "https://www.first_company.be/play_store", type = LinkType.PlayStore),
-            Link(UUID.fromString("00000000-0000-0000-0000-000000000003"), url = "https://www.second_company.be"),
-            Link(UUID.fromString("00000000-0000-0000-0000-000000000004"), url = "https://www.third_company.be"),
-            Link(UUID.fromString("00000000-0000-0000-0000-000000000005"), url = "https://www.unknown_company.be"),
-            Link(UUID.fromString("00000000-0000-0000-0000-000000000006"), url = "https://www.updated_company.be"),
+            LinkInstrumentation.givenALink("00000000-0000-0000-0000-000000000005", "https://www.unknown_company.be"),
+            LinkInstrumentation.givenALink("00000000-0000-0000-0000-000000000006", "https://www.updated_company.be"),
         ).forEach { data ->
             LinksTable.insert {
                 it[id] = data.id
                 it[url] = data.url
+                it[type] = data.type
+                it[createdAt] = data.createdAt
+                it[updatedAt] = data.updatedAt
             }
         }
 
-        listOf(
-            Company(UUID.fromString("00000000-0000-0000-0000-000000000001"), name = "First Company"),
-            Company(UUID.fromString("00000000-0000-0000-0000-000000000002"), name = "Second Company"),
-            Company(UUID.fromString("00000000-0000-0000-0000-000000000003"), name = "Third Company"),
-        ).forEach { data ->
+        // Seed companies
+        CompanyInstrumentation.givenCompanyList().take(3).forEachIndexed { index, data ->
             CompaniesTable.insert {
-                it[id] = data.id
+                it[id] = UUID.fromString("00000000-0000-0000-0000-00000000000${index + 1}")
                 it[name] = data.name
+                it[createdAt] = data.createdAt
+                it[updatedAt] = data.updatedAt
             }
         }
 
+        // Seed company-link relationships
         listOf(
             Pair(UUID.fromString("00000000-0000-0000-0000-000000000001"), UUID.fromString("00000000-0000-0000-0000-000000000001")),
             Pair(UUID.fromString("00000000-0000-0000-0000-000000000002"), UUID.fromString("00000000-0000-0000-0000-000000000001")),
@@ -82,7 +92,7 @@ internal class CompanyDaoImplTest : BaseDaoTest() {
         val company = dao.getCompanyById(UUID.fromString("00000000-0000-0000-0000-000000000001"))
 
         assertThat(company).matches {
-            it?.name == "First Company"
+            it?.name == CompanyInstrumentation.givenCompanyList()[0].name
         }
     }
 

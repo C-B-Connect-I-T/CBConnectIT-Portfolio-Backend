@@ -4,6 +4,7 @@ import com.cbconnectit.data.dto.requests.user.InsertNewUser
 import com.cbconnectit.data.dto.requests.user.UpdatePassword
 import com.cbconnectit.data.dto.requests.user.UpdateUser
 import com.cbconnectit.domain.models.user.User
+import com.cbconnectit.domain.models.user.UserRoles
 import java.time.LocalDateTime
 import java.util.*
 
@@ -44,4 +45,25 @@ object UserInstrumentation {
     fun givenPasswordNotStrong() = UpdatePassword("Test1", "test", "test")
 
     fun givenValidUpdatePassword() = UpdatePassword("Test1", "Test1234", "Test1234")
+
+    fun givenUserList() = listOf(
+        givenAUser(UUID.fromString("00000000-0000-0000-0000-000000000001"), "User One", "user1@example", "hash1"),
+        givenAUser(UUID.fromString("00000000-0000-0000-0000-000000000002"), "User Two", "user2@example", "hash2"),
+    )
+
+    fun givenAUser(
+        id: UUID = UUID.randomUUID(),
+        fullName: String = "John Doe",
+        username: String = "john.doe@example.be",
+        password: String = "ValidPass123",
+        role: UserRoles = UserRoles.User
+    ) = User(
+        id = id,
+        fullName = fullName,
+        username = username,
+        createdAt = LocalDateTime.now(),
+        updatedAt = LocalDateTime.now(),
+        role = role,
+        password = password
+    )
 }
