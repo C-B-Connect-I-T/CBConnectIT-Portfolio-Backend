@@ -48,7 +48,7 @@ class JwtConfigTest {
         val decodeToken = JWT.decode(tokens.accessToken)
         val decodeRefreshToken = JWT.decode(tokens.refreshToken)
 
-        assertThat(decodeToken.expiresAt).isCloseTo(Date(System.currentTimeMillis() + TimeUnit.HOURS.toMillis(24)), 5000)
+        assertThat(decodeToken.expiresAt).isCloseTo(Date(System.currentTimeMillis() + TimeUnit.MINUTES.toMillis(15)), 5000)
         assertThat(decodeRefreshToken.expiresAt).isCloseTo(Date(System.currentTimeMillis() + TimeUnit.DAYS.toMillis(30)), 5000)
     }
 

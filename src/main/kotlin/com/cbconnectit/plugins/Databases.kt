@@ -42,9 +42,15 @@ fun Application.configureDatabase() {
     val environment by inject<Environment>()
     val adminSeeder by inject<AdminSeeder>()
 
+    // Flyway database migration configuration
+    // baselineOnMigrate: Automatically creates a baseline entry for existing databases
+    // baselineVersion("1"): Marks V1__initial_schema as already applied (existing database state)
+    //                       Future migrations (V2, V3, etc.) will be applied normally
     Flyway.configure()
         .dataSource(environment.databaseUrl, environment.databaseUsername, environment.databasePassword)
         .locations("classpath:db/migration")
+        .baselineOnMigrate(true)  // Allow Flyway to baseline existing databases
+        .baselineVersion("1")     // Set baseline to version 1 (V1__initial_schema is already applied)
         .load()
         .migrate()
 

@@ -106,7 +106,8 @@ abstract class BaseRoutingTest {
         uri: String,
         body: String? = null,
         authorized: Boolean = true,
-        multipartCall: Boolean = false
+        multipartCall: Boolean = false,
+        clientType: String? = "web"
     ) = client.request(uri) {
         this.method = method
 
@@ -118,6 +119,37 @@ abstract class BaseRoutingTest {
 
         if (authorized && bearerToken != null) {
             header(HttpHeaders.Authorization, "${AuthScheme.Bearer} $bearerToken")
+        }
+
+        if (clientType != null) {
+            header("X-Client-Type", clientType)
+        }
+
+        if (body != null) {
+            setBody(body)
+        }
+    }
+
+    /**
+     * Make a call with a custom invalid/expired token to simulate authentication failure
+     */
+    protected suspend fun ApplicationTestBuilder.doCallWithInvalidToken(
+        method: HttpMethod,
+        uri: String,
+        body: String? = null,
+        clientType: String? = "web",
+        useInvalidToken: Boolean = true
+    ) = client.request(uri) {
+        this.method = method
+        contentType(ContentType.Application.Json)
+
+        if (useInvalidToken) {
+            // Provide an invalid token that won't match any authentication strategy
+            header(HttpHeaders.Authorization, "${AuthScheme.Bearer} invalid-token-that-will-fail-validation")
+        }
+
+        if (clientType != null) {
+            header("X-Client-Type", clientType)
         }
 
         if (body != null) {
