@@ -12,7 +12,6 @@ import com.cbconnectit.data.database.tables.TagsExperiencesPivotTable
 import com.cbconnectit.data.database.tables.TagsProjectsPivotTable
 import com.cbconnectit.data.database.tables.TagsTable
 import com.cbconnectit.data.database.tables.TestimonialsTable
-import com.cbconnectit.data.database.tables.UsersTable
 import com.cbconnectit.domain.models.Environment
 import com.cbconnectit.domain.models.company.Company
 import com.cbconnectit.domain.models.experience.Experience
@@ -49,8 +48,8 @@ fun Application.configureDatabase() {
     Flyway.configure()
         .dataSource(environment.databaseUrl, environment.databaseUsername, environment.databasePassword)
         .locations("classpath:db/migration")
-        .baselineOnMigrate(true)  // Allow Flyway to baseline existing databases
-        .baselineVersion("1")     // Set baseline to version 1 (V1__initial_schema is already applied)
+        .baselineOnMigrate(true) // Allow Flyway to baseline existing databases
+        .baselineVersion("1") // Set baseline to version 1 (V1__initial_schema is already applied)
         .load()
         .migrate()
 

@@ -16,7 +16,6 @@ import io.ktor.server.routing.*
 import java.net.URL
 import java.util.*
 
-
 // Get authenticated user from JWT (from Authorization header or cookie)
 val ApplicationCall.authenticatedUserOrNull get() = authentication.principal<User>()
 val ApplicationCall.authenticatedUser get() = authenticatedUserOrNull!!

@@ -3,7 +3,6 @@ package com.cbconnectit.instrumentation
 import com.cbconnectit.data.dto.requests.project.InsertNewProject
 import com.cbconnectit.data.dto.requests.project.UpdateProject
 import com.cbconnectit.domain.models.project.Project
-import java.time.LocalDateTime
 import java.util.*
 
 object ProjectInstrumentation {

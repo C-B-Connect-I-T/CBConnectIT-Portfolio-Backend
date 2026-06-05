@@ -3,7 +3,6 @@ package com.cbconnectit.instrumentation
 import com.cbconnectit.data.dto.requests.jobPosition.InsertNewJobPosition
 import com.cbconnectit.data.dto.requests.jobPosition.UpdateJobPosition
 import com.cbconnectit.domain.models.jobPosition.JobPosition
-import java.time.LocalDateTime
 import java.util.*
 
 object JobPositionInstrumentation {

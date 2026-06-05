@@ -2,6 +2,11 @@
 <SmellBaseline>
   <ManuallySuppressedIssues/>
   <CurrentIssues>
-    <ID>UnsafeCallOnNullableType:Extensions.kt$authentication.principal&lt;User>()!!</ID>
+    <ID>ReturnCount:AuthController.kt$AuthControllerImpl$override suspend fun getAuthStatus(accessToken: String?, refreshToken: String?): AuthStatusResponse</ID>
+    <ID>ReturnCount:AuthController.kt$AuthControllerImpl$private fun validateAccessToken(token: String): AuthStatusResponse?</ID>
+    <ID>ReturnCount:AuthValidator.kt$private fun JWTCredential.validateCredentialsAndGetUUID(): UUID?</ID>
+    <ID>ReturnCount:AuthValidator.kt$suspend fun JWTCredential.validateUser(userDao: IUserDao): User?</ID>
+    <ID>ReturnCount:AuthValidator.kt$suspend fun JWTCredential.validateUserIsAdmin(userDao: IUserDao): User?</ID>
+    <ID>UnsafeCallOnNullableType:Extensions.kt$authenticatedUserOrNull!!</ID>
   </CurrentIssues>
 </SmellBaseline>

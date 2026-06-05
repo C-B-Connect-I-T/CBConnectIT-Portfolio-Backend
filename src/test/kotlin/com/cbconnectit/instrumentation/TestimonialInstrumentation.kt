@@ -3,7 +3,6 @@ package com.cbconnectit.instrumentation
 import com.cbconnectit.data.dto.requests.testimonial.InsertNewTestimonial
 import com.cbconnectit.data.dto.requests.testimonial.UpdateTestimonial
 import com.cbconnectit.domain.models.testimonial.Testimonial
-import java.time.LocalDateTime
 import java.util.*
 
 object TestimonialInstrumentation {
