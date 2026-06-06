@@ -1,6 +1,5 @@
 package com.cbconnectit.modules.auth
 
-import com.cbconnectit.data.database.tables.Constants
 import com.cbconnectit.data.dto.requests.CreateTokenDto
 import com.cbconnectit.data.dto.requests.RefreshTokenDto
 import com.cbconnectit.data.dto.responses.CredentialsResponse
@@ -22,8 +21,7 @@ fun Route.authRouting(authController: AuthController) {
         val request = call.receiveOrRespondWithError<CreateTokenDto>()
         val tokens = authController.authorizeUser(request)
 
-        val clientType = call.request.headers[Constants.CLIENT_TYPE_HEADER]
-        if (clientType == "web") {
+        if (call.isTrustedWebClient()) {
             call.setAuthCookies(tokens)
             sendOk()
         } else {
@@ -37,8 +35,7 @@ fun Route.authRouting(authController: AuthController) {
 
         val newTokens = authController.refreshTokens(RefreshTokenDto(refreshToken))
 
-        val clientType = call.request.headers[Constants.CLIENT_TYPE_HEADER]
-        if (clientType == "web") {
+        if (call.isTrustedWebClient()) {
             call.setAuthCookies(newTokens)
             sendOk()
         } else {
@@ -77,8 +74,19 @@ fun Route.authRouting(authController: AuthController) {
 //    }
 }
 
+private fun ApplicationCall.isSecureConnection(): Boolean {
+    // Check X-Forwarded-Proto header first (set by reverse proxies)
+    val forwardedProto = request.headers["X-Forwarded-Proto"]
+    if (forwardedProto != null) {
+        return forwardedProto.equals("https", ignoreCase = true)
+    }
+    
+    // Fallback to direct connection scheme
+    return request.origin.scheme == "https"
+}
+
 private fun ApplicationCall.setAuthCookies(tokens: CredentialsResponse) {
-    val isSecure = request.origin.scheme == "https"
+    val isSecure = isSecureConnection()
 
     response.cookies.append(
         Cookie(
@@ -106,7 +114,7 @@ private fun ApplicationCall.setAuthCookies(tokens: CredentialsResponse) {
 }
 
 private fun ApplicationCall.clearAuthCookies() {
-    val isSecure = request.origin.scheme == "https"
+    val isSecure = isSecureConnection()
 
     response.cookies.append(
         Cookie(

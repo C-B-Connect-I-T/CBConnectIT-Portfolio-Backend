@@ -4,12 +4,14 @@ import com.cbconnectit.data.dto.requests.CreateTokenDto
 import com.cbconnectit.data.dto.requests.RefreshTokenDto
 import com.cbconnectit.data.dto.responses.AuthStatusResponse
 import com.cbconnectit.data.dto.responses.CredentialsResponse
+import com.cbconnectit.data.database.tables.Constants
 import com.cbconnectit.modules.auth.AuthController
 import com.cbconnectit.modules.auth.authRouting
 import com.cbconnectit.plugins.statuspages.ErrorInvalidToken
 import com.cbconnectit.plugins.statuspages.ErrorMissingBody
 import com.cbconnectit.plugins.statuspages.ErrorResponse
 import com.cbconnectit.plugins.statuspages.toErrorResponse
+import io.ktor.client.request.*
 import io.ktor.http.*
 import io.ktor.server.routing.*
 import io.ktor.server.testing.*
@@ -175,8 +177,13 @@ class AuthRoutingTest : BaseRoutingTest() {
         val authResponse = CredentialsResponse("access-token-value", "refresh-token-value", 86400)
         coEvery { authController.authorizeUser(any()) } returns authResponse
 
-        val body = toJsonBody(CreateTokenDto("test@example.com", "password"))
-        val response = doCall(HttpMethod.Post, "/api/oauth/token", body)
+        val response = client.request("/api/oauth/token") {
+            method = HttpMethod.Post
+            contentType(ContentType.Application.Json)
+            header(Constants.CLIENT_TYPE_HEADER, "web")
+            header(HttpHeaders.Origin, "https://cb-connect-it.com")
+            setBody(toJsonBody(CreateTokenDto("test@example.com", "password")))
+        }
 
         Assertions.assertThat(response.status).isEqualTo(HttpStatusCode.OK)
 
@@ -201,12 +208,40 @@ class AuthRoutingTest : BaseRoutingTest() {
     }
 
     @Test
+    fun `when logging in from web client without origin but trusted referer, we set auth cookies`() = withBaseAuthTestApplication {
+        val authResponse = CredentialsResponse("access-token-value", "refresh-token-value", 86400)
+        coEvery { authController.authorizeUser(any()) } returns authResponse
+
+        val response = client.request("/api/oauth/token") {
+            method = HttpMethod.Post
+            contentType(ContentType.Application.Json)
+            header(Constants.CLIENT_TYPE_HEADER, "web")
+            header(HttpHeaders.Referrer, "https://cb-connect-it.com/some/page")
+            setBody(toJsonBody(CreateTokenDto("test@example.com", "password")))
+        }
+
+        Assertions.assertThat(response.status).isEqualTo(HttpStatusCode.OK)
+
+        val cookies = response.headers.getAll("Set-Cookie") ?: emptyList()
+        val accessTokenCookie = cookies.find { it.contains("access_token") }
+        val refreshTokenCookie = cookies.find { it.contains("refresh_token") }
+
+        Assertions.assertThat(accessTokenCookie).isNotNull
+        Assertions.assertThat(refreshTokenCookie).isNotNull
+    }
+
+    @Test
     fun `when refreshing tokens, we set new auth cookies`() = withBaseAuthTestApplication {
         val authResponse = CredentialsResponse("new-access-token", "new-refresh-token", 86400)
         coEvery { authController.refreshTokens(any()) } returns authResponse
 
-        val body = toJsonBody(RefreshTokenDto("old-refresh-token"))
-        val response = doCall(HttpMethod.Post, "/api/oauth/refresh", body)
+        val response = client.request("/api/oauth/refresh") {
+            method = HttpMethod.Post
+            contentType(ContentType.Application.Json)
+            header(Constants.CLIENT_TYPE_HEADER, "web")
+            header(HttpHeaders.Origin, "https://cb-connect-it.com")
+            setBody(toJsonBody(RefreshTokenDto("old-refresh-token")))
+        }
 
         Assertions.assertThat(response.status).isEqualTo(HttpStatusCode.OK)
 
@@ -217,6 +252,107 @@ class AuthRoutingTest : BaseRoutingTest() {
 
         Assertions.assertThat(accessTokenCookie).contains("new-access-token")
         Assertions.assertThat(refreshTokenCookie).contains("new-refresh-token")
+    }
+
+    @Test
+    fun `when logging in as non-web client, we return body and do not set cookies`() = withBaseAuthTestApplication {
+        val authResponse = CredentialsResponse("access-token-value", "refresh-token-value", 86400)
+        coEvery { authController.authorizeUser(any()) } returns authResponse
+
+        val body = toJsonBody(CreateTokenDto("test@example.com", "password"))
+        val response = doCall(HttpMethod.Post, "/api/oauth/token", body, authorized = false, clientType = "mobile")
+
+        Assertions.assertThat(response.status).isEqualTo(HttpStatusCode.OK)
+        Assertions.assertThat(response.parseBody<CredentialsResponse>()).isEqualTo(authResponse)
+        Assertions.assertThat(response.headers.getAll("Set-Cookie")).isNull()
+    }
+
+    @Test
+    fun `when logging in as web client from untrusted origin, we return body and do not set cookies`() = withBaseAuthTestApplication {
+        val authResponse = CredentialsResponse("access-token-value", "refresh-token-value", 86400)
+        coEvery { authController.authorizeUser(any()) } returns authResponse
+
+        val response = client.request("/api/oauth/token") {
+            method = HttpMethod.Post
+            contentType(ContentType.Application.Json)
+            header(Constants.CLIENT_TYPE_HEADER, "web")
+            header(HttpHeaders.Origin, "https://evil.example")
+            setBody(toJsonBody(CreateTokenDto("test@example.com", "password")))
+        }
+
+        Assertions.assertThat(response.status).isEqualTo(HttpStatusCode.OK)
+        Assertions.assertThat(response.parseBody<CredentialsResponse>()).isEqualTo(authResponse)
+        Assertions.assertThat(response.headers.getAll("Set-Cookie")).isNull()
+    }
+
+    @Test
+    fun `when forwarding https proto on login, auth cookies are secure`() = withBaseAuthTestApplication {
+        val authResponse = CredentialsResponse("access-token-value", "refresh-token-value", 86400)
+        coEvery { authController.authorizeUser(any()) } returns authResponse
+
+        val response = client.request("/api/oauth/token") {
+            method = HttpMethod.Post
+            contentType(ContentType.Application.Json)
+            header(Constants.CLIENT_TYPE_HEADER, "web")
+            header(HttpHeaders.Origin, "https://cb-connect-it.com")
+            header("X-Forwarded-Proto", "https")
+            setBody(toJsonBody(CreateTokenDto("test@example.com", "password")))
+        }
+
+        Assertions.assertThat(response.status).isEqualTo(HttpStatusCode.OK)
+
+        val cookies = response.headers.getAll("Set-Cookie") ?: emptyList()
+        val accessTokenCookie = cookies.find { it.contains("access_token") }
+        val refreshTokenCookie = cookies.find { it.contains("refresh_token") }
+
+        Assertions.assertThat(accessTokenCookie).contains("Secure")
+        Assertions.assertThat(refreshTokenCookie).contains("Secure")
+    }
+
+    @Test
+    fun `when forwarding http proto on login, auth cookies are not secure`() = withBaseAuthTestApplication {
+        val authResponse = CredentialsResponse("access-token-value", "refresh-token-value", 86400)
+        coEvery { authController.authorizeUser(any()) } returns authResponse
+
+        val response = client.request("/api/oauth/token") {
+            method = HttpMethod.Post
+            contentType(ContentType.Application.Json)
+            header(Constants.CLIENT_TYPE_HEADER, "web")
+            header(HttpHeaders.Origin, "https://cb-connect-it.com")
+            header("X-Forwarded-Proto", "http")
+            setBody(toJsonBody(CreateTokenDto("test@example.com", "password")))
+        }
+
+        Assertions.assertThat(response.status).isEqualTo(HttpStatusCode.OK)
+
+        val cookies = response.headers.getAll("Set-Cookie") ?: emptyList()
+        val accessTokenCookie = cookies.find { it.contains("access_token") }
+        val refreshTokenCookie = cookies.find { it.contains("refresh_token") }
+
+        Assertions.assertThat(accessTokenCookie).doesNotContain("Secure")
+        Assertions.assertThat(refreshTokenCookie).doesNotContain("Secure")
+    }
+
+    @Test
+    fun `when forwarding https proto on logout, cleared cookies remain secure`() = withBaseAuthTestApplication {
+        coEvery { authController.logout(any()) } returns Unit
+
+        val response = client.request("/api/oauth/logout") {
+            method = HttpMethod.Post
+            contentType(ContentType.Application.Json)
+            header("X-Forwarded-Proto", "https")
+        }
+
+        Assertions.assertThat(response.status).isEqualTo(HttpStatusCode.OK)
+
+        val cookies = response.headers.getAll("Set-Cookie") ?: emptyList()
+        val accessTokenCookie = cookies.find { it.contains("access_token") }
+        val refreshTokenCookie = cookies.find { it.contains("refresh_token") }
+
+        Assertions.assertThat(accessTokenCookie).contains("Max-Age=0")
+        Assertions.assertThat(refreshTokenCookie).contains("Max-Age=0")
+        Assertions.assertThat(accessTokenCookie).contains("Secure")
+        Assertions.assertThat(refreshTokenCookie).contains("Secure")
     }
     // </editor-fold>
 }

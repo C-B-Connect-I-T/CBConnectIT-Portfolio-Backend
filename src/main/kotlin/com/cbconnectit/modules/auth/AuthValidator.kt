@@ -1,7 +1,6 @@
 package com.cbconnectit.modules.auth
 
 import com.auth0.jwt.interfaces.JWTVerifier
-import com.cbconnectit.data.database.tables.Constants
 import com.cbconnectit.domain.interfaces.IUserDao
 import com.cbconnectit.domain.models.user.User
 import com.cbconnectit.plugins.dbTransactionalQuery
@@ -27,15 +26,16 @@ fun JWTAuthenticationProvider.Config.setupAuthentication(
     // - Web clients (from trusted origins): MUST use cookies, Authorization header is ignored for security
     // - API clients (other origins): MUST use Authorization header, cookies are ignored
     // This prevents XSS attacks on web clients while supporting API integrations
+    // Security: We require BOTH Origin (browser-controlled) and X-Client-Type (client-controlled)
+    // so only legitimate web clients from trusted origins can use cookie authentication.
     // TODO: In the future, we could consider more advanced strategies as there is still a risk that an attacker stole a token from the cookie and uses a curl/Postman client to make malicious API calls.
     //  To mitigate this, we could implement additional checks like IP address or user agent validation, or even implement a separate token type for web clients that has stricter validation rules.
     authHeader { call ->
-        val clientType = call.request.headers[Constants.CLIENT_TYPE_HEADER]
-        val isWebClient = clientType == "web"
+        val isTrustedWebClient = call.isTrustedWebClient()
 
         when {
-            isWebClient -> {
-                // Web client: Only accept cookie-based authentication
+            isTrustedWebClient -> {
+                // Trusted web client: Only accept cookie-based authentication
                 // Ignore Authorization header to prevent XSS attacks
                 call.accessTokenFromCookie?.let {
                     try {
@@ -47,7 +47,7 @@ fun JWTAuthenticationProvider.Config.setupAuthentication(
             }
 
             else -> {
-                // API client: Only accept Authorization header
+                // API client or untrusted origin: Only accept Authorization header
                 // Ignore cookies to ensure API clients don't accidentally use them
                 call.request.parseAuthorizationHeader()
             }

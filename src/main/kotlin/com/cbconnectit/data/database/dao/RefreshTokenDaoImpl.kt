@@ -3,12 +3,13 @@ package com.cbconnectit.data.database.dao
 import com.cbconnectit.data.database.tables.RefreshTokensTable
 import com.cbconnectit.domain.interfaces.IRefreshTokenDao
 import com.cbconnectit.utils.PasswordManager
+import org.jetbrains.exposed.sql.IsNotNullOp
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.less
-import org.jetbrains.exposed.sql.SqlExpressionBuilder.neq
 import org.jetbrains.exposed.sql.and
 import org.jetbrains.exposed.sql.deleteWhere
 import org.jetbrains.exposed.sql.insert
+import org.jetbrains.exposed.sql.not
 import org.jetbrains.exposed.sql.or
 import org.jetbrains.exposed.sql.selectAll
 import org.jetbrains.exposed.sql.update
@@ -91,9 +92,9 @@ class RefreshTokenDaoImpl : IRefreshTokenDao {
 
         // Delete expired, invalidated, and replaced tokens in one query
         RefreshTokensTable.deleteWhere {
-            (expiresAt less now) or
-                    (invalidated eq true) or
-                    (replacedAt neq null)
+            (RefreshTokensTable.expiresAt less now) or
+                    (RefreshTokensTable.invalidated eq true) or
+                    IsNotNullOp(RefreshTokensTable.replacedAt)
         }
     }
 

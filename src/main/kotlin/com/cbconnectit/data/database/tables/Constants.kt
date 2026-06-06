@@ -9,8 +9,8 @@ object Constants {
     const val bigTextSize = 1000
 
     val trustedWebOrigins = setOf(
-        "localhost:8081",
-        "0.0.0.0:8081",
+        "localhost",
+        "0.0.0.0",
         "www.dev.cb-connect-it.com",
         "dev.cb-connect-it.com",
         "www.stag.cb-connect-it.com",
