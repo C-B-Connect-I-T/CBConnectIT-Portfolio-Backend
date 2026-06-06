@@ -63,23 +63,12 @@ class AuthControllerImpl(
         )
 
         return dbTransactionalQuery {
-            // Check if this token was already used and replaced within grace period
-            val replacementTokenHash = refreshTokenDao.getReplacementToken(userId, refreshDto.refreshToken)
-            if (replacementTokenHash != null) {
-                // Token was already rotated within grace period - find and return the same new tokens
-                // This handles concurrent requests gracefully
-                val user = userDao.getUser(userId) ?: throw ErrorInvalidToken
-
-                // We need to retrieve the already-generated tokens
-                // Since we can't retrieve the plain token from hash, we generate new ones
-                // but this is acceptable for the grace period edge case
-                val newTokens = tokenProvider.createTokens(user.copy(password = null))
-
-                // Store new refresh token in database
-                val expiresAt = LocalDateTime.now().plusDays(REFRESH_TOKEN_VALIDITY_DAYS)
-                refreshTokenDao.saveRefreshToken(user.id, newTokens.refreshToken, expiresAt)
-
-                return@dbTransactionalQuery newTokens
+            // Check for replay attack: rotated token being reused
+            if (refreshTokenDao.detectReplayAttack(userId, refreshDto.refreshToken)) {
+                // Security breach detected - invalidate all user tokens and force re-authentication
+                refreshTokenDao.invalidateAllUserTokens(userId)
+                // TODO: Log security event for monitoring
+                throw ErrorInvalidToken
             }
 
             // Validate token hasn't been invalidated in database
@@ -90,7 +79,7 @@ class AuthControllerImpl(
             // Generate new tokens
             val newTokens = tokenProvider.createTokens(user.copy(password = null))
 
-            // Mark old refresh token as replaced (token rotation with grace period)
+            // Mark old refresh token as replaced (token rotation)
             refreshTokenDao.replaceRefreshToken(userId, refreshDto.refreshToken, newTokens.refreshToken)
 
             // Store new refresh token in database

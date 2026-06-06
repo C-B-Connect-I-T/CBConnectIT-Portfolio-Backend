@@ -8,6 +8,7 @@ interface IRefreshTokenDao {
     fun isRefreshTokenValid(userId: UUID, token: String): Boolean
     fun invalidateRefreshToken(userId: UUID, token: String)
     fun replaceRefreshToken(userId: UUID, oldToken: String, newToken: String)
-    fun getReplacementToken(userId: UUID, oldToken: String): String?
     fun cleanupExpiredTokens()
+    fun detectReplayAttack(userId: UUID, token: String): Boolean
+    fun invalidateAllUserTokens(userId: UUID)
 }

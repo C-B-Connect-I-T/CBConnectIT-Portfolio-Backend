@@ -156,7 +156,7 @@ class AuthControllerTest : BaseControllerTest() {
         every { decodedJwt.audience.contains(JwtConfig.USERS_AUDIENCE) } returns true
         every { decodedJwt.claims[JwtConfig.TOKEN_CLAIM_TOKEN_TYPE]?.asString() } returns TokenType.Refresh.name
         every { decodedJwt.claims[JwtConfig.TOKEN_CLAIM_USER_ID_KEY]?.asString() } returns userId.toString()
-        coEvery { refreshTokenDao.getReplacementToken(any(), any()) } returns null
+        coEvery { refreshTokenDao.detectReplayAttack(any(), any()) } returns false
         coEvery { refreshTokenDao.isRefreshTokenValid(any(), any()) } returns true
         coEvery { userDao.getUser(any()) } returns null
 
@@ -174,7 +174,7 @@ class AuthControllerTest : BaseControllerTest() {
         every { decodedJwt.audience.contains(JwtConfig.USERS_AUDIENCE) } returns true
         every { decodedJwt.claims[JwtConfig.TOKEN_CLAIM_TOKEN_TYPE]?.asString() } returns TokenType.Refresh.name
         every { decodedJwt.claims[JwtConfig.TOKEN_CLAIM_USER_ID_KEY]?.asString() } returns userId.toString()
-        coEvery { refreshTokenDao.getReplacementToken(any(), any()) } returns null
+        coEvery { refreshTokenDao.detectReplayAttack(any(), any()) } returns false
         coEvery { refreshTokenDao.isRefreshTokenValid(any(), any()) } returns true
         coEvery { refreshTokenDao.replaceRefreshToken(any(), any(), any()) } returns Unit
         coEvery { refreshTokenDao.saveRefreshToken(any(), any(), any()) } returns Unit
@@ -186,68 +186,37 @@ class AuthControllerTest : BaseControllerTest() {
     }
 
     @Test
-    fun `when refreshing tokens with already replaced token within grace period, we return new tokens`() = runTest {
-        val createdToken = CredentialsResponse("new_access", "new_refresh", 3600)
+    fun `when refreshing tokens with rotated token (replay attack), we invalidate all tokens and throw exception`() = runTest {
         val userId = UUID.randomUUID()
 
         every { tokenProvider.verifier.verify(any<String>()) } returns decodedJwt
         every { decodedJwt.audience.contains(JwtConfig.USERS_AUDIENCE) } returns true
         every { decodedJwt.claims[JwtConfig.TOKEN_CLAIM_TOKEN_TYPE]?.asString() } returns TokenType.Refresh.name
         every { decodedJwt.claims[JwtConfig.TOKEN_CLAIM_USER_ID_KEY]?.asString() } returns userId.toString()
-        coEvery { refreshTokenDao.getReplacementToken(any(), any()) } returns "hashed_replacement_token"
-        coEvery { userDao.getUser(userId) } returns User(id = userId)
-        coEvery { tokenProvider.createTokens(any()) } returns createdToken
-        coEvery { refreshTokenDao.saveRefreshToken(any(), any(), any()) } returns Unit
+        coEvery { refreshTokenDao.detectReplayAttack(userId, any()) } returns true
+        coEvery { refreshTokenDao.invalidateAllUserTokens(userId) } returns Unit
 
-        val response = controller.refreshTokens(RefreshTokenDto("some_random_token"))
-        assertThat(response).isEqualTo(createdToken)
+        assertFailsWith<ErrorInvalidToken> {
+            controller.refreshTokens(RefreshTokenDto("rotated_token"))
+        }
 
-        // Verify that we didn't call isRefreshTokenValid or replaceRefreshToken
-        // because we detected the token was already replaced
-        coVerify(exactly = 0) { refreshTokenDao.isRefreshTokenValid(any(), any()) }
-        coVerify(exactly = 0) { refreshTokenDao.replaceRefreshToken(any(), any(), any()) }
+        // Verify all user tokens were invalidated
+        coVerify(exactly = 1) { refreshTokenDao.invalidateAllUserTokens(userId) }
     }
 
     @Test
-    fun `concurrent refresh requests within grace period both succeed`() = runTest {
+    fun `when refreshing tokens with invalid token in database, we throw exception`() = runTest {
         val userId = UUID.randomUUID()
-        val user = User(id = userId, username = "test@example.com")
-        val originalRefreshToken = "original-refresh-token"
-        val createdToken1 = CredentialsResponse("access1", "refresh1", 3600)
-        val createdToken2 = CredentialsResponse("access2", "refresh2", 3600)
-
-        // Mock token validation
-        every { tokenProvider.verifier.verify(originalRefreshToken) } returns decodedJwt
+        every { tokenProvider.verifier.verify(any<String>()) } returns decodedJwt
         every { decodedJwt.audience.contains(JwtConfig.USERS_AUDIENCE) } returns true
         every { decodedJwt.claims[JwtConfig.TOKEN_CLAIM_TOKEN_TYPE]?.asString() } returns TokenType.Refresh.name
         every { decodedJwt.claims[JwtConfig.TOKEN_CLAIM_USER_ID_KEY]?.asString() } returns userId.toString()
-        coEvery { userDao.getUser(userId) } returns user
+        coEvery { refreshTokenDao.detectReplayAttack(any(), any()) } returns false
+        coEvery { refreshTokenDao.isRefreshTokenValid(any(), any()) } returns false
 
-        // Simulate race condition:
-        // First call - no replacement yet
-        coEvery { refreshTokenDao.getReplacementToken(any(), originalRefreshToken) } returns null andThen "hashed_replacement"
-        coEvery { refreshTokenDao.isRefreshTokenValid(any(), originalRefreshToken) } returns true
-        coEvery { refreshTokenDao.replaceRefreshToken(any(), any(), any()) } returns Unit
-        coEvery { refreshTokenDao.saveRefreshToken(any(), any(), any()) } returns Unit
-        coEvery { tokenProvider.createTokens(any()) } returns createdToken1 andThen createdToken2
-
-        // Make two concurrent refresh requests
-        val response1 = controller.refreshTokens(RefreshTokenDto(originalRefreshToken))
-        val response2 = controller.refreshTokens(RefreshTokenDto(originalRefreshToken))
-
-        // Both should succeed
-        assertThat(response1).isNotNull
-        assertThat(response2).isNotNull
-
-        // Verify first request followed normal flow
-        coVerify(exactly = 1) { refreshTokenDao.replaceRefreshToken(any(), originalRefreshToken, any()) }
-
-        // Verify second request detected replacement (called getReplacementToken twice)
-        coVerify(exactly = 2) { refreshTokenDao.getReplacementToken(any(), originalRefreshToken) }
-
-        // Both should have generated new tokens
-        coVerify(exactly = 2) { tokenProvider.createTokens(any()) }
-        coVerify(exactly = 2) { refreshTokenDao.saveRefreshToken(any(), any(), any()) }
+        assertFailsWith<ErrorInvalidToken> {
+            controller.refreshTokens(RefreshTokenDto("some_random_token"))
+        }
     }
 
     // </editor-fold>

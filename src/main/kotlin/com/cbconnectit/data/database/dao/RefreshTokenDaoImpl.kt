@@ -4,8 +4,8 @@ import com.cbconnectit.data.database.tables.RefreshTokensTable
 import com.cbconnectit.domain.interfaces.IRefreshTokenDao
 import com.cbconnectit.utils.PasswordManager
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
-import org.jetbrains.exposed.sql.SqlExpressionBuilder.inList
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.less
+import org.jetbrains.exposed.sql.SqlExpressionBuilder.neq
 import org.jetbrains.exposed.sql.and
 import org.jetbrains.exposed.sql.deleteWhere
 import org.jetbrains.exposed.sql.insert
@@ -14,8 +14,6 @@ import org.jetbrains.exposed.sql.selectAll
 import org.jetbrains.exposed.sql.update
 import java.time.LocalDateTime
 import java.util.*
-
-private const val TOKEN_GRACE_PERIOD_SECONDS = 30L
 
 class RefreshTokenDaoImpl : IRefreshTokenDao {
 
@@ -37,6 +35,7 @@ class RefreshTokenDaoImpl : IRefreshTokenDao {
             .where {
                 (RefreshTokensTable.userId eq userId) and
                         (RefreshTokensTable.invalidated eq false) and
+                        (RefreshTokensTable.replacedAt.isNull()) and
                         (RefreshTokensTable.expiresAt greater LocalDateTime.now())
             }
             .map { it[RefreshTokensTable.token] }
@@ -87,51 +86,41 @@ class RefreshTokenDaoImpl : IRefreshTokenDao {
         }
     }
 
-    override fun getReplacementToken(userId: UUID, oldToken: String): String? {
+    override fun cleanupExpiredTokens() {
         val now = LocalDateTime.now()
-        val gracePeriodStart = now.minusSeconds(TOKEN_GRACE_PERIOD_SECONDS)
 
-        // Filter by userId first, then find tokens replaced within the grace period
+        // Delete expired, invalidated, and replaced tokens in one query
+        RefreshTokensTable.deleteWhere {
+            (expiresAt less now) or
+                    (invalidated eq true) or
+                    (replacedAt neq null)
+        }
+    }
+
+    override fun detectReplayAttack(userId: UUID, token: String): Boolean {
+        // Find the token record by userId first (reduces search space)
         val tokenRows = RefreshTokensTable.selectAll()
             .where { RefreshTokensTable.userId eq userId }
             .toList()
-            .filter { row ->
-                val replacedAt = row[RefreshTokensTable.replacedAt]
-                replacedAt != null &&
-                        replacedAt >= gracePeriodStart &&
-                        replacedAt <= now
-            }
 
-        // Find the row where the old token matches
         val matchingRow = tokenRows.firstOrNull { row ->
-            PasswordManager.validatePassword(oldToken, row[RefreshTokensTable.token])
+            PasswordManager.validatePassword(token, row[RefreshTokensTable.token])
         }
 
-        // Return the replacement token hash if found
-        return matchingRow?.get(RefreshTokensTable.replacedByToken)
+        matchingRow?.let { row ->
+            val replacedAt = row[RefreshTokensTable.replacedAt]
+            if (replacedAt != null) {
+                // SECURITY BREACH: Token was already rotated and is being reused
+                return true
+            }
+        }
+
+        return false
     }
 
-    override fun cleanupExpiredTokens() {
-        val gracePeriodCutoff = LocalDateTime.now().minusSeconds(TOKEN_GRACE_PERIOD_SECONDS)
-
-        // Delete expired tokens
-        RefreshTokensTable.deleteWhere {
-            (expiresAt less LocalDateTime.now()) or (invalidated eq true)
-        }
-
-        // Delete replaced tokens that are outside grace period
-        val tokensToDelete = RefreshTokensTable.selectAll()
-            .toList()
-            .filter { row ->
-                val replacedAt = row[RefreshTokensTable.replacedAt]
-                replacedAt != null && replacedAt < gracePeriodCutoff
-            }
-            .map { it[RefreshTokensTable.token] }
-
-        if (tokensToDelete.isNotEmpty()) {
-            RefreshTokensTable.deleteWhere {
-                RefreshTokensTable.token inList tokensToDelete
-            }
+    override fun invalidateAllUserTokens(userId: UUID) {
+        RefreshTokensTable.update({ RefreshTokensTable.userId eq userId }) {
+            it[invalidated] = true
         }
     }
 }

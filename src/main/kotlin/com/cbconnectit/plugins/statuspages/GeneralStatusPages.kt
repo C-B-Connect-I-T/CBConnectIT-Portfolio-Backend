@@ -1,11 +1,8 @@
 package com.cbconnectit.plugins.statuspages
 
 import io.ktor.http.*
-import io.ktor.server.plugins.statuspages.*
-import io.ktor.server.response.*
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
-import org.jetbrains.exposed.exceptions.ExposedSQLException
 import java.util.*
 
 data class InternalServerException(val body: String? = null) : ApiException("internal_error", "Internal error " + body.orEmpty(), HttpStatusCode.InternalServerError)
@@ -71,20 +68,6 @@ data class ErrorUnknownJobPositionIdsForUpdateExperience(private val ids: List<U
 data class ErrorUnknownTagIdsForCreateExperience(private val ids: List<UUID>) : ApiException("unknown_ids_for_create", "Can't create experience with unknown tags ${ids.joinToString(", ")}", HttpStatusCode.BadRequest)
 
 data class ErrorUnknownTagIdsForUpdateExperience(private val ids: List<UUID>) : ApiException("unknown_ids_for_update", "Can't update experience with unknown tags ${ids.joinToString(", ")}", HttpStatusCode.BadRequest)
-
-fun StatusPagesConfig.generalStatusPages() {
-    exception<ApiException> { call, cause ->
-        call.respond(cause.statusCode, cause.toErrorResponse())
-    }
-    exception<ExposedSQLException> { call, realCause ->
-        val cause = ApiException("error", realCause.localizedMessage, HttpStatusCode.InternalServerError)
-        call.respond(cause.statusCode, cause.toErrorResponse())
-    }
-    exception<Throwable> { call, _ ->
-        val cause = InternalServerException()
-        call.respond(cause.statusCode, cause.toErrorResponse())
-    }
-}
 
 open class ApiException(
     val error: String,
