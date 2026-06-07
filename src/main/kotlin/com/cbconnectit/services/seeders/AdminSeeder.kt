@@ -2,7 +2,7 @@ package com.cbconnectit.services.seeders
 
 import com.cbconnectit.data.database.tables.UsersTable
 import com.cbconnectit.domain.models.Environment
-import com.cbconnectit.domain.models.user.UserRoles
+import com.cbconnectit.domain.models.user.User
 import com.cbconnectit.utils.PasswordManagerContract
 import org.jetbrains.exposed.sql.insertIgnore
 import java.util.*
@@ -30,7 +30,7 @@ class AdminSeeder(
             it[fullName] = "Admin"
             it[username] = environment.adminSeedEmail
             it[password] = passwordEncryption.encryptPassword(environment.adminSeedPassword)
-            it[role] = UserRoles.Admin
+            it[role] = User.Role.Admin
         }
     }
 }

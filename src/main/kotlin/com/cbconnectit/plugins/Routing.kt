@@ -20,14 +20,8 @@ import com.cbconnectit.modules.testimonials.TestimonialController
 import com.cbconnectit.modules.testimonials.testimonialRouting
 import com.cbconnectit.modules.users.UserController
 import com.cbconnectit.modules.users.userRouting
-import com.cbconnectit.statuspages.ErrorMissingParameters
-import com.cbconnectit.statuspages.InternalServerException
-import com.cbconnectit.statuspages.generalStatusPages
-import com.cbconnectit.statuspages.toErrorResponse
 import io.ktor.server.application.*
 import io.ktor.server.http.content.*
-import io.ktor.server.plugins.statuspages.*
-import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import org.koin.ktor.ext.inject
 import java.io.File
@@ -44,27 +38,6 @@ fun Application.configureRouting() {
     val testimonialController by inject<TestimonialController>()
     val experienceController by inject<ExperienceController>()
 
-    // "example/" should resolve to "example/index.html" if present, but default ktor behavior rejects trailing slashes.
-    this.install(IgnoreTrailingSlash)
-
-    install(StatusPages) {
-        generalStatusPages()
-
-        exception<NullPointerException> { call, _ ->
-            val some = ErrorMissingParameters
-            call.respond(some.statusCode, some.toErrorResponse())
-        }
-
-        exception<Throwable> { call, _ ->
-            val cause = InternalServerException()
-            call.respond(cause.statusCode, cause.toErrorResponse())
-        }
-
-        exception<Exception> { call, _ ->
-            val cause = InternalServerException()
-            call.respond(cause.statusCode, cause.toErrorResponse())
-        }
-    }
     routing {
         // Serve uploaded media files
         staticFiles("/api/uploads", File("uploads"))

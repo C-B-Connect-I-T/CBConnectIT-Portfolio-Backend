@@ -3,25 +3,21 @@ package com.cbconnectit.routing
 import com.auth0.jwt.JWT
 import com.auth0.jwt.algorithms.Algorithm
 import com.cbconnectit.domain.models.user.User
-import com.cbconnectit.domain.models.user.UserRoles
-import com.cbconnectit.modules.auth.ADMIN_ONLY
-import com.cbconnectit.statuspages.InternalServerException
-import com.cbconnectit.statuspages.generalStatusPages
-import com.cbconnectit.statuspages.toErrorResponse
+import com.cbconnectit.plugins.statuspages.generalStatusPages
+import com.cbconnectit.utils.ParamConstants.ADMIN_AUTHENTICATE_KEY
 import com.cbconnectit.utils.toDatabaseString
-import com.google.gson.Gson
 import io.ktor.client.request.*
 import io.ktor.client.statement.*
 import io.ktor.http.*
 import io.ktor.http.auth.*
-import io.ktor.serialization.gson.*
+import io.ktor.serialization.kotlinx.json.*
 import io.ktor.server.application.*
 import io.ktor.server.auth.*
 import io.ktor.server.auth.jwt.*
 import io.ktor.server.plugins.contentnegotiation.*
 import io.ktor.server.plugins.statuspages.*
-import io.ktor.server.response.*
 import io.ktor.server.testing.*
+import kotlinx.serialization.json.Json
 import org.koin.core.context.stopKoin
 import org.koin.core.module.Module
 import org.koin.ktor.plugin.Koin
@@ -30,7 +26,10 @@ import java.util.*
 
 abstract class BaseRoutingTest {
 
-    protected val gson = Gson()
+    protected val json = Json {
+        ignoreUnknownKeys = false
+        isLenient = false
+    }
     protected var koinModules: Module? = null
     protected var moduleList: Application.() -> Unit = { }
 
@@ -45,16 +44,11 @@ abstract class BaseRoutingTest {
         testApplication {
             application {
                 install(ContentNegotiation) {
-                    gson()
+                    json(json)
                 }
 
                 install(StatusPages) {
                     generalStatusPages()
-
-                    exception<Throwable> { call, _ ->
-                        val cause = InternalServerException()
-                        call.respond(cause.statusCode, cause.toErrorResponse())
-                    }
                 }
 
                 install(Koin) {
@@ -78,10 +72,10 @@ abstract class BaseRoutingTest {
         }
     }
 
-    fun toJsonBody(obj: Any): String = gson.toJson(obj)
+    protected inline fun <reified T> toJsonBody(obj: T): String = json.encodeToString(obj)
 
     protected suspend inline fun <reified T> HttpResponse.parseBody(): T {
-        return gson.fromJson(this.bodyAsText(), T::class.java)
+        return json.decodeFromString(this.bodyAsText())
     }
 
     private fun AuthenticationConfig.jwtTest(authenticationTest: AuthenticationInstrumentation) = jwt(authenticationTest.name) {
@@ -93,8 +87,8 @@ abstract class BaseRoutingTest {
             val time = LocalDateTime.now().toDatabaseString()
 
             return@validate when (authenticationTest.name) {
-                ADMIN_ONLY -> {
-                    if (authenticationTest.userRole != UserRoles.Admin) return@validate null
+                ADMIN_AUTHENTICATE_KEY -> {
+                    if (authenticationTest.userRole != User.Role.Admin) return@validate null
 
                     User(UUID.fromString("00000000-0000-0000-0000-000000000001"), "Chris Bol", "chris.bol@example.com", LocalDateTime.now(), LocalDateTime.now(), authenticationTest.userRole)
                 }
@@ -112,7 +106,8 @@ abstract class BaseRoutingTest {
         uri: String,
         body: String? = null,
         authorized: Boolean = true,
-        multipartCall: Boolean = false
+        multipartCall: Boolean = false,
+        clientType: String? = "web"
     ) = client.request(uri) {
         this.method = method
 
@@ -126,10 +121,41 @@ abstract class BaseRoutingTest {
             header(HttpHeaders.Authorization, "${AuthScheme.Bearer} $bearerToken")
         }
 
+        if (clientType != null) {
+            header("X-Client-Type", clientType)
+        }
+
+        if (body != null) {
+            setBody(body)
+        }
+    }
+
+    /**
+     * Make a call with a custom invalid/expired token to simulate authentication failure
+     */
+    protected suspend fun ApplicationTestBuilder.doCallWithInvalidToken(
+        method: HttpMethod,
+        uri: String,
+        body: String? = null,
+        clientType: String? = "web",
+        useInvalidToken: Boolean = true
+    ) = client.request(uri) {
+        this.method = method
+        contentType(ContentType.Application.Json)
+
+        if (useInvalidToken) {
+            // Provide an invalid token that won't match any authentication strategy
+            header(HttpHeaders.Authorization, "${AuthScheme.Bearer} invalid-token-that-will-fail-validation")
+        }
+
+        if (clientType != null) {
+            header("X-Client-Type", clientType)
+        }
+
         if (body != null) {
             setBody(body)
         }
     }
 }
 
-data class AuthenticationInstrumentation(val name: String? = null, val userRole: UserRoles = UserRoles.User)
+data class AuthenticationInstrumentation(val name: String? = null, val userRole: User.Role = User.Role.User)

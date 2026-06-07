@@ -118,12 +118,19 @@ pipeline {
 
                     withCredentials([file(credentialsId: envFileCredentialId, variable: 'ENV_FILE')]) {
                         sh """
+                            # Create upload directory if it doesn't exist
+                            mkdir -p /opt/docker-data/applications/${PROJECT_NAME}/${ENVIRONMENT}/uploads
+
                             docker run -d \\
                               --env-file \$ENV_FILE \\
                               --name ${CONTAINER_NAME} \\
                               --network ${DOCKER_NETWORK} \\
                               -p ${EXPOSED_PORT}:8080 \\
+                              -v /opt/docker-data/applications/${PROJECT_NAME}/${ENVIRONMENT}/uploads:/uploads \\
                               --restart unless-stopped \\
+                              --memory="768m" \\
+                              --memory-reservation="384m" \\
+                              --cpus="0.5" \\
                               ${PROJECT_NAME}-${ENVIRONMENT}:${VERSION}
                         """
                     }

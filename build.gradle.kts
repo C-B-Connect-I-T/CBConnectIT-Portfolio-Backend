@@ -22,7 +22,7 @@ repositories {
 dependencies {
     implementation(libs.ktor.server.content.negotiation)
     implementation(libs.ktor.server.core)
-    implementation(libs.ktor.serialization.gson)
+    implementation(libs.ktor.serialization.json)
     implementation(libs.ktor.server.auth)
     implementation(libs.ktor.server.auth.jwt)
     implementation(libs.ktor.server.netty)
@@ -43,8 +43,9 @@ dependencies {
     implementation(libs.mysql)
     implementation(libs.jbcrypt)
 
-    // Firebase Admin SDK
-//    implementation(libs.firebase.admin)
+    // Flyway
+    implementation(libs.flyway.core)
+    implementation(libs.flyway.mysql)
 
     // Koin for Ktor; make sure you go to File...Project Structure
     // and switch to Java 11
@@ -61,6 +62,7 @@ dependencies {
     testImplementation(platform(libs.junit.bom))
     testImplementation(libs.junit.platform.launcher)
     testImplementation(libs.junit.jupiter.engine)
+    testImplementation(libs.flyway.core)
 }
 
 tasks {

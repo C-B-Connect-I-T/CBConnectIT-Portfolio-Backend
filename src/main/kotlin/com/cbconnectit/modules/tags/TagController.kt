@@ -6,12 +6,12 @@ import com.cbconnectit.data.dto.requests.tag.UpdateTag
 import com.cbconnectit.domain.interfaces.ITagDao
 import com.cbconnectit.domain.models.tag.toDto
 import com.cbconnectit.plugins.dbTransactionalQuery
-import com.cbconnectit.statuspages.ErrorDuplicateEntity
-import com.cbconnectit.statuspages.ErrorFailedCreate
-import com.cbconnectit.statuspages.ErrorFailedDelete
-import com.cbconnectit.statuspages.ErrorFailedUpdate
-import com.cbconnectit.statuspages.ErrorInvalidParameters
-import com.cbconnectit.statuspages.ErrorNotFound
+import com.cbconnectit.plugins.statuspages.ErrorDuplicateEntity
+import com.cbconnectit.plugins.statuspages.ErrorFailedCreate
+import com.cbconnectit.plugins.statuspages.ErrorFailedDelete
+import com.cbconnectit.plugins.statuspages.ErrorFailedUpdate
+import com.cbconnectit.plugins.statuspages.ErrorInvalidParameters
+import com.cbconnectit.plugins.statuspages.ErrorNotFound
 import java.util.*
 
 class TagControllerImpl(

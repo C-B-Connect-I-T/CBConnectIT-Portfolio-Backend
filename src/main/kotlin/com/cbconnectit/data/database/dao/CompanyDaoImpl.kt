@@ -17,6 +17,7 @@ import org.jetbrains.exposed.sql.and
 import org.jetbrains.exposed.sql.deleteWhere
 import org.jetbrains.exposed.sql.insert
 import org.jetbrains.exposed.sql.insertAndGetId
+import org.jetbrains.exposed.sql.insertIgnore
 import org.jetbrains.exposed.sql.javatime.CurrentDateTime
 import org.jetbrains.exposed.sql.selectAll
 import org.jetbrains.exposed.sql.update
@@ -80,7 +81,7 @@ class CompanyDaoImpl : ICompanyDao {
         CompaniesTable.update({ CompaniesTable.id eq id }) {
             it[name] = updateCompany.name
 
-            it[LinksTable.updatedAt] = CurrentDateTime
+            it[updatedAt] = CurrentDateTime
         }
 
         CompaniesLinksPivotTable.deleteWhere {
@@ -88,7 +89,7 @@ class CompanyDaoImpl : ICompanyDao {
         }
 
         updateCompany.links?.forEach { linkId ->
-            CompaniesLinksPivotTable.insert {
+            CompaniesLinksPivotTable.insertIgnore {
                 it[this.linkId] = UUID.fromString(linkId)
                 it[companyId] = id
             }
@@ -98,10 +99,7 @@ class CompanyDaoImpl : ICompanyDao {
     }
 
     override fun deleteCompany(id: UUID): Boolean {
-        val result = CompaniesTable.deleteWhere { CompaniesTable.id eq id } > 0
-        val result2 = CompaniesLinksPivotTable.deleteWhere { companyId eq id } > 0
-
-        return result && result2
+        return CompaniesTable.deleteWhere { CompaniesTable.id eq id } > 0
     }
 
     override fun companyUnique(name: String): Boolean =

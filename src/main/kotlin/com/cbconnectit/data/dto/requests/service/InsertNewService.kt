@@ -1,24 +1,26 @@
 package com.cbconnectit.data.dto.requests.service
 
-import com.google.gson.annotations.SerializedName
+import kotlinx.serialization.SerialName
+import kotlinx.serialization.Serializable
 import java.util.*
 
+@Serializable
 data class InsertNewService(
     val title: String,
-    @SerializedName("image_url")
+    @SerialName("image_url")
     val imageUrl: String,
-    @SerializedName("banner_image_url")
+    @SerialName("banner_image_url")
     val bannerImageUrl: String? = null,
-    @SerializedName("short_description")
+    @SerialName("short_description")
     val shortDescription: String? = null,
     val description: String,
-    @SerializedName("banner_description")
+    @SerialName("banner_description")
     val bannerDescription: String? = null,
-    @SerializedName("extra_info")
+    @SerialName("extra_info")
     val extraInfo: String? = null,
-    @SerializedName("parent_service_id")
+    @SerialName("parent_service_id")
     val parentServiceId: String? = null,
-    @SerializedName("tag_id")
+    @SerialName("tag_id")
     val tagId: String? = null
 ) {
     val parentServiceUuid get() = parentServiceId?.let { UUID.fromString(it) }
@@ -26,22 +28,23 @@ data class InsertNewService(
     val isValid get() = title.isNotBlank() && description.isNotBlank() && imageUrl.isNotBlank() // && (tagId == null || tagId.isNotBlank())
 }
 
+@Serializable
 data class UpdateService(
     val title: String,
-    @SerializedName("image_url")
+    @SerialName("image_url")
     val imageUrl: String,
-    @SerializedName("banner_image_url")
+    @SerialName("banner_image_url")
     val bannerImageUrl: String? = null,
-    @SerializedName("short_description")
+    @SerialName("short_description")
     val shortDescription: String? = null,
     val description: String,
-    @SerializedName("banner_description")
+    @SerialName("banner_description")
     val bannerDescription: String? = null,
-    @SerializedName("extra_info")
+    @SerialName("extra_info")
     val extraInfo: String? = null,
-    @SerializedName("parent_service_id")
+    @SerialName("parent_service_id")
     val parentServiceId: String? = null,
-    @SerializedName("tag_id")
+    @SerialName("tag_id")
     val tagId: String? = null
 ) {
     val parentServiceUuid get() = parentServiceId?.let { UUID.fromString(it) }

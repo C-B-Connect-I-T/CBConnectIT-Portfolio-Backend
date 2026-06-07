@@ -1,7 +1,6 @@
 package com.cbconnectit.data.database.dao
 
 import com.cbconnectit.data.database.tables.JobPositionsTable
-import com.cbconnectit.data.database.tables.LinksTable
 import com.cbconnectit.data.database.tables.toJobPosition
 import com.cbconnectit.data.database.tables.toJobPositions
 import com.cbconnectit.data.dto.requests.jobPosition.InsertNewJobPosition
@@ -35,7 +34,7 @@ class JobPositionDaoImpl : IJobPositionDao {
         JobPositionsTable.update({ JobPositionsTable.id eq id }) {
             it[name] = updateJobPosition.name
 
-            it[LinksTable.updatedAt] = CurrentDateTime
+            it[updatedAt] = CurrentDateTime
         }
 
         return getJobPositionById(id)

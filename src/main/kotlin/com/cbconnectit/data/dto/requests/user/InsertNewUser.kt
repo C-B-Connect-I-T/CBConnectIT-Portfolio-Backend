@@ -1,13 +1,15 @@
 package com.cbconnectit.data.dto.requests.user
 
-import com.google.gson.annotations.SerializedName
+import kotlinx.serialization.SerialName
+import kotlinx.serialization.Serializable
 
+@Serializable
 data class InsertNewUser(
-    @SerializedName("full_name")
+    @SerialName("full_name")
     override val fullName: String,
     val username: String,
     override val password: String,
-    @SerializedName("repeat_password")
+    @SerialName("repeat_password")
     override val repeatPassword: String?
 ) : PasswordAble, NameAble {
     val isValid get() = fullName.isNotBlank() && password.isNotBlank() && repeatPassword?.isNotBlank() == true && username.isNotBlank()

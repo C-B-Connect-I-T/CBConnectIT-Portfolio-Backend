@@ -6,6 +6,7 @@ import com.cbconnectit.data.database.dao.ExperienceDaoImpl
 import com.cbconnectit.data.database.dao.JobPositionDaoImpl
 import com.cbconnectit.data.database.dao.LinkDaoImpl
 import com.cbconnectit.data.database.dao.ProjectDaoImpl
+import com.cbconnectit.data.database.dao.RefreshTokenDaoImpl
 import com.cbconnectit.data.database.dao.ServiceDaoImpl
 import com.cbconnectit.data.database.dao.TagDaoImpl
 import com.cbconnectit.data.database.dao.TestimonialDaoImpl
@@ -15,6 +16,7 @@ import com.cbconnectit.domain.interfaces.IExperienceDao
 import com.cbconnectit.domain.interfaces.IJobPositionDao
 import com.cbconnectit.domain.interfaces.ILinkDao
 import com.cbconnectit.domain.interfaces.IProjectDao
+import com.cbconnectit.domain.interfaces.IRefreshTokenDao
 import com.cbconnectit.domain.interfaces.IServiceDao
 import com.cbconnectit.domain.interfaces.ITagDao
 import com.cbconnectit.domain.interfaces.ITestimonialDao
@@ -56,33 +58,35 @@ import org.koin.dsl.module
 import org.koin.ktor.plugin.Koin
 
 fun Application.configureKoin() {
-        install(Koin) {
-            modules(
-                module {
-                    single {
-                        Json {
-                            ignoreUnknownKeys = true
-                            encodeDefaults = true
-                            isLenient = false
-                        }
-                    }
-                    singleOf(::parseEnvironment)
-                    single<MediaStorageService> { LocalMediaStorageService(environment = get()) }
-                    single<PasswordManagerContract> { PasswordManager }
-                    single<TokenProvider> {
-                        val environment = get<Environment>()
-                        JwtConfig("https://cb-connect-it.com/", JwtConfig.USERS_AUDIENCE, environment)
-                    }
-                    single<JWTVerifier> {
-                        val tokenProvider = get<TokenProvider>()
-                        tokenProvider.verifier
-                    }
-                    singleOf(::AdminSeeder)
-                },
-                controllerModule(),
-                daoModule()
-            )
+    install(Koin) {
+        modules(
+            applicationModule(),
+            controllerModule(),
+            daoModule()
+        )
+    }
+}
+
+fun applicationModule() = module {
+    single {
+        Json {
+            ignoreUnknownKeys = true
+            encodeDefaults = true
+            isLenient = false
         }
+    }
+    singleOf(::parseEnvironment)
+    single<MediaStorageService> { LocalMediaStorageService(environment = get()) }
+    single<PasswordManagerContract> { PasswordManager }
+    single<TokenProvider> {
+        val environment = get<Environment>()
+        JwtConfig("https://cb-connect-it.com/", JwtConfig.USERS_AUDIENCE, environment)
+    }
+    single<JWTVerifier> {
+        val tokenProvider = get<TokenProvider>()
+        tokenProvider.verifier
+    }
+    singleOf(::AdminSeeder)
 }
 
 fun controllerModule() = module {
@@ -100,6 +104,7 @@ fun controllerModule() = module {
 
 fun daoModule() = module {
     singleOf(::UserDaoImpl) { bind<IUserDao>() }
+    singleOf(::RefreshTokenDaoImpl) { bind<IRefreshTokenDao>() }
     singleOf(::TagDaoImpl) { bind<ITagDao>() }
     singleOf(::ServiceDaoImpl) { bind<IServiceDao>() }
     singleOf(::LinkDaoImpl) { bind<ILinkDao>() }

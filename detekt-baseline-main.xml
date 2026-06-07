@@ -1,7 +1,0 @@
-<?xml version='1.0' encoding='UTF-8'?>
-<SmellBaseline>
-  <ManuallySuppressedIssues/>
-  <CurrentIssues>
-    <ID>UnsafeCallOnNullableType:Extensions.kt$authentication.principal&lt;User>()!!</ID>
-  </CurrentIssues>
-</SmellBaseline>

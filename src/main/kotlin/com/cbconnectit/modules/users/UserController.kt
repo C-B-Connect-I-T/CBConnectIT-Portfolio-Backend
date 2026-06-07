@@ -7,16 +7,16 @@ import com.cbconnectit.data.dto.requests.user.UserDto
 import com.cbconnectit.domain.interfaces.IUserDao
 import com.cbconnectit.domain.models.user.toDto
 import com.cbconnectit.plugins.dbTransactionalQuery
-import com.cbconnectit.statuspages.ErrorFailedCreate
-import com.cbconnectit.statuspages.ErrorFailedDelete
-import com.cbconnectit.statuspages.ErrorFailedUpdate
-import com.cbconnectit.statuspages.ErrorInvalidCredentials
-import com.cbconnectit.statuspages.ErrorInvalidParameters
-import com.cbconnectit.statuspages.ErrorNotFound
-import com.cbconnectit.statuspages.ErrorPasswordsDoNotMatch
-import com.cbconnectit.statuspages.ErrorSameAsOldPassword
-import com.cbconnectit.statuspages.ErrorUsernameExists
-import com.cbconnectit.statuspages.ErrorWeakPassword
+import com.cbconnectit.plugins.statuspages.ErrorFailedCreate
+import com.cbconnectit.plugins.statuspages.ErrorFailedDelete
+import com.cbconnectit.plugins.statuspages.ErrorFailedUpdate
+import com.cbconnectit.plugins.statuspages.ErrorInvalidCredentials
+import com.cbconnectit.plugins.statuspages.ErrorInvalidParameters
+import com.cbconnectit.plugins.statuspages.ErrorNotFound
+import com.cbconnectit.plugins.statuspages.ErrorPasswordsDoNotMatch
+import com.cbconnectit.plugins.statuspages.ErrorSameAsOldPassword
+import com.cbconnectit.plugins.statuspages.ErrorUsernameExists
+import com.cbconnectit.plugins.statuspages.ErrorWeakPassword
 import com.cbconnectit.utils.PasswordManagerContract
 import java.util.*
 

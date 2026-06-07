@@ -17,8 +17,8 @@ import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.notInList
 import org.jetbrains.exposed.sql.and
 import org.jetbrains.exposed.sql.deleteWhere
-import org.jetbrains.exposed.sql.insert
 import org.jetbrains.exposed.sql.insertAndGetId
+import org.jetbrains.exposed.sql.insertIgnore
 import org.jetbrains.exposed.sql.selectAll
 import org.jetbrains.exposed.sql.update
 import java.time.LocalDateTime
@@ -97,14 +97,14 @@ class ProjectDaoImpl : IProjectDao {
         }.value
 
         insertNewProject.tags?.forEach { tagId ->
-            TagsProjectsPivotTable.insert {
+            TagsProjectsPivotTable.insertIgnore {
                 it[projectId] = id
                 it[this.tagId] = UUID.fromString(tagId)
             }
         }
 
         insertNewProject.links?.forEach { linkId ->
-            LinksProjectsPivotTable.insert {
+            LinksProjectsPivotTable.insertIgnore {
                 it[projectId] = id
                 it[this.linkId] = UUID.fromString(linkId)
             }
@@ -114,7 +114,7 @@ class ProjectDaoImpl : IProjectDao {
     }
 
     override fun updateProject(id: UUID, updateProject: UpdateProject): Project? {
-        ProjectsTable.update({ ProjectsTable.id eq id }) { body ->
+        val updateCount = ProjectsTable.update({ ProjectsTable.id eq id }) { body ->
             body[title] = updateProject.title
             body[shortDescription] = updateProject.shortDescription
             body[description] = updateProject.description
@@ -124,11 +124,13 @@ class ProjectDaoImpl : IProjectDao {
             body[updatedAt] = LocalDateTime.now()
         }
 
+        if (updateCount == 0) return null
+
         TagsProjectsPivotTable.deleteWhere {
             projectId eq id and (tagId notInList (updateProject.tags?.map { stringId -> UUID.fromString(stringId) } ?: emptyList()))
         }
         updateProject.tags?.forEach { tagId ->
-            TagsProjectsPivotTable.insert {
+            TagsProjectsPivotTable.insertIgnore {
                 it[projectId] = id
                 it[this.tagId] = UUID.fromString(tagId)
             }
@@ -138,7 +140,7 @@ class ProjectDaoImpl : IProjectDao {
             projectId eq id and (linkId notInList (updateProject.links?.map { stringId -> UUID.fromString(stringId) } ?: emptyList()))
         }
         updateProject.links?.forEach { linkId ->
-            LinksProjectsPivotTable.insert {
+            LinksProjectsPivotTable.insertIgnore {
                 it[projectId] = id
                 it[this.linkId] = UUID.fromString(linkId)
             }
@@ -148,10 +150,6 @@ class ProjectDaoImpl : IProjectDao {
     }
 
     override fun deleteProject(id: UUID): Boolean {
-        val result = ProjectsTable.deleteWhere { ProjectsTable.id eq id }
-        val result2 = TagsProjectsPivotTable.deleteWhere { projectId eq id }
-        val result3 = LinksProjectsPivotTable.deleteWhere { projectId eq id }
-
-        return result > 0 && result2 > 0 && result3 > 0
+        return ProjectsTable.deleteWhere { ProjectsTable.id eq id } > 0
     }
 }

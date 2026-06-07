@@ -13,4 +13,6 @@ object ParamConstants {
     const val EXPERIENCE_ID_KEY = "experience_id"
 
     const val LIMIT_KEY = "limit"
+
+    const val ADMIN_AUTHENTICATE_KEY = "admin"
 }

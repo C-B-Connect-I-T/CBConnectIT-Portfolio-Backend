@@ -1,9 +1,11 @@
 package com.cbconnectit.data.dto.requests.user
 
-import com.google.gson.annotations.SerializedName
+import kotlinx.serialization.SerialName
+import kotlinx.serialization.Serializable
 
+@Serializable
 data class UpdateUser(
-    @SerializedName("full_name")
+    @SerialName("full_name")
     override val fullName: String? = null,
     val username: String? = null
 ) : NameAble {

@@ -1,17 +1,19 @@
 package com.cbconnectit.data.dto.requests.user
 
 import com.cbconnectit.domain.models.interfaces.DateAble
-import com.cbconnectit.domain.models.user.UserRoles
-import com.google.gson.annotations.SerializedName
+import com.cbconnectit.domain.models.user.User
+import kotlinx.serialization.SerialName
+import kotlinx.serialization.Serializable
 
+@Serializable
 data class UserDto(
     val id: String = "",
-    @SerializedName("full_name")
+    @SerialName("full_name")
     override val fullName: String? = null,
     val username: String = "",
-    @SerializedName("created_at")
+    @SerialName("created_at")
     override val createdAt: String = "",
-    @SerializedName("updated_at")
+    @SerialName("updated_at")
     override val updatedAt: String = "",
-    val role: UserRoles = UserRoles.User
+    val role: User.Role = User.Role.User
 ) : DateAble, NameAble

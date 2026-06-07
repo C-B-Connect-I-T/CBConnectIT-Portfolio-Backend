@@ -3,20 +3,22 @@ package com.cbconnectit.data.dto.requests.testimonial
 import com.cbconnectit.data.dto.requests.company.CompanyDto
 import com.cbconnectit.data.dto.requests.jobPosition.JobPositionDto
 import com.cbconnectit.domain.models.interfaces.DateAble
-import com.google.gson.annotations.SerializedName
+import kotlinx.serialization.SerialName
+import kotlinx.serialization.Serializable
 
+@Serializable
 data class TestimonialDto(
     val id: String = "",
-    @SerializedName("image_url")
+    @SerialName("image_url")
     val imageUrl: String = "",
-    @SerializedName("full_name")
+    @SerialName("full_name")
     val fullName: String = "",
     val company: CompanyDto? = null,
-    @SerializedName("job_position")
+    @SerialName("job_position")
     val jobPosition: JobPositionDto = JobPositionDto(),
     val review: String = "",
-    @SerializedName("created_at")
+    @SerialName("created_at")
     override val createdAt: String = "",
-    @SerializedName("updated_at")
+    @SerialName("updated_at")
     override val updatedAt: String = ""
 ) : DateAble

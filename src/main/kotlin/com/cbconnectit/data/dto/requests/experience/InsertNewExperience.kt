@@ -1,20 +1,22 @@
 package com.cbconnectit.data.dto.requests.experience
 
-import com.google.gson.annotations.SerializedName
+import kotlinx.serialization.SerialName
+import kotlinx.serialization.Serializable
 import java.util.*
 
+@Serializable
 data class InsertNewExperience(
-    @SerializedName("short_description")
+    @SerialName("short_description")
     val shortDescription: String,
     val description: String,
     val from: String,
     val to: String,
     val tags: List<String>? = emptyList(), // TODO: determine if this really should be a required field!!
-    @SerializedName("as_freelance")
+    @SerialName("as_freelance")
     val asFreelance: Boolean = false,
-    @SerializedName("company_id")
+    @SerialName("company_id")
     val companyId: String,
-    @SerializedName("job_position_id")
+    @SerialName("job_position_id")
     val jobPositionId: String
 ) {
     val companyUuid: UUID get() = UUID.fromString(companyId)
@@ -22,18 +24,19 @@ data class InsertNewExperience(
     val isValid get() = shortDescription.isNotBlank() && description.isNotBlank() && from.isNotBlank() && to.isNotBlank() && companyId.isNotBlank() && jobPositionId.isNotBlank()
 }
 
+@Serializable
 data class UpdateExperience(
-    @SerializedName("short_description")
+    @SerialName("short_description")
     val shortDescription: String,
     val description: String,
     val from: String,
     val to: String,
-    @SerializedName("as_freelance")
+    @SerialName("as_freelance")
     val asFreelance: Boolean = false,
     val tags: List<String>? = emptyList(), // TODO: determine if this really should be a required field!!
-    @SerializedName("company_id")
+    @SerialName("company_id")
     val companyId: String,
-    @SerializedName("job_position_id")
+    @SerialName("job_position_id")
     val jobPositionId: String
 ) {
     val companyUuid: UUID get() = UUID.fromString(companyId)

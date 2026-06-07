@@ -8,7 +8,6 @@ import com.cbconnectit.data.dto.requests.user.InsertNewUser
 import com.cbconnectit.data.dto.requests.user.UpdateUser
 import com.cbconnectit.domain.interfaces.IUserDao
 import com.cbconnectit.domain.models.user.User
-import com.cbconnectit.domain.models.user.UserRoles
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
 import org.jetbrains.exposed.sql.deleteWhere
 import org.jetbrains.exposed.sql.insertAndGetId
@@ -59,7 +58,7 @@ class UserDaoImpl : IUserDao {
         UsersTable.selectAll().where { UsersTable.username eq username }.empty()
 
     override fun isUserRoleAdmin(userId: UUID): Boolean =
-        UsersTable.selectAll().where { UsersTable.id eq userId }.firstOrNull()?.get(UsersTable.role) == UserRoles.Admin
+        UsersTable.selectAll().where { UsersTable.id eq userId }.firstOrNull()?.get(UsersTable.role) == User.Role.Admin
 
     override fun updateUserPassword(userId: UUID, updatePassword: String): User? {
         UsersTable.update({ UsersTable.id eq userId }) {

@@ -7,11 +7,11 @@ import com.cbconnectit.domain.interfaces.ILinkDao
 import com.cbconnectit.domain.models.link.LinkType
 import com.cbconnectit.domain.models.link.toDto
 import com.cbconnectit.plugins.dbTransactionalQuery
-import com.cbconnectit.statuspages.ErrorFailedCreate
-import com.cbconnectit.statuspages.ErrorFailedDelete
-import com.cbconnectit.statuspages.ErrorFailedUpdate
-import com.cbconnectit.statuspages.ErrorInvalidParameters
-import com.cbconnectit.statuspages.ErrorNotFound
+import com.cbconnectit.plugins.statuspages.ErrorFailedCreate
+import com.cbconnectit.plugins.statuspages.ErrorFailedDelete
+import com.cbconnectit.plugins.statuspages.ErrorFailedUpdate
+import com.cbconnectit.plugins.statuspages.ErrorInvalidParameters
+import com.cbconnectit.plugins.statuspages.ErrorNotFound
 import io.ktor.http.*
 import java.util.*
 
