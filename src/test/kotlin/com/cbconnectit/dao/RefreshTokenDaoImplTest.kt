@@ -151,7 +151,7 @@ class RefreshTokenDaoImplTest : BaseDaoTest() {
         val invalidatedToken = "invalidated-token"
         val replacedToken = "replaced-token"
         val validToken = "valid-token"
-        
+
         val pastExpiry = LocalDateTime.now().minusDays(1)
         val futureExpiry = LocalDateTime.now().plusDays(30)
 
