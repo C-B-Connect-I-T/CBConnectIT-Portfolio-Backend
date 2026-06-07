@@ -2,6 +2,10 @@
 <SmellBaseline>
   <ManuallySuppressedIssues/>
   <CurrentIssues>
+    <ID>MagicNumber:AuthClientTrust.kt$443</ID>
+    <ID>MagicNumber:AuthClientTrust.kt$80</ID>
+    <ID>ReturnCount:AuthClientTrust.kt$internal fun ApplicationCall.isTrustedWebClient(): Boolean</ID>
+    <ID>ReturnCount:AuthClientTrust.kt$private fun normalizeTrustedOrigin(rawHeader: String?): String?</ID>
     <ID>ReturnCount:AuthController.kt$AuthControllerImpl$override suspend fun getAuthStatus(accessToken: String?, refreshToken: String?): AuthStatusResponse</ID>
     <ID>ReturnCount:AuthController.kt$AuthControllerImpl$private fun validateAccessToken(token: String): AuthStatusResponse?</ID>
     <ID>ReturnCount:AuthValidator.kt$private fun JWTCredential.validateCredentialsAndGetUUID(): UUID?</ID>

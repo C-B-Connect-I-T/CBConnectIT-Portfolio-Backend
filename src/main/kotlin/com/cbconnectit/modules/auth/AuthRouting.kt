@@ -80,7 +80,7 @@ private fun ApplicationCall.isSecureConnection(): Boolean {
     if (forwardedProto != null) {
         return forwardedProto.equals("https", ignoreCase = true)
     }
-    
+
     // Fallback to direct connection scheme
     return request.origin.scheme == "https"
 }

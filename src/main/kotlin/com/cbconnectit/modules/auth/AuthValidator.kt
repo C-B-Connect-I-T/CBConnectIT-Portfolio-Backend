@@ -67,7 +67,7 @@ fun JWTAuthenticationProvider.Config.setupAuthentication(
         }
     }
 
-    challenge { scheme, _ ->
+    challenge { scheme, challengeRealm ->
         val exception = call.attributes.getOrNull(AuthenticationExceptionKey)
         if (exception != null) throw exception
 
@@ -75,7 +75,7 @@ fun JWTAuthenticationProvider.Config.setupAuthentication(
             UnauthorizedResponse(
                 HttpAuthHeader.Parameterized(
                     scheme,
-                    mapOf(HttpAuthHeader.Parameters.Realm to realm)
+                    mapOf(HttpAuthHeader.Parameters.Realm to challengeRealm)
                 )
             )
         )
