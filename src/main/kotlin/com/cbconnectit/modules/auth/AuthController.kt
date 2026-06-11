@@ -5,21 +5,16 @@ import com.cbconnectit.data.dto.requests.RefreshTokenDto
 import com.cbconnectit.data.dto.requests.hasData
 import com.cbconnectit.data.dto.responses.AuthStatusResponse
 import com.cbconnectit.data.dto.responses.CredentialsResponse
-import com.cbconnectit.domain.interfaces.IRefreshTokenDao
 import com.cbconnectit.domain.interfaces.IUserDao
 import com.cbconnectit.plugins.dbTransactionalQuery
 import com.cbconnectit.plugins.statuspages.ErrorInvalidCredentials
 import com.cbconnectit.plugins.statuspages.ErrorInvalidParameters
 import com.cbconnectit.plugins.statuspages.ErrorInvalidToken
 import com.cbconnectit.utils.PasswordManagerContract
-import java.time.LocalDateTime
 import java.util.*
-
-private const val REFRESH_TOKEN_VALIDITY_DAYS = 30L
 
 class AuthControllerImpl(
     private val userDao: IUserDao,
-    private val refreshTokenDao: IRefreshTokenDao,
     private val tokenProvider: TokenProvider,
     private val passwordManager: PasswordManagerContract
 ) : AuthController {
@@ -33,13 +28,7 @@ class AuthControllerImpl(
             val isValidPassword = passwordManager.validatePassword(tokenDto.password, userHashable.password ?: "")
             if (!isValidPassword) throw ErrorInvalidCredentials
 
-            val tokens = tokenProvider.createTokens(userHashable.copy(password = null))
-
-            // Store refresh token in database
-            val expiresAt = LocalDateTime.now().plusDays(REFRESH_TOKEN_VALIDITY_DAYS)
-            refreshTokenDao.saveRefreshToken(userHashable.id, tokens.refreshToken, expiresAt)
-
-            tokens
+            tokenProvider.createTokens(userHashable.copy(password = null))
         }
     }
 
@@ -63,30 +52,9 @@ class AuthControllerImpl(
         )
 
         return dbTransactionalQuery {
-            // Check for replay attack: rotated token being reused
-            if (refreshTokenDao.detectReplayAttack(userId, refreshDto.refreshToken)) {
-                // Security breach detected - invalidate all user tokens and force re-authentication
-                refreshTokenDao.invalidateAllUserTokens(userId)
-                // TODO: Log security event for monitoring
-                throw ErrorInvalidToken
-            }
-
-            // Validate token hasn't been invalidated in database
-            if (!refreshTokenDao.isRefreshTokenValid(userId, refreshDto.refreshToken)) throw ErrorInvalidToken
-
             val user = userDao.getUser(userId) ?: throw ErrorInvalidToken
 
-            // Generate new tokens
-            val newTokens = tokenProvider.createTokens(user.copy(password = null))
-
-            // Mark old refresh token as replaced (token rotation)
-            refreshTokenDao.replaceRefreshToken(userId, refreshDto.refreshToken, newTokens.refreshToken)
-
-            // Store new refresh token in database
-            val expiresAt = LocalDateTime.now().plusDays(REFRESH_TOKEN_VALIDITY_DAYS)
-            refreshTokenDao.saveRefreshToken(user.id, newTokens.refreshToken, expiresAt)
-
-            newTokens
+            tokenProvider.createTokens(user.copy(password = null))
         }
     }
 
@@ -173,25 +141,24 @@ class AuthControllerImpl(
         }
     }
 
-    private suspend fun validateRefreshToken(token: String): AuthStatusResponse = dbTransactionalQuery {
-        try {
+    private suspend fun validateRefreshToken(token: String): AuthStatusResponse {
+        return try {
             val decoded = tokenProvider.verifier.verify(token)
 
             if (!decoded.audience.contains(JwtConfig.USERS_AUDIENCE)) {
-                return@dbTransactionalQuery AuthStatusResponse(authenticated = false)
+                return AuthStatusResponse(authenticated = false)
             }
 
             if (decoded.claims[JwtConfig.TOKEN_CLAIM_TOKEN_TYPE]?.asString() != TokenType.Refresh.name) {
-                return@dbTransactionalQuery AuthStatusResponse(authenticated = false)
+                return AuthStatusResponse(authenticated = false)
             }
 
-            val userIdString = decoded.claims[JwtConfig.TOKEN_CLAIM_USER_ID_KEY]?.asString()
-                ?: return@dbTransactionalQuery AuthStatusResponse(authenticated = false)
-
-            val userId = UUID.fromString(userIdString)
-
-            if (!refreshTokenDao.isRefreshTokenValid(userId, token)) {
-                return@dbTransactionalQuery AuthStatusResponse(authenticated = false)
+            val userId = decoded.claims[JwtConfig.TOKEN_CLAIM_USER_ID_KEY]?.asString()
+                ?: return AuthStatusResponse(authenticated = false)
+            val normalizedUserId = try {
+                UUID.fromString(userId).toString()
+            } catch (_: Exception) {
+                return AuthStatusResponse(authenticated = false)
             }
 
             val username = decoded.claims[JwtConfig.TOKEN_CLAIM_USER_NAME]?.asString()
@@ -200,7 +167,7 @@ class AuthControllerImpl(
             AuthStatusResponse(
                 authenticated = true,
                 role = role,
-                userId = userId.toString(),
+                userId = normalizedUserId,
                 username = username
             )
         } catch (_: Exception) {
@@ -209,23 +176,8 @@ class AuthControllerImpl(
     }
 
     override suspend fun logout(refreshToken: String?) {
-        // If no refresh token provided, just return success (idempotent)
-        refreshToken ?: return
-
-        dbTransactionalQuery {
-            try {
-                // Extract userId from refresh token
-                val decoded = tokenProvider.verifier.verify(refreshToken)
-                val userIdString = decoded.claims[JwtConfig.TOKEN_CLAIM_USER_ID_KEY]?.asString()
-                    ?: return@dbTransactionalQuery
-
-                val userId = UUID.fromString(userIdString)
-                refreshTokenDao.invalidateRefreshToken(userId, refreshToken)
-            } catch (_: Exception) {
-                // Token invalid/expired - that's fine, logout should always succeed
-                return@dbTransactionalQuery
-            }
-        }
+        // Stateless refresh token flow: client clears local token/cookies on logout.
+        return
     }
 }
 

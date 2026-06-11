@@ -4,7 +4,6 @@ import com.auth0.jwt.exceptions.JWTVerificationException
 import com.auth0.jwt.interfaces.DecodedJWT
 import com.cbconnectit.data.dto.requests.RefreshTokenDto
 import com.cbconnectit.data.dto.responses.CredentialsResponse
-import com.cbconnectit.domain.interfaces.IRefreshTokenDao
 import com.cbconnectit.domain.interfaces.IUserDao
 import com.cbconnectit.domain.models.user.User
 import com.cbconnectit.instrumentation.AuthInstrumentation
@@ -19,7 +18,6 @@ import com.cbconnectit.plugins.statuspages.ErrorInvalidToken
 import com.cbconnectit.utils.PasswordManagerContract
 import io.mockk.clearMocks
 import io.mockk.coEvery
-import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.test.runTest
@@ -34,16 +32,15 @@ import kotlin.test.assertFailsWith
 class AuthControllerTest : BaseControllerTest() {
 
     private val userDao: IUserDao = mockk()
-    private val refreshTokenDao: IRefreshTokenDao = mockk()
     private val tokenProvider: TokenProvider = mockk()
     private val passwordEncryption: PasswordManagerContract = mockk()
     private val decodedJwt: DecodedJWT = mockk()
 
-    private val controller: AuthController by lazy { AuthControllerImpl(userDao, refreshTokenDao, tokenProvider, passwordEncryption) }
+    private val controller: AuthController by lazy { AuthControllerImpl(userDao, tokenProvider, passwordEncryption) }
 
     @BeforeEach
     fun setupBeforeEach() {
-        clearMocks(userDao, refreshTokenDao, tokenProvider, passwordEncryption)
+        clearMocks(userDao, tokenProvider, passwordEncryption)
     }
 
     // <editor-fold desc="authorizeUser">
@@ -91,7 +88,6 @@ class AuthControllerTest : BaseControllerTest() {
         coEvery { userDao.getUserHashableByUsername(any()) } returns User()
         coEvery { passwordEncryption.validatePassword(any(), any()) } returns true
         coEvery { tokenProvider.createTokens(any()) } returns createdToken
-        coEvery { refreshTokenDao.saveRefreshToken(any(), any(), any()) } returns Unit
 
         val response = controller.authorizeUser(AuthInstrumentation.givenAValidEmailCreateToken())
         assertThat(response).isEqualTo(createdToken)
@@ -156,8 +152,6 @@ class AuthControllerTest : BaseControllerTest() {
         every { decodedJwt.audience.contains(JwtConfig.USERS_AUDIENCE) } returns true
         every { decodedJwt.claims[JwtConfig.TOKEN_CLAIM_TOKEN_TYPE]?.asString() } returns TokenType.Refresh.name
         every { decodedJwt.claims[JwtConfig.TOKEN_CLAIM_USER_ID_KEY]?.asString() } returns userId.toString()
-        coEvery { refreshTokenDao.detectReplayAttack(any(), any()) } returns false
-        coEvery { refreshTokenDao.isRefreshTokenValid(any(), any()) } returns true
         coEvery { userDao.getUser(any()) } returns null
 
         assertFailsWith<ErrorInvalidToken> {
@@ -174,49 +168,11 @@ class AuthControllerTest : BaseControllerTest() {
         every { decodedJwt.audience.contains(JwtConfig.USERS_AUDIENCE) } returns true
         every { decodedJwt.claims[JwtConfig.TOKEN_CLAIM_TOKEN_TYPE]?.asString() } returns TokenType.Refresh.name
         every { decodedJwt.claims[JwtConfig.TOKEN_CLAIM_USER_ID_KEY]?.asString() } returns userId.toString()
-        coEvery { refreshTokenDao.detectReplayAttack(any(), any()) } returns false
-        coEvery { refreshTokenDao.isRefreshTokenValid(any(), any()) } returns true
-        coEvery { refreshTokenDao.replaceRefreshToken(any(), any(), any()) } returns Unit
-        coEvery { refreshTokenDao.saveRefreshToken(any(), any(), any()) } returns Unit
         coEvery { userDao.getUser(any()) } returns User()
         coEvery { tokenProvider.createTokens(any()) } returns createdToken
 
         val response = controller.refreshTokens(RefreshTokenDto("some_random_token"))
         assertThat(response).isEqualTo(createdToken)
-    }
-
-    @Test
-    fun `when refreshing tokens with rotated token (replay attack), we invalidate all tokens and throw exception`() = runTest {
-        val userId = UUID.randomUUID()
-
-        every { tokenProvider.verifier.verify(any<String>()) } returns decodedJwt
-        every { decodedJwt.audience.contains(JwtConfig.USERS_AUDIENCE) } returns true
-        every { decodedJwt.claims[JwtConfig.TOKEN_CLAIM_TOKEN_TYPE]?.asString() } returns TokenType.Refresh.name
-        every { decodedJwt.claims[JwtConfig.TOKEN_CLAIM_USER_ID_KEY]?.asString() } returns userId.toString()
-        coEvery { refreshTokenDao.detectReplayAttack(userId, any()) } returns true
-        coEvery { refreshTokenDao.invalidateAllUserTokens(userId) } returns Unit
-
-        assertFailsWith<ErrorInvalidToken> {
-            controller.refreshTokens(RefreshTokenDto("rotated_token"))
-        }
-
-        // Verify all user tokens were invalidated
-        coVerify(exactly = 1) { refreshTokenDao.invalidateAllUserTokens(userId) }
-    }
-
-    @Test
-    fun `when refreshing tokens with invalid token in database, we throw exception`() = runTest {
-        val userId = UUID.randomUUID()
-        every { tokenProvider.verifier.verify(any<String>()) } returns decodedJwt
-        every { decodedJwt.audience.contains(JwtConfig.USERS_AUDIENCE) } returns true
-        every { decodedJwt.claims[JwtConfig.TOKEN_CLAIM_TOKEN_TYPE]?.asString() } returns TokenType.Refresh.name
-        every { decodedJwt.claims[JwtConfig.TOKEN_CLAIM_USER_ID_KEY]?.asString() } returns userId.toString()
-        coEvery { refreshTokenDao.detectReplayAttack(any(), any()) } returns false
-        coEvery { refreshTokenDao.isRefreshTokenValid(any(), any()) } returns false
-
-        assertFailsWith<ErrorInvalidToken> {
-            controller.refreshTokens(RefreshTokenDto("some_random_token"))
-        }
     }
 
     // </editor-fold>
@@ -329,7 +285,6 @@ class AuthControllerTest : BaseControllerTest() {
         )
 
         every { tokenProvider.verifier.verify(refreshToken) } returns decodedJwt
-        every { refreshTokenDao.isRefreshTokenValid(userId, refreshToken) } returns true
 
         val status = controller.getAuthStatus(accessToken, refreshToken)
 
@@ -350,10 +305,10 @@ class AuthControllerTest : BaseControllerTest() {
     }
 
     @Test
-    fun `when getting auth status with invalidated refresh token, we return unauthenticated`() = runTest {
+    fun `when getting auth status with invalid refresh token, we return unauthenticated`() = runTest {
         val userId = UUID.randomUUID()
         val accessToken = "expired-access-token"
-        val refreshToken = "invalidated-refresh-token"
+        val refreshToken = "invalid-refresh-token"
 
         // Mock JWT verification - access token throws exception (expired)
         every { tokenProvider.verifier.verify(accessToken) } throws com.auth0.jwt.exceptions.TokenExpiredException("Token expired", null)
@@ -365,14 +320,13 @@ class AuthControllerTest : BaseControllerTest() {
         every { userIdClaim.asString() } returns userId.toString()
         every { tokenTypeClaim.asString() } returns TokenType.Refresh.name
 
-        every { decodedJwt.audience } returns listOf(JwtConfig.USERS_AUDIENCE)
+        every { decodedJwt.audience } returns emptyList()
         every { decodedJwt.claims } returns mapOf(
             JwtConfig.TOKEN_CLAIM_USER_ID_KEY to userIdClaim,
             JwtConfig.TOKEN_CLAIM_TOKEN_TYPE to tokenTypeClaim
         )
 
         every { tokenProvider.verifier.verify(refreshToken) } returns decodedJwt
-        every { refreshTokenDao.isRefreshTokenValid(userId, refreshToken) } returns false
 
         val status = controller.getAuthStatus(accessToken, refreshToken)
 
@@ -383,46 +337,17 @@ class AuthControllerTest : BaseControllerTest() {
     // <editor-fold desc="Logout">
     @Test
     fun `when logging out with null refresh token, it completes successfully`() = runTest {
-        // Logout should always succeed, even with null token (idempotent)
         controller.logout(null)
-
-        // No exception should be thrown
-        coVerify(exactly = 0) { refreshTokenDao.invalidateRefreshToken(any(), any()) }
     }
 
     @Test
-    fun `when logging out with valid refresh token, it invalidates the token`() = runTest {
-        val userId = UUID.randomUUID()
-        val refreshToken = "valid-refresh-token"
-
-        // Mock JWT verification for refresh token
-        val userIdClaim = mockk<com.auth0.jwt.interfaces.Claim>()
-        every { userIdClaim.asString() } returns userId.toString()
-
-        every { decodedJwt.claims } returns mapOf(
-            JwtConfig.TOKEN_CLAIM_USER_ID_KEY to userIdClaim
-        )
-
-        every { tokenProvider.verifier.verify(refreshToken) } returns decodedJwt
-        coEvery { refreshTokenDao.invalidateRefreshToken(userId, refreshToken) } returns Unit
-
-        controller.logout(refreshToken)
-
-        coVerify { refreshTokenDao.invalidateRefreshToken(userId, refreshToken) }
+    fun `when logging out with refresh token, it completes successfully`() = runTest {
+        controller.logout("valid-refresh-token")
     }
 
     @Test
     fun `when logging out with invalid refresh token, it handles gracefully`() = runTest {
-        val refreshToken = "invalid-token"
-
-        // Token verification fails
-        every { tokenProvider.verifier.verify(refreshToken) } throws com.auth0.jwt.exceptions.TokenExpiredException("Token expired", null)
-
-        // Should not throw - just handle it gracefully
-        controller.logout(refreshToken)
-
-        // Verify invalidateRefreshToken was NOT called since token was invalid
-        coVerify(exactly = 0) { refreshTokenDao.invalidateRefreshToken(any(), any()) }
+        controller.logout("invalid-token")
     }
     // </editor-fold>
 }
