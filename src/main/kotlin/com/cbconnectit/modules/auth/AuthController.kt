@@ -141,7 +141,7 @@ class AuthControllerImpl(
         }
     }
 
-    private suspend fun validateRefreshToken(token: String): AuthStatusResponse {
+    private fun validateRefreshToken(token: String): AuthStatusResponse {
         return try {
             val decoded = tokenProvider.verifier.verify(token)
 
