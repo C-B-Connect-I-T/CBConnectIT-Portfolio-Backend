@@ -14,4 +14,5 @@ interface ILinkDao {
     fun updateLink(id: UUID, updateLink: UpdateLink, linkType: LinkType): Link?
     fun deleteLink(id: UUID): Boolean
     fun getListOfExistingLinkIds(linkIds: List<UUID>): List<UUID>
+    fun getOrInsertLinkByUrl(url: String, linkType: LinkType): UUID
 }

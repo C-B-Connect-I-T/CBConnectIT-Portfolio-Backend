@@ -6,6 +6,7 @@ import com.cbconnectit.data.dto.requests.project.UpdateProject
 import com.cbconnectit.domain.interfaces.ILinkDao
 import com.cbconnectit.domain.interfaces.IProjectDao
 import com.cbconnectit.domain.interfaces.ITagDao
+import com.cbconnectit.domain.models.link.LinkType
 import com.cbconnectit.domain.models.project.toDto
 import com.cbconnectit.plugins.dbTransactionalQuery
 import com.cbconnectit.plugins.statuspages.ErrorFailedCreate
@@ -13,10 +14,9 @@ import com.cbconnectit.plugins.statuspages.ErrorFailedDelete
 import com.cbconnectit.plugins.statuspages.ErrorFailedUpdate
 import com.cbconnectit.plugins.statuspages.ErrorInvalidParameters
 import com.cbconnectit.plugins.statuspages.ErrorNotFound
-import com.cbconnectit.plugins.statuspages.ErrorUnknownLinkIdsForCreateProject
-import com.cbconnectit.plugins.statuspages.ErrorUnknownLinkIdsForUpdateProject
 import com.cbconnectit.plugins.statuspages.ErrorUnknownTagIdsForCreateProject
 import com.cbconnectit.plugins.statuspages.ErrorUnknownTagIdsForUpdateProject
+import io.ktor.http.*
 import java.util.*
 
 class ProjectControllerImpl(
@@ -39,22 +39,17 @@ class ProjectControllerImpl(
         val tagUUIDs = insertNewProject.tags?.map { UUID.fromString(it) } ?: emptyList()
         val existingTagUUIDs = tagDao.getListOfExistingTagIds(tagUUIDs)
 
-        val linkUUIDS = insertNewProject.links?.map { UUID.fromString(it) } ?: emptyList()
-        val existingLinkUUIDs = linkDao.getListOfExistingLinkIds(linkUUIDS)
-
-        // A project can only be added when all the added tags exist
         if (tagUUIDs.isNotEmpty() && existingTagUUIDs.count() != insertNewProject.tags?.count()) {
             val nonExistingIds = tagUUIDs.filterNot { existingTagUUIDs.contains(it) }
             throw ErrorUnknownTagIdsForCreateProject(nonExistingIds)
         }
 
-        // A project can only be added when all the added tags exist
-        if (linkUUIDS.isNotEmpty() && existingLinkUUIDs.count() != insertNewProject.links?.count()) {
-            val nonExistingIds = linkUUIDS.filterNot { existingLinkUUIDs.contains(it) }
-            throw ErrorUnknownLinkIdsForCreateProject(nonExistingIds)
+        val resolvedLinkIds = (insertNewProject.links ?: emptyList()).map { url ->
+            val linkType = LinkType.getTypeByUrl(Url(url))
+            linkDao.getOrInsertLinkByUrl(url, linkType).toString()
         }
 
-        projectDao.insertProject(insertNewProject)?.toDto() ?: throw ErrorFailedCreate
+        projectDao.insertProject(insertNewProject.copy(links = resolvedLinkIds))?.toDto() ?: throw ErrorFailedCreate
     }
 
     override suspend fun updateProjectById(projectId: UUID, updateProject: UpdateProject): ProjectDto = dbTransactionalQuery {
@@ -63,22 +58,17 @@ class ProjectControllerImpl(
         val tagUUIDs = updateProject.tags?.map { UUID.fromString(it) } ?: emptyList()
         val existingTagUUIDs = tagDao.getListOfExistingTagIds(tagUUIDs)
 
-        val linkUUIDS = updateProject.links?.map { UUID.fromString(it) } ?: emptyList()
-        val existingLinkUUIDs = linkDao.getListOfExistingLinkIds(linkUUIDS)
-
-        // A project can only be added when all the added tags exist
         if (tagUUIDs.isNotEmpty() && existingTagUUIDs.count() != updateProject.tags?.count()) {
             val nonExistingIds = tagUUIDs.filterNot { existingTagUUIDs.contains(it) }
             throw ErrorUnknownTagIdsForUpdateProject(nonExistingIds)
         }
 
-        // A project can only be added when all the added tags exist
-        if (linkUUIDS.isNotEmpty() && existingLinkUUIDs.count() != updateProject.links?.count()) {
-            val nonExistingIds = linkUUIDS.filterNot { existingLinkUUIDs.contains(it) }
-            throw ErrorUnknownLinkIdsForUpdateProject(nonExistingIds)
+        val resolvedLinkIds = (updateProject.links ?: emptyList()).map { url ->
+            val linkType = LinkType.getTypeByUrl(Url(url))
+            linkDao.getOrInsertLinkByUrl(url, linkType).toString()
         }
 
-        projectDao.updateProject(projectId, updateProject)?.toDto() ?: throw ErrorFailedUpdate
+        projectDao.updateProject(projectId, updateProject.copy(links = resolvedLinkIds))?.toDto() ?: throw ErrorFailedUpdate
     }
 
     override suspend fun deleteProjectById(projectId: UUID) = dbTransactionalQuery {

@@ -47,4 +47,12 @@ class LinkDaoImpl : ILinkDao {
 
     override fun getListOfExistingLinkIds(linkIds: List<UUID>): List<UUID> =
         LinksTable.selectAll().where { LinksTable.id inList linkIds }.map { it[LinksTable.id].value }
+
+    override fun getOrInsertLinkByUrl(url: String, linkType: LinkType): UUID =
+        LinksTable.selectAll().where { LinksTable.url eq url }.firstOrNull()
+            ?.get(LinksTable.id)?.value
+            ?: LinksTable.insertAndGetId {
+                it[LinksTable.url] = url
+                it[type] = linkType
+            }.value
 }

@@ -16,8 +16,6 @@ import com.cbconnectit.plugins.statuspages.ErrorFailedDelete
 import com.cbconnectit.plugins.statuspages.ErrorFailedUpdate
 import com.cbconnectit.plugins.statuspages.ErrorInvalidParameters
 import com.cbconnectit.plugins.statuspages.ErrorNotFound
-import com.cbconnectit.plugins.statuspages.ErrorUnknownLinkIdsForCreateProject
-import com.cbconnectit.plugins.statuspages.ErrorUnknownLinkIdsForUpdateProject
 import com.cbconnectit.plugins.statuspages.ErrorUnknownTagIdsForCreateProject
 import com.cbconnectit.plugins.statuspages.ErrorUnknownTagIdsForUpdateProject
 import io.mockk.clearMocks
@@ -105,7 +103,7 @@ class ProjectControllerTest : BaseControllerTest() {
         val createdProject = givenAProject()
 
         coEvery { tagDao.getListOfExistingTagIds(any()) } returns listOf(UUID.fromString("00000000-0000-0000-0000-000000000001"))
-        coEvery { linkDao.getListOfExistingLinkIds(any()) } returns listOf(UUID.fromString("00000000-0000-0000-0000-000000000001"))
+        coEvery { linkDao.getOrInsertLinkByUrl(any(), any()) } returns UUID.randomUUID()
         coEvery { projectDao.insertProject(any()) } returns createdProject
 
         runBlocking {
@@ -121,7 +119,7 @@ class ProjectControllerTest : BaseControllerTest() {
         val createdProject = givenAProject()
 
         coEvery { tagDao.getListOfExistingTagIds(any()) } returns listOf()
-        coEvery { linkDao.getListOfExistingLinkIds(any()) } returns listOf(UUID.fromString("00000000-0000-0000-0000-000000000001"))
+        coEvery { linkDao.getOrInsertLinkByUrl(any(), any()) } returns UUID.randomUUID()
         coEvery { projectDao.insertProject(any()) } returns createdProject
 
         assertThrows<ErrorUnknownTagIdsForCreateProject> {
@@ -130,15 +128,10 @@ class ProjectControllerTest : BaseControllerTest() {
     }
 
     @Test
-    fun `when creating project with correct information but linkId does not exist, we throw exception`() {
-        val postProject = givenAValidInsertProject()
-        val createdProject = givenAProject()
+    fun `when creating project with an invalid link url, we throw exception`() {
+        val postProject = givenAValidInsertProject().copy(links = listOf("not-a-valid-url"))
 
-        coEvery { tagDao.getListOfExistingTagIds(any()) } returns listOf(UUID.fromString("00000000-0000-0000-0000-000000000001"))
-        coEvery { linkDao.getListOfExistingLinkIds(any()) } returns listOf()
-        coEvery { projectDao.insertProject(any()) } returns createdProject
-
-        assertThrows<ErrorUnknownLinkIdsForCreateProject> {
+        assertThrows<ErrorInvalidParameters> {
             runBlocking { controller.postProject(postProject) }
         }
     }
@@ -148,7 +141,7 @@ class ProjectControllerTest : BaseControllerTest() {
         val postProject = givenAValidInsertProject()
 
         coEvery { tagDao.getListOfExistingTagIds(any()) } returns listOf(UUID.fromString("00000000-0000-0000-0000-000000000001"))
-        coEvery { linkDao.getListOfExistingLinkIds(any()) } returns listOf(UUID.fromString("00000000-0000-0000-0000-000000000001"))
+        coEvery { linkDao.getOrInsertLinkByUrl(any(), any()) } returns UUID.randomUUID()
         coEvery { projectDao.insertProject(any()) } returns null
 
         assertThrows<ErrorFailedCreate> {
@@ -164,7 +157,7 @@ class ProjectControllerTest : BaseControllerTest() {
         val createdProject = givenAProject()
 
         coEvery { tagDao.getListOfExistingTagIds(any()) } returns listOf(UUID.fromString("00000000-0000-0000-0000-000000000001"))
-        coEvery { linkDao.getListOfExistingLinkIds(any()) } returns listOf(UUID.fromString("00000000-0000-0000-0000-000000000001"))
+        coEvery { linkDao.getOrInsertLinkByUrl(any(), any()) } returns UUID.randomUUID()
         coEvery { projectDao.updateProject(any(), any()) } returns createdProject
 
         runBlocking {
@@ -181,7 +174,7 @@ class ProjectControllerTest : BaseControllerTest() {
         val createdProject = givenAProject()
 
         coEvery { tagDao.getListOfExistingTagIds(any()) } returns listOf()
-        coEvery { linkDao.getListOfExistingLinkIds(any()) } returns listOf(UUID.fromString("00000000-0000-0000-0000-000000000001"))
+        coEvery { linkDao.getOrInsertLinkByUrl(any(), any()) } returns UUID.randomUUID()
         coEvery { projectDao.updateProject(any(), any()) } returns createdProject
 
         assertThrows<ErrorUnknownTagIdsForUpdateProject> {
@@ -190,15 +183,10 @@ class ProjectControllerTest : BaseControllerTest() {
     }
 
     @Test
-    fun `when updating specific project but linkId does not exist, we throw exception`() {
-        val updateProject = givenAValidUpdateProject()
-        val createdProject = givenAProject()
+    fun `when updating specific project with an invalid link url, we throw exception`() {
+        val updateProject = givenAValidUpdateProject().copy(links = listOf("not-a-valid-url"))
 
-        coEvery { tagDao.getListOfExistingTagIds(any()) } returns listOf(UUID.fromString("00000000-0000-0000-0000-000000000001"))
-        coEvery { linkDao.getListOfExistingLinkIds(any()) } returns listOf()
-        coEvery { projectDao.updateProject(any(), any()) } returns createdProject
-
-        assertThrows<ErrorUnknownLinkIdsForUpdateProject> {
+        assertThrows<ErrorInvalidParameters> {
             runBlocking { controller.updateProjectById(UUID.randomUUID(), updateProject) }
         }
     }
@@ -217,7 +205,7 @@ class ProjectControllerTest : BaseControllerTest() {
         val updateProject = givenAValidUpdateProject()
 
         coEvery { tagDao.getListOfExistingTagIds(any()) } returns listOf(UUID.fromString("00000000-0000-0000-0000-000000000001"))
-        coEvery { linkDao.getListOfExistingLinkIds(any()) } returns listOf(UUID.fromString("00000000-0000-0000-0000-000000000001"))
+        coEvery { linkDao.getOrInsertLinkByUrl(any(), any()) } returns UUID.randomUUID()
         coEvery { projectDao.updateProject(any(), any()) } throws ErrorFailedUpdate
 
         assertThrows<ErrorFailedUpdate> {

@@ -6,6 +6,7 @@ import com.cbconnectit.data.dto.requests.company.UpdateCompany
 import com.cbconnectit.domain.interfaces.ICompanyDao
 import com.cbconnectit.domain.interfaces.ILinkDao
 import com.cbconnectit.domain.models.company.toDto
+import com.cbconnectit.domain.models.link.LinkType
 import com.cbconnectit.plugins.dbTransactionalQuery
 import com.cbconnectit.plugins.statuspages.ErrorDuplicateEntity
 import com.cbconnectit.plugins.statuspages.ErrorFailedCreate
@@ -13,8 +14,7 @@ import com.cbconnectit.plugins.statuspages.ErrorFailedDelete
 import com.cbconnectit.plugins.statuspages.ErrorFailedUpdate
 import com.cbconnectit.plugins.statuspages.ErrorInvalidParameters
 import com.cbconnectit.plugins.statuspages.ErrorNotFound
-import com.cbconnectit.plugins.statuspages.ErrorUnknownLinkIdsForCreateCompany
-import com.cbconnectit.plugins.statuspages.ErrorUnknownLinkIdsForUpdateCompany
+import io.ktor.http.*
 import java.util.*
 
 class CompanyControllerImpl(
@@ -36,36 +36,26 @@ class CompanyControllerImpl(
         val positionUnique = companyDao.companyUnique(insertNewCompany.name)
         if (!positionUnique) throw ErrorDuplicateEntity
 
-        val links = insertNewCompany.links ?: emptyList()
-        val linkUUIDS = links.map { UUID.fromString(it) }
-        val existingLinkUUIDs = linkDao.getListOfExistingLinkIds(linkUUIDS)
-
-        // A project can only be added when all the added tags exist
-        if (existingLinkUUIDs.count() != links.count()) {
-            val nonExistingIds = linkUUIDS.filterNot { existingLinkUUIDs.contains(it) }
-            throw ErrorUnknownLinkIdsForCreateCompany(nonExistingIds)
+        val resolvedLinkIds = (insertNewCompany.links ?: emptyList()).map { url ->
+            val linkType = LinkType.getTypeByUrl(Url(url))
+            linkDao.getOrInsertLinkByUrl(url, linkType).toString()
         }
 
-        companyDao.insertCompany(insertNewCompany)?.toDto() ?: throw ErrorFailedCreate
+        companyDao.insertCompany(insertNewCompany.copy(links = resolvedLinkIds))?.toDto() ?: throw ErrorFailedCreate
     }
 
     override suspend fun updateCompanyById(companyId: UUID, updateCompany: UpdateCompany): CompanyDto = dbTransactionalQuery {
         if (!updateCompany.isValid) throw ErrorInvalidParameters
 
-        val positionUnique = companyDao.companyUnique(updateCompany.name)
+        val positionUnique = companyDao.companyUnique(updateCompany.name, companyId)
         if (!positionUnique) throw ErrorDuplicateEntity
 
-        val links = updateCompany.links ?: emptyList()
-        val linkUUIDS = links.map { UUID.fromString(it) }
-        val existingLinkUUIDs = linkDao.getListOfExistingLinkIds(linkUUIDS)
-
-        // A project can only be added when all the added tags exist
-        if (existingLinkUUIDs.count() != links.count()) {
-            val nonExistingIds = linkUUIDS.filterNot { existingLinkUUIDs.contains(it) }
-            throw ErrorUnknownLinkIdsForUpdateCompany(nonExistingIds)
+        val resolvedLinkIds = (updateCompany.links ?: emptyList()).map { url ->
+            val linkType = LinkType.getTypeByUrl(Url(url))
+            linkDao.getOrInsertLinkByUrl(url, linkType).toString()
         }
 
-        companyDao.updateCompany(companyId, updateCompany)?.toDto() ?: throw ErrorFailedUpdate
+        companyDao.updateCompany(companyId, updateCompany.copy(links = resolvedLinkIds))?.toDto() ?: throw ErrorFailedUpdate
     }
 
     override suspend fun deleteCompanyById(companyId: UUID) = dbTransactionalQuery {
