@@ -2,6 +2,7 @@ package com.cbconnectit.dao
 
 import com.cbconnectit.data.database.dao.LinkDaoImpl
 import com.cbconnectit.data.database.tables.LinksTable
+import com.cbconnectit.data.dto.requests.link.InsertNewLink
 import com.cbconnectit.domain.models.link.LinkType
 import com.cbconnectit.instrumentation.LinkInstrumentation
 import com.cbconnectit.instrumentation.LinkInstrumentation.givenAValidInsertLinkBody
@@ -12,6 +13,7 @@ import org.assertj.core.api.Assertions.assertThat
 import org.jetbrains.exposed.sql.insert
 import org.junit.jupiter.api.Test
 import java.util.*
+import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
@@ -128,9 +130,44 @@ internal class LinkDaoImplTest : BaseDaoTest() {
 
     @Test
     fun `getListOfExistingLinkIds where some ids exist, should return list of existing items`() = runTest {
-        val id = dao.insertLink(givenAValidInsertLinkBody(), LinkType.Unknown)?.id
+        val id = dao.insertLink(InsertNewLink("https://existing-link-ids.com"), LinkType.Unknown)?.id
         val list = dao.getListOfExistingLinkIds(listOf(id!!, UUID.fromString("20000000-0000-0000-0000-000000000000")))
         assertThat(list).hasSize(1)
+    }
+    // </editor-fold>
+
+    // <editor-fold desc="Get or insert link by URL">
+    @Test
+    fun `getOrInsertLinkByUrl where url already exists, should return existing id`() = runTest {
+        val existingId = UUID.fromString("00000000-0000-0000-0000-000000000001")
+
+        val resolvedId = dao.getOrInsertLinkByUrl("https://first-link.com", LinkType.Github)
+
+        assertEquals(existingId, resolvedId)
+        assertThat(dao.getLinks()).hasSize(4)
+    }
+
+    @Test
+    fun `getOrInsertLinkByUrl where url does not exist, should insert and return new id`() = runTest(shouldSeedData = false) {
+        val url = "https://brand-new-link.com"
+
+        val resolvedId = dao.getOrInsertLinkByUrl(url, LinkType.LinkedIn)
+        val storedLink = dao.getLinkById(resolvedId)
+
+        assertThat(storedLink).matches {
+            it?.url == url && it.type == LinkType.LinkedIn
+        }
+    }
+
+    @Test
+    fun `getOrInsertLinkByUrl called twice with same url, should return same id without duplicates`() = runTest(shouldSeedData = false) {
+        val url = "https://deduplicated-link.com"
+
+        val firstId = dao.getOrInsertLinkByUrl(url, LinkType.Github)
+        val secondId = dao.getOrInsertLinkByUrl(url, LinkType.LinkedIn)
+
+        assertEquals(firstId, secondId)
+        assertThat(dao.getLinks()).hasSize(1)
     }
     // </editor-fold>
 }

@@ -37,17 +37,9 @@ data class ErrorUnknownTagIdsForCreate(private val ids: List<UUID>) : ApiExcepti
 
 data class ErrorUnknownTagIdsForUpdate(private val ids: List<UUID>) : ApiException("unknown_ids_for_update", "Can't update service with unknown tag ${ids.joinToString(", ")}", HttpStatusCode.BadRequest)
 
-data class ErrorUnknownLinkIdsForCreateProject(private val ids: List<UUID>) : ApiException("unknown_ids_for_create", "Can't create project with unknown links ${ids.joinToString(", ")}", HttpStatusCode.BadRequest)
-
-data class ErrorUnknownLinkIdsForUpdateProject(private val ids: List<UUID>) : ApiException("unknown_ids_for_update", "Can't update project with unknown links ${ids.joinToString(", ")}", HttpStatusCode.BadRequest)
-
 data class ErrorUnknownTagIdsForCreateProject(private val ids: List<UUID>) : ApiException("unknown_ids_for_create", "Can't create project with unknown tags ${ids.joinToString(", ")}", HttpStatusCode.BadRequest)
 
 data class ErrorUnknownTagIdsForUpdateProject(private val ids: List<UUID>) : ApiException("unknown_ids_for_update", "Can't update project with unknown tags ${ids.joinToString(", ")}", HttpStatusCode.BadRequest)
-
-data class ErrorUnknownLinkIdsForCreateCompany(private val ids: List<UUID>) : ApiException("unknown_ids_for_create", "Can't create company with unknown links ${ids.joinToString(", ")}", HttpStatusCode.BadRequest)
-
-data class ErrorUnknownLinkIdsForUpdateCompany(private val ids: List<UUID>) : ApiException("unknown_ids_for_update", "Can't update company with unknown links ${ids.joinToString(", ")}", HttpStatusCode.BadRequest)
 
 data class ErrorUnknownCompanyIdsForCreateTestimonial(private val ids: List<UUID>) : ApiException("unknown_ids_for_create", "Can't create testimonial with unknown company ${ids.joinToString(", ")}", HttpStatusCode.BadRequest)
 

@@ -22,7 +22,8 @@ data class InsertNewProject(
                 shortDescription.isNotBlank() &&
                 description.isNotBlank() &&
                 (bannerImageUrl == null || bannerImageUrl.isValidUrl) &&
-                (imageUrl == null || imageUrl.isValidUrl)
+                (imageUrl == null || imageUrl.isValidUrl) &&
+                (links == null || links.all { it.isNotBlank() && it.isValidUrl })
 }
 
 @Serializable
@@ -43,5 +44,6 @@ data class UpdateProject(
                 shortDescription.isNotBlank() &&
                 description.isNotBlank() &&
                 (bannerImageUrl == null || bannerImageUrl.isValidUrl) &&
-                (imageUrl == null || imageUrl.isValidUrl)
+                (imageUrl == null || imageUrl.isValidUrl) &&
+                (links == null || links.all { it.isNotBlank() && it.isValidUrl })
 }

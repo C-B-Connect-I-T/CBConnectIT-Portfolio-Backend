@@ -14,7 +14,7 @@ object ProjectInstrumentation {
         description = "Updated description",
         shortDescription = "Updated short description",
         tags = listOf("00000000-0000-0000-0000-000000000001"),
-        links = listOf("00000000-0000-0000-0000-000000000001")
+        links = listOf("https://github.com/example")
     )
 
     fun givenAValidUpdateProject() = UpdateProject(
@@ -22,7 +22,7 @@ object ProjectInstrumentation {
         description = "Updated description",
         shortDescription = "Updated short description",
         tags = listOf("00000000-0000-0000-0000-000000000002"),
-        links = listOf("00000000-0000-0000-0000-000000000002")
+        links = listOf("https://github.com/example")
     )
 
     fun givenProjectList() = listOf(

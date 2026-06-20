@@ -12,6 +12,6 @@ interface ICompanyDao {
     fun insertCompany(insertNewCompany: InsertNewCompany): Company?
     fun updateCompany(id: UUID, updateCompany: UpdateCompany): Company?
     fun deleteCompany(id: UUID): Boolean
-    fun companyUnique(name: String): Boolean
+    fun companyUnique(name: String, id: UUID? = null): Boolean
     fun getListOfExistingCompanyIds(companyIds: List<UUID>): List<UUID>
 }

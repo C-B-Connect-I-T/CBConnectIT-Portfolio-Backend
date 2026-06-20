@@ -11,14 +11,13 @@ import com.cbconnectit.domain.interfaces.ICompanyDao
 import com.cbconnectit.domain.models.company.Company
 import com.cbconnectit.domain.models.link.Link
 import org.jetbrains.exposed.sql.Query
-import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
-import org.jetbrains.exposed.sql.SqlExpressionBuilder.notInList
 import org.jetbrains.exposed.sql.and
 import org.jetbrains.exposed.sql.deleteWhere
 import org.jetbrains.exposed.sql.insert
 import org.jetbrains.exposed.sql.insertAndGetId
 import org.jetbrains.exposed.sql.insertIgnore
 import org.jetbrains.exposed.sql.javatime.CurrentDateTime
+import org.jetbrains.exposed.sql.lowerCase
 import org.jetbrains.exposed.sql.selectAll
 import org.jetbrains.exposed.sql.update
 import java.util.*
@@ -85,7 +84,9 @@ class CompanyDaoImpl : ICompanyDao {
         }
 
         CompaniesLinksPivotTable.deleteWhere {
-            companyId eq id and (linkId notInList (updateCompany.links ?: emptyList()).map { linkId -> UUID.fromString(linkId) })
+            with(it) {
+                companyId eq id and (linkId notInList (updateCompany.links ?: emptyList()).map { linkId -> UUID.fromString(linkId) })
+            }
         }
 
         updateCompany.links?.forEach { linkId ->
@@ -99,11 +100,17 @@ class CompanyDaoImpl : ICompanyDao {
     }
 
     override fun deleteCompany(id: UUID): Boolean {
-        return CompaniesTable.deleteWhere { CompaniesTable.id eq id } > 0
+        return CompaniesTable.deleteWhere {
+            with(it) {
+                CompaniesTable.id eq id
+            }
+        } > 0
     }
 
-    override fun companyUnique(name: String): Boolean =
-        CompaniesTable.selectAll().where { CompaniesTable.name eq name }.empty()
+    // Check if the company name is unique, excluding the company with the given id (if provided)
+    override fun companyUnique(name: String, id: UUID?): Boolean =
+        CompaniesTable.selectAll()
+            .where { (CompaniesTable.name.lowerCase() eq name.lowercase()) and (CompaniesTable.id neq id) }.empty()
 
     override fun getListOfExistingCompanyIds(companyIds: List<UUID>): List<UUID> =
         CompaniesTable.selectAll().where { CompaniesTable.id inList companyIds }.map { it[CompaniesTable.id].value }

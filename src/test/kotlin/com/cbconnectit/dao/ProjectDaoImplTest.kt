@@ -127,7 +127,7 @@ internal class ProjectDaoImplTest : BaseDaoTest() {
     // <editor-fold desc="Create new Project">
     @Test
     fun `insertProject where information is correct, database is storing Project and returning correct content`() = runTest {
-        val validProject = givenAValidInsertProject()
+        val validProject = givenAValidInsertProject().copy(links = listOf("00000000-0000-0000-0000-000000000001"))
         val project = dao.insertProject(validProject)
 
         assertThat(project).matches {
@@ -143,7 +143,7 @@ internal class ProjectDaoImplTest : BaseDaoTest() {
         // adding a delay so there is a clear difference between `updatedAt` and `createdAt`
         delay(1000)
 
-        val validUpdateProject = givenAValidUpdateProject()
+        val validUpdateProject = givenAValidUpdateProject().copy(links = listOf("00000000-0000-0000-0000-000000000002"))
         val project = dao.updateProject(UUID.fromString("00000000-0000-0000-0000-000000000001"), validUpdateProject)
 
         assertThat(project).matches {

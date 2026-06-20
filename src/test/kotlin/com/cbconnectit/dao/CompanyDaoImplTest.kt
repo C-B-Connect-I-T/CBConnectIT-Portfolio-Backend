@@ -197,6 +197,26 @@ internal class CompanyDaoImplTest : BaseDaoTest() {
         assertTrue(unique)
     }
 
+    @Test
+    fun `companyUnique() is case-insensitive and returns false for existing name`() = runTest {
+        val unique = dao.companyUnique("first company")
+        assertFalse(unique)
+    }
+
+    @Test
+    fun `companyUnique() returns true when same name belongs to excluded id`() = runTest {
+        val existingId = UUID.fromString("00000000-0000-0000-0000-000000000001")
+        val unique = dao.companyUnique("First Company", existingId)
+        assertTrue(unique)
+    }
+
+    @Test
+    fun `companyUnique() returns false when same name exists for a different id`() = runTest {
+        val otherId = UUID.fromString("00000000-0000-0000-0000-000000000002")
+        val unique = dao.companyUnique("First Company", otherId)
+        assertFalse(unique)
+    }
+
     // </editor-fold>
 
     // <editor-fold desc="List of Existing Company IDs">

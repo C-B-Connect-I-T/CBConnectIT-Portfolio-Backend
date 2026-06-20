@@ -20,7 +20,8 @@ CREATE TABLE Links (
     url        VARCHAR(255) NOT NULL,
     type       INT          NOT NULL DEFAULT 4,
     created_at DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    updated_at DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP
+    updated_at DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT uq_Links_url UNIQUE (url)
 );
 
 CREATE TABLE JobPositions (
