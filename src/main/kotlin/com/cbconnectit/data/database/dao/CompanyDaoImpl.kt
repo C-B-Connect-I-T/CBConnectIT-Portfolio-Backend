@@ -107,7 +107,7 @@ class CompanyDaoImpl : ICompanyDao {
         } > 0
     }
 
-    // Check if the category name is unique, excluding the category with the given id (if provided)
+    // Check if the company name is unique, excluding the company with the given id (if provided)
     override fun companyUnique(name: String, id: UUID?): Boolean =
         CompaniesTable.selectAll()
             .where { (CompaniesTable.name.lowerCase() eq name.lowercase()) and (CompaniesTable.id neq id) }.empty()

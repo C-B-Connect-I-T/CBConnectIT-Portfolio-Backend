@@ -11,7 +11,7 @@ import org.jetbrains.exposed.sql.javatime.datetime
 import java.util.*
 
 object LinksTable: UUIDTable() {
-    val url = varchar("url", normalTextSize)
+    val url = varchar("url", normalTextSize).uniqueIndex()
     val type = enumeration<LinkType>("type").default(LinkType.Unknown)
     val createdAt = datetime("created_at").defaultExpression(CurrentDateTime)
     val updatedAt = datetime("updated_at").defaultExpression(CurrentDateTime)

@@ -11,6 +11,7 @@ import com.cbconnectit.domain.models.link.LinkType
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
 import org.jetbrains.exposed.sql.deleteWhere
 import org.jetbrains.exposed.sql.insertAndGetId
+import org.jetbrains.exposed.sql.insertIgnoreAndGetId
 import org.jetbrains.exposed.sql.javatime.CurrentDateTime
 import org.jetbrains.exposed.sql.selectAll
 import org.jetbrains.exposed.sql.update
@@ -48,11 +49,21 @@ class LinkDaoImpl : ILinkDao {
     override fun getListOfExistingLinkIds(linkIds: List<UUID>): List<UUID> =
         LinksTable.selectAll().where { LinksTable.id inList linkIds }.map { it[LinksTable.id].value }
 
-    override fun getOrInsertLinkByUrl(url: String, linkType: LinkType): UUID =
-        LinksTable.selectAll().where { LinksTable.url eq url }.firstOrNull()
-            ?.get(LinksTable.id)?.value
-            ?: LinksTable.insertAndGetId {
+    override fun getOrInsertLinkByUrl(url: String, linkType: LinkType): UUID {
+        LinksTable
+            .insertIgnoreAndGetId {
                 it[LinksTable.url] = url
                 it[type] = linkType
-            }.value
+            }
+            ?.value
+            ?.let { return it }
+
+        return LinksTable.selectAll()
+            .where { LinksTable.url eq url }
+            .limit(1)
+            .firstOrNull()
+            ?.get(LinksTable.id)
+            ?.value
+            ?: error("Failed to resolve link id for url: $url")
+    }
 }
