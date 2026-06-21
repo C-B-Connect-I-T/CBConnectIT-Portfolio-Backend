@@ -43,18 +43,40 @@ fun Route.testimonialRouting(
                 call.respond(HttpStatusCode.Created, testimonial)
             }
 
-            put("{${ParamConstants.TESTIMONIAL_ID_KEY}}") {
-                val testimonialId = call.getTestimonialId()
-                val (imageFile, updateTestimonial) = getImageFileAndData<UpdateTestimonial>(json)
+            route("{${ParamConstants.TESTIMONIAL_ID_KEY}}") {
+                put {
+                    val testimonialId = call.getTestimonialId()
+                    val (imageFile, updateTestimonial) = getImageFileAndData<UpdateTestimonial>(json)
 
-                val testimonial = testimonialController.updateById(testimonialId, updateTestimonial, imageFile)
-                call.respond(testimonial)
-            }
+                    val testimonial = testimonialController.updateById(testimonialId, updateTestimonial, imageFile)
+                    call.respond(testimonial)
+                }
 
-            delete("{${ParamConstants.TESTIMONIAL_ID_KEY}}") {
-                val testimonialId = call.getTestimonialId()
-                testimonialController.deleteById(testimonialId)
-                sendOk()
+                delete {
+                    val testimonialId = call.getTestimonialId()
+                    testimonialController.deleteById(testimonialId)
+                    sendOk()
+                }
+
+                // Dedicated image management endpoints
+                route("image") {
+                    put {
+                        val categoryId = call.getTestimonialId()
+
+                        val (imageFile, request) = getImageFileAndData<Map<String, String>>(json)
+                        if (imageFile == null) throw ErrorInvalidParameters // Image file is required for this endpoint
+                        val altText = request["altText"] ?: ""
+
+                        val updatedCategory = testimonialController.updateTestimonialAvatar(categoryId, imageFile, altText)
+                        call.respond(updatedCategory)
+                    }
+
+                    delete {
+                        val categoryId = call.getTestimonialId()
+                        val updatedCategory = testimonialController.deleteTestimonialAvatar(categoryId)
+                        call.respond(updatedCategory)
+                    }
+                }
             }
         }
     }

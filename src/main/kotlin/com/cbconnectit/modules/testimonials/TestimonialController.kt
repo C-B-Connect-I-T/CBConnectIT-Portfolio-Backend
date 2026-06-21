@@ -184,6 +184,79 @@ class TestimonialControllerImpl(
         }
     }
 
+    override suspend fun updateTestimonialAvatar(id: UUID, imageFile: Parts.File, altText: String): TestimonialDto {
+        if (!FileValidationUtils.isValidImageFile(imageFile.contentType, imageFile.fileName, imageFile.data)) {
+            throw ErrorInvalidFileType
+        }
+
+        // Phase 1: Store new file to external storage (outside transaction)
+        val storageResult = storageService.storeFromBytes(imageFile.data, imageFile.fileName, imageFile.contentType)
+
+        // Phase 2: Database operations in transaction
+        @Suppress("TooGenericExceptionCaught")
+        return try {
+            val oldFileUrl = dbTransactionalQuery {
+                // Verify category exists
+                testimonialDao.readById(id) ?: throw ErrorNotFound
+
+                // Check for existing media file
+                val existingFile = mediaFileDao.readByOwnerId(id, OwnerType.TESTIMONIAL)
+                val oldUrl = existingFile?.url
+
+                if (existingFile != null) {
+                    mediaFileDao.delete(existingFile.id)
+                }
+
+                // Create new media file record
+                val mediaFile = MediaFile(
+                    storageResult = storageResult,
+                    imageFile = imageFile,
+                    ownerId = id,
+                    ownerType = OwnerType.TESTIMONIAL,
+                    altText = altText
+                )
+                mediaFileDao.create(mediaFile)
+
+                // Return old file URL and category DTO
+                Pair(oldUrl, testimonialDao.readById(id)?.toDto() ?: throw ErrorNotFound)
+            }
+
+            // Phase 3: Delete old file from storage (after successful DB commit, outside transaction)
+            oldFileUrl.first?.let { storageService.delete(it) }
+
+            oldFileUrl.second
+        } catch (e: Exception) {
+            // Cleanup newly uploaded file if DB operation failed
+            storageService.delete(storageResult.url)
+            throw e
+        }
+    }
+
+    override suspend fun deleteTestimonialAvatar(id: UUID): TestimonialDto {
+        // Phase 1: Get file URL from database
+        val fileUrl = dbTransactionalQuery {
+            // Verify category exists
+            testimonialDao.readById(id) ?: throw ErrorNotFound
+
+            val existingFile = mediaFileDao.readByOwnerId(id, OwnerType.TESTIMONIAL)
+            val url = existingFile?.url
+
+            // Delete from database
+            existingFile?.let { mediaFileDao.delete(it.id) }
+
+            url
+        }
+
+        // Phase 2: Delete from storage (outside transaction)
+        fileUrl?.let { storageService.delete(it) }
+
+        // Phase 3: Return updated category
+        return dbTransactionalQuery {
+            testimonialDao.readById(id)?.toDto() ?: throw ErrorNotFound
+        }
+    }
+
+    // TODO: Also delete the used image from the storage!
     override suspend fun deleteById(id: UUID) = dbTransactionalQuery {
         val deleted = testimonialDao.deleteById(id)
         if (!deleted) throw ErrorFailedDelete
@@ -199,6 +272,8 @@ interface TestimonialController {
         updateTestimonial: UpdateTestimonial,
         imageFile: Parts.File? = null
     ): TestimonialDto
+    suspend fun updateTestimonialAvatar(id: UUID, imageFile: Parts.File, altText: String): TestimonialDto
+    suspend fun deleteTestimonialAvatar(id: UUID): TestimonialDto
 
     suspend fun deleteById(id: UUID)
 }
