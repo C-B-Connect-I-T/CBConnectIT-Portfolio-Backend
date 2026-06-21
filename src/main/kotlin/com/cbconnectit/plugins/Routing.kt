@@ -23,6 +23,7 @@ import com.cbconnectit.modules.users.userRouting
 import io.ktor.server.application.*
 import io.ktor.server.http.content.*
 import io.ktor.server.routing.*
+import kotlinx.serialization.json.Json
 import org.koin.ktor.ext.inject
 import java.io.File
 
@@ -37,6 +38,7 @@ fun Application.configureRouting() {
     val companyController by inject<CompanyController>()
     val testimonialController by inject<TestimonialController>()
     val experienceController by inject<ExperienceController>()
+    val json by inject<Json>()
 
     routing {
         // Serve uploaded media files
@@ -52,7 +54,7 @@ fun Application.configureRouting() {
             projectRouting(projectController)
             jobPositionRouting(jobPositionController)
             companyRouting(companyController)
-            testimonialRouting(testimonialController)
+            testimonialRouting(json, testimonialController)
             experienceRouting(experienceController)
         }
     }

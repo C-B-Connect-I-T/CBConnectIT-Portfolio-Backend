@@ -28,6 +28,7 @@ object ErrorInvalidUUID : ApiException("invalid_uuid", "The uuid provided is not
 object ErrorMissingParameters : ApiException("missing_parameters", "Missing parameters for required field", HttpStatusCode.BadRequest)
 object ErrorNotFound : ApiException("not_found", "The resource could not be found", HttpStatusCode.NotFound)
 object ErrorUnauthorized : ApiException("unauthorized", "The user is not authorized to perform this action", HttpStatusCode.Forbidden)
+object ErrorInvalidFileType : ApiException("invalid_file_type", "Invalid file type. Only images are allowed.", HttpStatusCode.BadRequest)
 
 data class ErrorUnknownServiceIdsForCreate(private val ids: List<UUID>) : ApiException("unknown_ids_for_create", "Can't create service with unknown parent service ${ids.joinToString(", ")}", HttpStatusCode.BadRequest)
 

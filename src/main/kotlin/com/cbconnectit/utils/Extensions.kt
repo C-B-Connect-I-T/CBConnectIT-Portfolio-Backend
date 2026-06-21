@@ -69,6 +69,7 @@ fun ApplicationCall.getServiceId(): UUID = getParameterUUID(ParamConstants.SERVI
 fun ApplicationCall.getTestimonialId(): UUID = getParameterUUID(ParamConstants.TESTIMONIAL_ID_KEY)
 fun ApplicationCall.getExperienceId(): UUID = getParameterUUID(ParamConstants.EXPERIENCE_ID_KEY)
 fun ApplicationCall.getProjectId(): UUID = getParameterUUID(ParamConstants.PROJECT_ID_KEY)
+fun ApplicationCall.getMediaFileId(): UUID = getParameterUUID(ParamConstants.MEDIA_FILE_ID_KEY)
 
 fun ApplicationCall.getTagIdentifier(): String = parameters[ParamConstants.TAG_IDENTIFIER_KEY] ?: throw ErrorInvalidParameters
 // fun ApplicationCall.getProjectId(): UUID = getParameterUUID(ParamConstants.PROJECT_ID_KEY)

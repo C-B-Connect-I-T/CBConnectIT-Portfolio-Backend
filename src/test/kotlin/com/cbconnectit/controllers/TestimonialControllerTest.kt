@@ -3,6 +3,7 @@ package com.cbconnectit.controllers
 import com.cbconnectit.data.dto.requests.testimonial.TestimonialDto
 import com.cbconnectit.domain.interfaces.ICompanyDao
 import com.cbconnectit.domain.interfaces.IJobPositionDao
+import com.cbconnectit.domain.interfaces.IMediaFileDao
 import com.cbconnectit.domain.interfaces.ITestimonialDao
 import com.cbconnectit.instrumentation.TestimonialInstrumentation.givenATestimonial
 import com.cbconnectit.instrumentation.TestimonialInstrumentation.givenAValidInsertTestimonial
@@ -13,13 +14,15 @@ import com.cbconnectit.modules.testimonials.TestimonialController
 import com.cbconnectit.modules.testimonials.TestimonialControllerImpl
 import com.cbconnectit.plugins.statuspages.ErrorFailedCreate
 import com.cbconnectit.plugins.statuspages.ErrorFailedDelete
-import com.cbconnectit.plugins.statuspages.ErrorFailedUpdate
 import com.cbconnectit.plugins.statuspages.ErrorInvalidParameters
 import com.cbconnectit.plugins.statuspages.ErrorNotFound
 import com.cbconnectit.plugins.statuspages.ErrorUnknownCompanyIdsForCreateTestimonial
 import com.cbconnectit.plugins.statuspages.ErrorUnknownCompanyIdsForUpdateTestimonial
 import com.cbconnectit.plugins.statuspages.ErrorUnknownJobPositionIdsForCreateTestimonial
 import com.cbconnectit.plugins.statuspages.ErrorUnknownJobPositionIdsForUpdateTestimonial
+import com.cbconnectit.services.MediaStorageService
+import com.cbconnectit.services.StorageResult
+import com.cbconnectit.utils.Parts
 import io.mockk.clearMocks
 import io.mockk.coEvery
 import io.mockk.mockk
@@ -30,7 +33,10 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import org.junit.jupiter.api.assertDoesNotThrow
 import org.junit.jupiter.api.assertThrows
+import java.awt.image.BufferedImage
+import java.io.ByteArrayOutputStream
 import java.util.*
+import javax.imageio.ImageIO
 import kotlin.test.assertNotNull
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
@@ -39,12 +45,43 @@ class TestimonialControllerTest : BaseControllerTest() {
     private val testimonialDao: ITestimonialDao = mockk()
     private val companyDao: ICompanyDao = mockk()
     private val jobPositionDao: IJobPositionDao = mockk()
-    private val controller: TestimonialController by lazy { TestimonialControllerImpl(testimonialDao, companyDao, jobPositionDao) }
+    private val mediaFileDao: IMediaFileDao = mockk()
+    private val storageService: MediaStorageService = mockk()
+    private val controller: TestimonialController by lazy { TestimonialControllerImpl(testimonialDao, companyDao, jobPositionDao, mediaFileDao, storageService) }
+
+    private fun createValidImageBytes(): ByteArray {
+        val image = BufferedImage(100, 100, BufferedImage.TYPE_INT_RGB)
+        val graphics = image.createGraphics()
+        graphics.fillRect(0, 0, 100, 100)
+        graphics.dispose()
+
+        val outputStream = ByteArrayOutputStream()
+        ImageIO.write(image, "jpeg", outputStream)
+        return outputStream.toByteArray()
+    }
+
+    private val mockFileData = createValidImageBytes()
+    private val mockFile = Parts.File(
+        name = "image",
+        fileName = "test.jpg",
+        contentType = "image/jpeg",
+        height = 600,
+        width = 800,
+        size = mockFileData.size.toLong(),
+        data = mockFileData
+    )
+
+    private val mockStorageResult = StorageResult(
+        url = "https://example.com/test.jpg",
+        fileSize = 1024L,
+        mimeType = "image/jpeg",
+        originalFilename = "test.jpg"
+    )
 
     @BeforeEach
     override fun before() {
         super.before()
-        clearMocks(testimonialDao, companyDao, jobPositionDao)
+        clearMocks(testimonialDao, companyDao, jobPositionDao, mediaFileDao, storageService)
     }
 
     // <editor-fold desc="Get all testimonials">
@@ -52,10 +89,10 @@ class TestimonialControllerTest : BaseControllerTest() {
     fun `when requesting all testimonials, we return valid list`() {
         val createdTestimonial = givenATestimonial()
 
-        coEvery { testimonialDao.getTestimonials() } returns listOf(createdTestimonial)
+        coEvery { testimonialDao.readAll() } returns listOf(createdTestimonial)
 
         runBlocking {
-            val responseTestimonials = controller.getTestimonials()
+            val responseTestimonials = controller.readAll()
 
             assertThat(responseTestimonials).hasSize(1)
             assertThat(responseTestimonials).allMatch { it is TestimonialDto }
@@ -68,10 +105,10 @@ class TestimonialControllerTest : BaseControllerTest() {
     fun `when requesting specific testimonial by ID, we return valid testimonialDto`() {
         val createdTestimonial = givenATestimonial()
 
-        coEvery { testimonialDao.getTestimonialById(any() as UUID) } returns createdTestimonial
+        coEvery { testimonialDao.readById(any() as UUID) } returns createdTestimonial
 
         runBlocking {
-            val responseTestimonial = controller.getTestimonialById(UUID.randomUUID())
+            val responseTestimonial = controller.readById(UUID.randomUUID())
 
             assertThat(responseTestimonial.review).isEqualTo(createdTestimonial.review)
             assertNotNull(responseTestimonial.createdAt)
@@ -81,10 +118,10 @@ class TestimonialControllerTest : BaseControllerTest() {
 
     @Test
     fun `when requesting specific testimonial by ID where the ID does not exist, we throw exception`() {
-        coEvery { testimonialDao.getTestimonialById(any() as UUID) } throws ErrorNotFound
+        coEvery { testimonialDao.readById(any() as UUID) } throws ErrorNotFound
 
         assertThrows<ErrorNotFound> {
-            runBlocking { controller.getTestimonialById(UUID.randomUUID()) }
+            runBlocking { controller.readById(UUID.randomUUID()) }
         }
     }
     // </editor-fold>
@@ -95,7 +132,7 @@ class TestimonialControllerTest : BaseControllerTest() {
         val postTestimonial = givenAnInvalidInsertTestimonial()
 
         assertThrows<ErrorInvalidParameters> {
-            runBlocking { controller.postTestimonial(postTestimonial) }
+            runBlocking { controller.create(postTestimonial) }
         }
     }
 
@@ -106,10 +143,11 @@ class TestimonialControllerTest : BaseControllerTest() {
 
         coEvery { companyDao.getListOfExistingCompanyIds(any()) } returns listOf(UUID.fromString("00000000-0000-0000-0000-000000000001"))
         coEvery { jobPositionDao.getListOfExistingJobPositionIds(any()) } returns listOf(UUID.fromString("00000000-0000-0000-0000-000000000001"))
-        coEvery { testimonialDao.insertTestimonial(any()) } returns createdTestimonial
+        coEvery { testimonialDao.create(any(), any()) } returns UUID.randomUUID()
+        coEvery { testimonialDao.readById(any()) } returns createdTestimonial
 
         runBlocking {
-            val responseTestimonial = controller.postTestimonial(postTestimonial)
+            val responseTestimonial = controller.create(postTestimonial)
 
             assertThat(responseTestimonial.review).isEqualTo(createdTestimonial.review)
         }
@@ -122,10 +160,11 @@ class TestimonialControllerTest : BaseControllerTest() {
 
         coEvery { companyDao.getListOfExistingCompanyIds(any()) } returns listOf()
         coEvery { jobPositionDao.getListOfExistingJobPositionIds(any()) } returns listOf(UUID.fromString("00000000-0000-0000-0000-000000000001"))
-        coEvery { testimonialDao.insertTestimonial(any()) } returns createdTestimonial
+        coEvery { testimonialDao.create(any(), any()) } returns UUID.randomUUID()
+        coEvery { testimonialDao.readById(any()) } returns createdTestimonial
 
         assertThrows<ErrorUnknownCompanyIdsForCreateTestimonial> {
-            runBlocking { controller.postTestimonial(postTestimonial) }
+            runBlocking { controller.create(postTestimonial) }
         }
     }
 
@@ -136,10 +175,11 @@ class TestimonialControllerTest : BaseControllerTest() {
 
         coEvery { companyDao.getListOfExistingCompanyIds(any()) } returns listOf(UUID.fromString("00000000-0000-0000-0000-000000000001"))
         coEvery { jobPositionDao.getListOfExistingJobPositionIds(any()) } returns listOf()
-        coEvery { testimonialDao.insertTestimonial(any()) } returns createdTestimonial
+        coEvery { testimonialDao.create(any(), any()) } returns UUID.randomUUID()
+        coEvery { testimonialDao.readById(any()) } returns createdTestimonial
 
         assertThrows<ErrorUnknownJobPositionIdsForCreateTestimonial> {
-            runBlocking { controller.postTestimonial(postTestimonial) }
+            runBlocking { controller.create(postTestimonial) }
         }
     }
 
@@ -149,10 +189,11 @@ class TestimonialControllerTest : BaseControllerTest() {
 
         coEvery { companyDao.getListOfExistingCompanyIds(any()) } returns listOf(UUID.fromString("00000000-0000-0000-0000-000000000001"))
         coEvery { jobPositionDao.getListOfExistingJobPositionIds(any()) } returns listOf(UUID.fromString("00000000-0000-0000-0000-000000000001"))
-        coEvery { testimonialDao.insertTestimonial(any()) } returns null
+        coEvery { testimonialDao.create(any(), any()) } returns UUID.randomUUID()
+        coEvery { testimonialDao.readById(any()) } returns null
 
         assertThrows<ErrorFailedCreate> {
-            runBlocking { controller.postTestimonial(postTestimonial) }
+            runBlocking { controller.create(postTestimonial) }
         }
     }
     // </editor-fold>
@@ -165,10 +206,11 @@ class TestimonialControllerTest : BaseControllerTest() {
 
         coEvery { companyDao.getListOfExistingCompanyIds(any()) } returns listOf(UUID.fromString("00000000-0000-0000-0000-000000000001"))
         coEvery { jobPositionDao.getListOfExistingJobPositionIds(any()) } returns listOf(UUID.fromString("00000000-0000-0000-0000-000000000001"))
-        coEvery { testimonialDao.updateTestimonial(any(), any()) } returns createdTestimonial
+        coEvery { testimonialDao.updateById(any(), any()) } returns true
+        coEvery { testimonialDao.readById(any()) } returns createdTestimonial
 
         runBlocking {
-            val responseTestimonial = controller.updateTestimonialById(UUID.randomUUID(), updateTestimonial)
+            val responseTestimonial = controller.updateById(UUID.randomUUID(), updateTestimonial)
 
             // Assertion
             assertThat(responseTestimonial.review).isEqualTo(createdTestimonial.review)
@@ -182,10 +224,11 @@ class TestimonialControllerTest : BaseControllerTest() {
 
         coEvery { companyDao.getListOfExistingCompanyIds(any()) } returns listOf()
         coEvery { jobPositionDao.getListOfExistingJobPositionIds(any()) } returns listOf(UUID.fromString("00000000-0000-0000-0000-000000000001"))
-        coEvery { testimonialDao.updateTestimonial(any(), any()) } returns createdTestimonial
+        coEvery { testimonialDao.updateById(any(), any()) } returns true
+        coEvery { testimonialDao.readById(any()) } returns createdTestimonial
 
         assertThrows<ErrorUnknownCompanyIdsForUpdateTestimonial> {
-            runBlocking { controller.updateTestimonialById(UUID.randomUUID(), updateTestimonial) }
+            runBlocking { controller.updateById(UUID.randomUUID(), updateTestimonial) }
         }
     }
 
@@ -196,10 +239,11 @@ class TestimonialControllerTest : BaseControllerTest() {
 
         coEvery { companyDao.getListOfExistingCompanyIds(any()) } returns listOf(UUID.fromString("00000000-0000-0000-0000-000000000001"))
         coEvery { jobPositionDao.getListOfExistingJobPositionIds(any()) } returns listOf()
-        coEvery { testimonialDao.updateTestimonial(any(), any()) } returns createdTestimonial
+        coEvery { testimonialDao.updateById(any(), any()) } returns true
+        coEvery { testimonialDao.readById(any()) } returns createdTestimonial
 
         assertThrows<ErrorUnknownJobPositionIdsForUpdateTestimonial> {
-            runBlocking { controller.updateTestimonialById(UUID.randomUUID(), updateTestimonial) }
+            runBlocking { controller.updateById(UUID.randomUUID(), updateTestimonial) }
         }
     }
 
@@ -208,7 +252,7 @@ class TestimonialControllerTest : BaseControllerTest() {
         val updateTestimonial = givenAnInvalidUpdateTestimonial()
 
         assertThrows<ErrorInvalidParameters> {
-            runBlocking { controller.updateTestimonialById(UUID.randomUUID(), updateTestimonial) }
+            runBlocking { controller.updateById(UUID.randomUUID(), updateTestimonial) }
         }
     }
 
@@ -218,10 +262,11 @@ class TestimonialControllerTest : BaseControllerTest() {
 
         coEvery { companyDao.getListOfExistingCompanyIds(any()) } returns listOf(UUID.fromString("00000000-0000-0000-0000-000000000001"))
         coEvery { jobPositionDao.getListOfExistingJobPositionIds(any()) } returns listOf(UUID.fromString("00000000-0000-0000-0000-000000000001"))
-        coEvery { testimonialDao.updateTestimonial(any(), any()) } throws ErrorFailedUpdate
+        coEvery { testimonialDao.updateById(any(), any()) } returns true
+        coEvery { testimonialDao.readById(any()) } returns null
 
-        assertThrows<ErrorFailedUpdate> {
-            runBlocking { controller.updateTestimonialById(UUID.randomUUID(), updateTestimonial) }
+        assertThrows<ErrorNotFound> {
+            runBlocking { controller.updateById(UUID.randomUUID(), updateTestimonial) }
         }
     }
     // </editor-fold>
@@ -229,21 +274,21 @@ class TestimonialControllerTest : BaseControllerTest() {
     // <editor-fold desc="Delete testimonial">
     @Test
     fun `when deleting specific testimonial, we return valid testimonialDto`() {
-        coEvery { testimonialDao.deleteTestimonial(any()) } returns true
+        coEvery { testimonialDao.deleteById(any()) } returns true
 
         assertDoesNotThrow {
             runBlocking {
-                controller.deleteTestimonialById(UUID.randomUUID())
+                controller.deleteById(UUID.randomUUID())
             }
         }
     }
 
     @Test
     fun `when deleting specific testimonial which does not exist, we throw exception`() {
-        coEvery { testimonialDao.deleteTestimonial(any()) } returns false
+        coEvery { testimonialDao.deleteById(any()) } returns false
 
         assertThrows<ErrorFailedDelete> {
-            runBlocking { controller.deleteTestimonialById(UUID.randomUUID()) }
+            runBlocking { controller.deleteById(UUID.randomUUID()) }
         }
     }
     // </editor-fold>
