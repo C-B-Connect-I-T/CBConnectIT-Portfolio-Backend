@@ -65,7 +65,7 @@ fun Route.testimonialRouting(
 
                         val (imageFile, request) = getImageFileAndData<Map<String, String>>(json)
                         if (imageFile == null) throw ErrorInvalidParameters // Image file is required for this endpoint
-                        val altText = request["altText"] ?: ""
+                        val altText = request["alt_text"] ?: ""
 
                         val updatedTestimonial = testimonialController.updateTestimonialAvatar(testimonialId, imageFile, altText)
                         call.respond(updatedTestimonial)

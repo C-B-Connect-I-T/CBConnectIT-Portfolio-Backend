@@ -16,8 +16,8 @@ data class TestimonialDto(
     @SerialName("job_position")
     val jobPosition: JobPositionDto = JobPositionDto(),
     val review: String = "",
-    @SerialName("alt_text")
-    val altText: String = "",
+    @SerialName("avatar_alt_text")
+    val avatarAltText: String = "",
     @SerialName("avatar_image")
     val avatarImage: CompactMediaFileDto? = null,
     @SerialName("created_at")

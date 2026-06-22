@@ -2,9 +2,9 @@
 -- Create MediaFiles table
 -- =============================================
 CREATE TABLE MediaFiles (
-    id                BINARY(16)   NOT NULL PRIMARY KEY,
+    id                VARCHAR(36)  NOT NULL PRIMARY KEY,
     url               TEXT         NOT NULL,
-    owner_id          BINARY(16)   NOT NULL,
+    owner_id          VARCHAR(36)  NOT NULL,
     owner_type        VARCHAR(100) NOT NULL,
     media_type        VARCHAR(100) NOT NULL,
     file_size         BIGINT       NOT NULL,

@@ -5,6 +5,8 @@ import com.cbconnectit.domain.interfaces.ICompanyDao
 import com.cbconnectit.domain.interfaces.IJobPositionDao
 import com.cbconnectit.domain.interfaces.IMediaFileDao
 import com.cbconnectit.domain.interfaces.ITestimonialDao
+import com.cbconnectit.domain.models.mediafile.OwnerType
+import com.cbconnectit.instrumentation.MediaFileInstrumentation
 import com.cbconnectit.instrumentation.TestimonialInstrumentation.givenATestimonial
 import com.cbconnectit.instrumentation.TestimonialInstrumentation.givenAValidInsertTestimonial
 import com.cbconnectit.instrumentation.TestimonialInstrumentation.givenAValidUpdateTestimonial
@@ -25,7 +27,9 @@ import com.cbconnectit.services.StorageResult
 import com.cbconnectit.utils.Parts
 import io.mockk.clearMocks
 import io.mockk.coEvery
+import io.mockk.coVerify
 import io.mockk.mockk
+import io.mockk.verify
 import kotlinx.coroutines.runBlocking
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
@@ -273,7 +277,43 @@ class TestimonialControllerTest : BaseControllerTest() {
 
     // <editor-fold desc="Delete testimonial">
     @Test
-    fun `when deleting specific testimonial, we return valid testimonialDto`() {
+    fun `when deleting specific testimonial, with an avatar image attached, we delete avatar image and return true`() {
+        val mediaFile = MediaFileInstrumentation.givenAMediaFile()
+
+        coEvery { mediaFileDao.readByOwnerId(any(), OwnerType.TESTIMONIAL) } returns mediaFile
+        coEvery { testimonialDao.deleteById(any()) } returns true
+        coEvery { mediaFileDao.delete(any()) } returns true
+        coEvery { storageService.delete(any()) } returns true
+
+        assertDoesNotThrow {
+            runBlocking {
+                controller.deleteById(UUID.randomUUID())
+            }
+        }
+        verify(exactly = 1) { mediaFileDao.readByOwnerId(any(), any()) }
+        verify(exactly = 1) { mediaFileDao.delete(any()) }
+        coVerify(exactly = 1) { storageService.delete(any()) }
+    }
+
+    @Test
+    fun `when deleting specific testimonial, without an avatar image attached, we delete testimonial and return true`() {
+        coEvery { mediaFileDao.readByOwnerId(any(), OwnerType.TESTIMONIAL) } returns null
+        coEvery { testimonialDao.deleteById(any()) } returns true
+
+        assertDoesNotThrow {
+            runBlocking {
+                controller.deleteById(UUID.randomUUID())
+            }
+        }
+
+        verify(exactly = 1) { mediaFileDao.readByOwnerId(any(), any()) }
+        verify(inverse = true) { mediaFileDao.delete(any()) }
+        coVerify(inverse = true) { storageService.delete(any()) }
+    }
+
+    @Test
+    fun `when deleting specific testimonial, we return true`() {
+        coEvery { mediaFileDao.readByOwnerId(any(), OwnerType.TESTIMONIAL) } returns null
         coEvery { testimonialDao.deleteById(any()) } returns true
 
         assertDoesNotThrow {
@@ -285,6 +325,7 @@ class TestimonialControllerTest : BaseControllerTest() {
 
     @Test
     fun `when deleting specific testimonial which does not exist, we throw exception`() {
+        coEvery { mediaFileDao.readByOwnerId(any(), OwnerType.TESTIMONIAL) } returns null
         coEvery { testimonialDao.deleteById(any()) } returns false
 
         assertThrows<ErrorFailedDelete> {

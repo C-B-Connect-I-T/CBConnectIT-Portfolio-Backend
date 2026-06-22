@@ -8,6 +8,7 @@ import com.cbconnectit.utils.ParamConstants.ADMIN_AUTHENTICATE_KEY
 import com.cbconnectit.utils.getFile
 import com.cbconnectit.utils.getMediaFileId
 import com.cbconnectit.utils.getPayload
+import com.cbconnectit.utils.receiveOrRespondWithError
 import com.cbconnectit.utils.toParts
 import io.ktor.http.*
 import io.ktor.server.auth.*
@@ -29,10 +30,10 @@ fun Route.mediaFileRouting(
                     .receiveMultipart()
                     .toParts()
 
-                val logoFile = parts.getFile("image") ?: throw ErrorInvalidParameters
+                val imageFile = parts.getFile("image") ?: throw ErrorInvalidParameters
                 val insertRequest = parts.getPayload<InsertMediaFile>(json) ?: throw ErrorInvalidParameters
 
-                val mediaFile = controller.create(insertRequest, logoFile)
+                val mediaFile = controller.create(insertRequest, imageFile)
 
                 call.respond(HttpStatusCode.Created, mediaFile)
             }
@@ -50,7 +51,7 @@ fun Route.mediaFileRouting(
 
             put("{${ParamConstants.MEDIA_FILE_ID_KEY}}") {
                 val id = call.getMediaFileId()
-                val request = call.receive<UpdateMediaFile>()
+                val request = call.receiveOrRespondWithError<UpdateMediaFile>()
                 val updated = controller.update(id, request)
                 call.respond(updated)
             }
