@@ -76,7 +76,7 @@ class TestimonialControllerImpl(
                         imageFile = imageFile,
                         ownerId = testimonialId,
                         ownerType = OwnerType.TESTIMONIAL,
-                        altText = "${insertTestimonial.fullName} avatar",
+                        altText = insertTestimonial.avatarAltText ?: "",
                     )
                     mediaFileDao.create(mediaFile)
                 }
@@ -256,10 +256,19 @@ class TestimonialControllerImpl(
         }
     }
 
-    // TODO: Also delete the used image from the storage!
-    override suspend fun deleteById(id: UUID) = dbTransactionalQuery {
-        val deleted = testimonialDao.deleteById(id)
-        if (!deleted) throw ErrorFailedDelete
+    override suspend fun deleteById(id: UUID) {
+        val fileUrl = dbTransactionalQuery {
+            val existingFile = mediaFileDao.readByOwnerId(id, OwnerType.TESTIMONIAL)
+
+            existingFile?.let { mediaFileDao.delete(it.id) }
+
+            val deleted = testimonialDao.deleteById(id)
+            if (!deleted) throw ErrorFailedDelete
+
+            existingFile?.url
+        }
+
+        fileUrl?.let { storageService.delete(it) }
     }
 }
 
@@ -272,6 +281,7 @@ interface TestimonialController {
         updateTestimonial: UpdateTestimonial,
         imageFile: Parts.File? = null
     ): TestimonialDto
+
     suspend fun updateTestimonialAvatar(id: UUID, imageFile: Parts.File, altText: String): TestimonialDto
     suspend fun deleteTestimonialAvatar(id: UUID): TestimonialDto
 

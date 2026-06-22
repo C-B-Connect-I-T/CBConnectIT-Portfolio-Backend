@@ -61,20 +61,20 @@ fun Route.testimonialRouting(
                 // Dedicated image management endpoints
                 route("image") {
                     put {
-                        val categoryId = call.getTestimonialId()
+                        val testimonialId = call.getTestimonialId()
 
                         val (imageFile, request) = getImageFileAndData<Map<String, String>>(json)
                         if (imageFile == null) throw ErrorInvalidParameters // Image file is required for this endpoint
                         val altText = request["altText"] ?: ""
 
-                        val updatedCategory = testimonialController.updateTestimonialAvatar(categoryId, imageFile, altText)
-                        call.respond(updatedCategory)
+                        val updatedTestimonial = testimonialController.updateTestimonialAvatar(testimonialId, imageFile, altText)
+                        call.respond(updatedTestimonial)
                     }
 
                     delete {
-                        val categoryId = call.getTestimonialId()
-                        val updatedCategory = testimonialController.deleteTestimonialAvatar(categoryId)
-                        call.respond(updatedCategory)
+                        val testimonialId = call.getTestimonialId()
+                        val updatedTestimonial = testimonialController.deleteTestimonialAvatar(testimonialId)
+                        call.respond(updatedTestimonial)
                     }
                 }
             }
@@ -89,12 +89,12 @@ private suspend inline fun <reified T> RoutingContext.getImageFileAndData(json: 
         // Multipart request with image
         val parts = call.receiveMultipart().toParts()
         val imageFile = parts.getFile("image") // Optional
-        val insertCategory = parts.getPayload<T>(json) ?: throw ErrorInvalidParameters
+        val insertObject = parts.getPayload<T>(json) ?: throw ErrorInvalidParameters
 
-        Pair(imageFile, insertCategory)
+        Pair(imageFile, insertObject)
     } else {
         // JSON request without image
-        val insertCategory = call.receiveOrRespondWithError<T>()
-        Pair(null, insertCategory)
+        val insertObject = call.receiveOrRespondWithError<T>()
+        Pair(null, insertObject)
     }
 }

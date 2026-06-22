@@ -25,7 +25,7 @@ import java.util.*
 
 class TestimonialDaoImpl : ITestimonialDao {
 
-    private fun getTestimonialQuery() = (TestimonialsTable leftJoin JobPositionsTable leftJoin CompaniesTable leftJoin CompaniesLinksPivotTable leftJoin LinksTable)
+    private fun getTestimonialQuery() = (TestimonialsTable leftJoin JobPositionsTable leftJoin CompaniesTable)
         .leftJoinMediaFiles(
             onColumn = { TestimonialsTable.id },
             ownerType = OwnerType.TESTIMONIAL

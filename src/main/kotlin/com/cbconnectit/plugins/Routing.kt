@@ -10,6 +10,8 @@ import com.cbconnectit.modules.jobPositions.JobPositionController
 import com.cbconnectit.modules.jobPositions.jobPositionRouting
 import com.cbconnectit.modules.links.LinkController
 import com.cbconnectit.modules.links.linkRouting
+import com.cbconnectit.modules.mediafile.MediaFileController
+import com.cbconnectit.modules.mediafile.mediaFileRouting
 import com.cbconnectit.modules.projects.ProjectController
 import com.cbconnectit.modules.projects.projectRouting
 import com.cbconnectit.modules.services.ServiceController
@@ -38,6 +40,7 @@ fun Application.configureRouting() {
     val companyController by inject<CompanyController>()
     val testimonialController by inject<TestimonialController>()
     val experienceController by inject<ExperienceController>()
+    val mediaFileController by inject<MediaFileController>()
     val json by inject<Json>()
 
     routing {
@@ -56,6 +59,7 @@ fun Application.configureRouting() {
             companyRouting(companyController)
             testimonialRouting(json, testimonialController)
             experienceRouting(experienceController)
+            mediaFileRouting(json, mediaFileController)
         }
     }
 }
