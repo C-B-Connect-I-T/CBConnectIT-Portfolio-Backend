@@ -3,9 +3,10 @@ package com.cbconnectit.routing
 import com.auth0.jwt.JWT
 import com.auth0.jwt.algorithms.Algorithm
 import com.cbconnectit.domain.models.user.User
+import com.cbconnectit.plugins.statuspages.ApiException
+import com.cbconnectit.plugins.statuspages.ErrorUnauthorized
 import com.cbconnectit.plugins.statuspages.generalStatusPages
 import com.cbconnectit.utils.ParamConstants.ADMIN_AUTHENTICATE_KEY
-import com.cbconnectit.utils.toDatabaseString
 import io.ktor.client.request.*
 import io.ktor.client.statement.*
 import io.ktor.http.*
@@ -16,7 +17,9 @@ import io.ktor.server.auth.*
 import io.ktor.server.auth.jwt.*
 import io.ktor.server.plugins.contentnegotiation.*
 import io.ktor.server.plugins.statuspages.*
+import io.ktor.server.response.*
 import io.ktor.server.testing.*
+import io.ktor.util.*
 import kotlinx.serialization.json.Json
 import org.koin.core.context.stopKoin
 import org.koin.core.module.Module
@@ -32,6 +35,8 @@ abstract class BaseRoutingTest {
     }
     protected var koinModules: Module? = null
     protected var moduleList: Application.() -> Unit = { }
+
+    private val AuthenticationExceptionKey = AttributeKey<ApiException>("AuthenticationException")
 
     init {
         stopKoin()
@@ -79,23 +84,48 @@ abstract class BaseRoutingTest {
     }
 
     private fun AuthenticationConfig.jwtTest(authenticationTest: AuthenticationInstrumentation) = jwt(authenticationTest.name) {
-        validate { User() }
-
         verifier(JWT.require(Algorithm.HMAC256("secret")).build())
 
         validate { _ ->
-            val time = LocalDateTime.now().toDatabaseString()
+            try {
+                val result = when (authenticationTest.name) {
+                    ADMIN_AUTHENTICATE_KEY -> {
+                        // Real validator: throws ErrorUnauthorized if user is authenticated but not an admin
+                        val user = User(
+                            UUID.fromString("00000000-0000-0000-0000-000000000001"),
+                            "Chris Bol",
+                            "chris.bol@example.com",
+                            role = authenticationTest.userRole
+                        )
+                        if (user.role != User.Role.Admin) {
+                            throw ErrorUnauthorized
+                        }
+                        user
+                    }
 
-            return@validate when (authenticationTest.name) {
-                ADMIN_AUTHENTICATE_KEY -> {
-                    if (authenticationTest.userRole != User.Role.Admin) return@validate null
-
-                    User(UUID.fromString("00000000-0000-0000-0000-000000000001"), "Chris Bol", "chris.bol@example.com", LocalDateTime.now(), LocalDateTime.now(), authenticationTest.userRole)
+                    "error" -> null // Will be used whenever we want to force an invalid user during the tests!
+                    else -> User(UUID.fromString("00000000-0000-0000-0000-000000000001"), "Chris Bol", "chris.bol@example.com", LocalDateTime.now(), LocalDateTime.now(), authenticationTest.userRole)
                 }
-
-                "error" -> null // Will be used whenever we want to force an invalid user during the tests!
-                else -> User(UUID.fromString("00000000-0000-0000-0000-000000000001"), "Chris Bol", "chris.bol@example.com", LocalDateTime.now(), LocalDateTime.now(), authenticationTest.userRole)
+                result
+            } catch (e: ApiException) {
+                // Store the exception in call attributes so the challenge can throw it
+                attributes.put(AuthenticationExceptionKey, e)
+                null // Return null to trigger the challenge
             }
+        }
+
+        challenge { scheme, _ ->
+            val exception = call.attributes.getOrNull(AuthenticationExceptionKey)
+            if (exception != null) throw exception
+
+            call.respond(
+                UnauthorizedResponse(
+                    HttpAuthHeader.Parameterized(
+                        scheme,
+                        mapOf(HttpAuthHeader.Parameters.Realm to "Test Realm")
+                    )
+                )
+            )
         }
     }
 

@@ -1,16 +1,16 @@
 package com.cbconnectit.instrumentation
 
-import com.cbconnectit.data.dto.requests.testimonial.InsertNewTestimonial
+import com.cbconnectit.data.dto.requests.testimonial.InsertTestimonial
 import com.cbconnectit.data.dto.requests.testimonial.UpdateTestimonial
 import com.cbconnectit.domain.models.testimonial.Testimonial
 import java.util.*
 
 object TestimonialInstrumentation {
 
-    fun givenAnInvalidInsertTestimonial() = InsertNewTestimonial("  ", "", "", companyId = "00000000-0000-0000-0000-000000000001", jobPositionId = "00000000-0000-0000-0000-000000000001")
-    fun givenAnInvalidUpdateTestimonial() = UpdateTestimonial("  ", "", "", companyId = "00000000-0000-0000-0000-000000000001", jobPositionId = "00000000-0000-0000-0000-000000000001")
-    fun givenAValidInsertTestimonial() = InsertNewTestimonial("https://www.google.be", "First Testimonial", "First name", companyId = "00000000-0000-0000-0000-000000000001", jobPositionId = "00000000-0000-0000-0000-000000000001")
-    fun givenAValidUpdateTestimonial() = UpdateTestimonial("Updated testimonial", "Updated testimonial", "Updated name", companyId = "00000000-0000-0000-0000-000000000001", jobPositionId = "00000000-0000-0000-0000-000000000001")
+    fun givenAnInvalidInsertTestimonial() = InsertTestimonial("  ", "", companyId = "00000000-0000-0000-0000-000000000001", jobPositionId = "00000000-0000-0000-0000-000000000001")
+    fun givenAnInvalidUpdateTestimonial() = UpdateTestimonial("  ", "", companyId = "00000000-0000-0000-0000-000000000001", jobPositionId = "00000000-0000-0000-0000-000000000001")
+    fun givenAValidInsertTestimonial() = InsertTestimonial("First Testimonial", "First name", companyId = "00000000-0000-0000-0000-000000000001", jobPositionId = "00000000-0000-0000-0000-000000000001")
+    fun givenAValidUpdateTestimonial() = UpdateTestimonial("Updated testimonial", "Updated name", companyId = "00000000-0000-0000-0000-000000000001", jobPositionId = "00000000-0000-0000-0000-000000000001")
 
     fun givenTestimonialList() = listOf(
         givenATestimonial(id = UUID.fromString("00000000-0000-0000-0000-000000000001"), review = "First Testimonial"),

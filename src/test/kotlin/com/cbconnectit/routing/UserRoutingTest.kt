@@ -18,6 +18,7 @@ import io.ktor.http.*
 import io.ktor.server.routing.*
 import io.mockk.coEvery
 import io.mockk.mockk
+import org.assertj.core.api.Assertions
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.BeforeEach
@@ -71,7 +72,7 @@ class UserRoutingTest : BaseRoutingTest() {
     ) {
         val response = doCall(HttpMethod.Post, "/users")
 
-        assertThat(response.status).isEqualTo(HttpStatusCode.Unauthorized)
+        assertThat(response.status).isEqualTo(HttpStatusCode.Forbidden)
     }
 
     @Test
@@ -220,7 +221,17 @@ class UserRoutingTest : BaseRoutingTest() {
 
         val response = doCall(HttpMethod.Get, "/users/a63a20c4-14dd-4e11-9e87-5ab361a51f65")
 
-        assertThat(response.status).isEqualTo(HttpStatusCode.Unauthorized)
+        assertThat(response.status).isEqualTo(HttpStatusCode.Forbidden)
+    }
+
+    @Test
+    fun `when fetching a specific user, user not logged in, we return 401 error`() = withBaseTestApplication(
+        AuthenticationInstrumentation(ADMIN_AUTHENTICATE_KEY),
+        AuthenticationInstrumentation()
+    ) {
+        val response = doCall(HttpMethod.Get, "/users/00000000-0000-0000-0000-000000000001", authorized = false)
+
+        Assertions.assertThat(response.status).isEqualTo(HttpStatusCode.Unauthorized)
     }
 
     @Test
@@ -261,7 +272,7 @@ class UserRoutingTest : BaseRoutingTest() {
 
         val response = doCall(HttpMethod.Put, "/users/a63a20c4-14dd-4e11-9e87-5ab361a51f65")
 
-        assertThat(response.status).isEqualTo(HttpStatusCode.Unauthorized)
+        assertThat(response.status).isEqualTo(HttpStatusCode.Forbidden)
     }
 
     @Test
@@ -302,7 +313,7 @@ class UserRoutingTest : BaseRoutingTest() {
 
         val response = doCall(HttpMethod.Put, "/users/a63a20c4-14dd-4e11-9e87-5ab361a51f65/password")
 
-        assertThat(response.status).isEqualTo(HttpStatusCode.Unauthorized)
+        assertThat(response.status).isEqualTo(HttpStatusCode.Forbidden)
     }
 
     @Test
@@ -338,6 +349,6 @@ class UserRoutingTest : BaseRoutingTest() {
 
         val response = doCall(HttpMethod.Put, "/users/a63a20c4-14dd-4e11-9e87-5ab361a51f65/password")
 
-        assertThat(response.status).isEqualTo(HttpStatusCode.Unauthorized)
+        assertThat(response.status).isEqualTo(HttpStatusCode.Forbidden)
     }
 }

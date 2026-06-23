@@ -57,7 +57,7 @@ internal class TestimonialDaoImplTest : BaseDaoTest() {
                 it[review] = testimonials[index].review
                 it[companyId] = compId
                 it[jobPositionId] = jobPosId
-                it[imageUrl] = ""
+                it[avatarAltText] = ""
                 it[fullName] = ""
                 it[createdAt] = testimonials[index].createdAt
                 it[updatedAt] = testimonials[index].updatedAt
@@ -70,7 +70,7 @@ internal class TestimonialDaoImplTest : BaseDaoTest() {
             it[review] = "Fifth Testimonial"
             it[companyId] = null
             it[jobPositionId] = UUID.fromString("00000000-0000-0000-0000-000000000001")
-            it[imageUrl] = ""
+            it[avatarAltText] = ""
             it[fullName] = ""
             it[createdAt] = testimonials[0].createdAt
             it[updatedAt] = testimonials[0].updatedAt
@@ -80,13 +80,13 @@ internal class TestimonialDaoImplTest : BaseDaoTest() {
     // <editor-fold desc="Get all Testimonials">
     @Test
     fun `getTestimonials but none exists, return empty list`() = runTest(shouldSeedData = false) {
-        val list = dao.getTestimonials()
+        val list = dao.readAll()
         assertThat(list).isEmpty()
     }
 
     @Test
     fun `getTestimonials return the list`() = runTest {
-        val list = dao.getTestimonials()
+        val list = dao.readAll()
         assertThat(list).hasSize(5)
     }
     // </editor-fold>
@@ -94,7 +94,7 @@ internal class TestimonialDaoImplTest : BaseDaoTest() {
     // <editor-fold desc="Get specific Testimonial by id">
     @Test
     fun `getTestimonial where item exists, return correct Testimonial`() = runTest {
-        val testimonial = dao.getTestimonialById(UUID.fromString("00000000-0000-0000-0000-000000000001"))
+        val testimonial = dao.readById(UUID.fromString("00000000-0000-0000-0000-000000000001"))
 
         assertThat(testimonial).matches {
             it?.review == "First Testimonial"
@@ -103,7 +103,7 @@ internal class TestimonialDaoImplTest : BaseDaoTest() {
 
     @Test
     fun `getTestimonial where item does not exists, return 'null'`() = runTest {
-        val testimonial = dao.getTestimonialById(UUID.randomUUID())
+        val testimonial = dao.readById(UUID.randomUUID())
 
         assertNull(testimonial)
     }
@@ -113,7 +113,8 @@ internal class TestimonialDaoImplTest : BaseDaoTest() {
     @Test
     fun `insertTestimonial where information is correct, database is storing Testimonial and returning correct content`() = runTest {
         val validTestimonial = givenAValidInsertTestimonial()
-        val testimonial = dao.insertTestimonial(validTestimonial)
+        val testimonialId = dao.create(UUID.randomUUID(), validTestimonial)
+        val testimonial = dao.readById(testimonialId)
 
         assertThat(testimonial).matches {
             it?.review == validTestimonial.review &&
@@ -125,37 +126,38 @@ internal class TestimonialDaoImplTest : BaseDaoTest() {
     // <editor-fold desc="Update Testimonial">
     @Test
     fun `updateTestimonial where information is correct, database is storing information and returning the correct content`() = runTest {
-        // adding a delay so there is a clear difference between `updatedAt` and `createdAt`
-        delay(1000)
-
         val validUpdateTestimonial = givenAValidUpdateTestimonial()
-        val testimonial = dao.updateTestimonial(UUID.fromString("00000000-0000-0000-0000-000000000001"), validUpdateTestimonial)
+        val id = UUID.fromString("00000000-0000-0000-0000-000000000001")
 
-        assertThat(testimonial).matches {
-            it?.review == validUpdateTestimonial.review &&
-                    it.createdAt != it.updatedAt
-        }
+        delay(1000) // to make sure timestamps differ
+        val updated = dao.updateById(id, validUpdateTestimonial)
+
+        assertTrue(updated)
+
+        val testimonial = dao.readById(id)
+        assertThat(testimonial?.fullName).isEqualTo(validUpdateTestimonial.fullName)
+        assertThat(testimonial?.updatedAt).isAfter(testimonial?.createdAt)
     }
 
     @Test
     fun `updateTestimonial where information is correct but Testimonial with id does not exist, database does nothing and returns 'null'`() = runTest {
         val validTestimonial = givenAValidUpdateTestimonial()
-        val testimonial = dao.updateTestimonial(UUID.randomUUID(), validTestimonial)
+        val updated = dao.updateById(UUID.randomUUID(), validTestimonial)
 
-        assertNull(testimonial)
+        assertFalse(updated)
     }
     // </editor-fold>
 
     // <editor-fold desc="Delete Testimonial">
     @Test
     fun `deleteTestimonial for id that exists, return true`() = runTest {
-        val deleted = dao.deleteTestimonial(UUID.fromString("00000000-0000-0000-0000-000000000001"))
+        val deleted = dao.deleteById(UUID.fromString("00000000-0000-0000-0000-000000000001"))
         assertTrue(deleted)
     }
 
     @Test
     fun `deleteTestimonial for id that does not exist, return false`() = runTest {
-        val deleted = dao.deleteTestimonial(UUID.randomUUID())
+        val deleted = dao.deleteById(UUID.randomUUID())
         assertFalse(deleted)
     }
     // </editor-fold>

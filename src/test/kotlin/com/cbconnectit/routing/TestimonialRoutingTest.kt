@@ -34,10 +34,11 @@ class TestimonialRoutingTest : BaseRoutingTest() {
     fun setup() {
         koinModules = module {
             single { testimonialController }
+            single { json }
         }
         moduleList = {
             routing {
-                testimonialRouting(testimonialController)
+                testimonialRouting(json, testimonialController)
             }
         }
     }
@@ -52,7 +53,7 @@ class TestimonialRoutingTest : BaseRoutingTest() {
     fun `when fetching all testimonials, we return a list`() = withBaseTestApplication(
         AuthenticationInstrumentation()
     ) {
-        coEvery { testimonialController.getTestimonials() } returns givenTestimonialList().map { it.toDto() }
+        coEvery { testimonialController.readAll() } returns givenTestimonialList().map { it.toDto() }
 
         val response = doCall(HttpMethod.Get, "/testimonials")
 
@@ -67,7 +68,7 @@ class TestimonialRoutingTest : BaseRoutingTest() {
         AuthenticationInstrumentation()
     ) {
         val testimonialResponse = givenATestimonial().toDto()
-        coEvery { testimonialController.getTestimonialById(any()) } returns testimonialResponse
+        coEvery { testimonialController.readById(any()) } returns testimonialResponse
 
         val response = doCall(HttpMethod.Get, "/testimonials/a63a20c4-14dd-4e11-9e87-5ab361a51f65")
 
@@ -80,7 +81,7 @@ class TestimonialRoutingTest : BaseRoutingTest() {
         AuthenticationInstrumentation()
     ) {
         val exception = ErrorNotFound
-        coEvery { testimonialController.getTestimonialById(any()) } throws exception
+        coEvery { testimonialController.readById(any()) } throws exception
 
         val response = doCall(HttpMethod.Get, "/testimonials/a63a20c4-14dd-4e11-9e87-5ab361a51f65")
 
@@ -95,7 +96,7 @@ class TestimonialRoutingTest : BaseRoutingTest() {
         AuthenticationInstrumentation()
     ) {
         val testimonialResponse = givenATestimonial().toDto()
-        coEvery { testimonialController.postTestimonial(any()) } returns testimonialResponse
+        coEvery { testimonialController.create(any()) } returns testimonialResponse
 
         val body = toJsonBody(givenAValidInsertTestimonial())
         val response = doCall(HttpMethod.Post, "/testimonials", body)
@@ -109,7 +110,7 @@ class TestimonialRoutingTest : BaseRoutingTest() {
         AuthenticationInstrumentation()
     ) {
         val exception = ErrorDuplicateEntity
-        coEvery { testimonialController.postTestimonial(any()) } throws exception
+        coEvery { testimonialController.create(any()) } throws exception
 
         val body = toJsonBody(givenAValidInsertTestimonial())
         val response = doCall(HttpMethod.Post, "/testimonials", body)
@@ -125,7 +126,7 @@ class TestimonialRoutingTest : BaseRoutingTest() {
         AuthenticationInstrumentation()
     ) {
         val testimonialResponse = givenATestimonial().toDto()
-        coEvery { testimonialController.updateTestimonialById(any(), any()) } returns testimonialResponse
+        coEvery { testimonialController.updateById(any(), any()) } returns testimonialResponse
 
         val body = toJsonBody(givenAValidUpdateTestimonial())
         val response = doCall(HttpMethod.Put, "/testimonials/a63a20c4-14dd-4e11-9e87-5ab361a51f65", body)
@@ -139,7 +140,7 @@ class TestimonialRoutingTest : BaseRoutingTest() {
         AuthenticationInstrumentation()
     ) {
         val exception = ErrorNotFound
-        coEvery { testimonialController.updateTestimonialById(any(), any()) } throws exception
+        coEvery { testimonialController.updateById(any(), any()) } throws exception
 
         val body = toJsonBody(givenAValidUpdateTestimonial())
         val response = doCall(HttpMethod.Put, "/testimonials/a63a20c4-14dd-4e11-9e87-5ab361a51f65", body)
@@ -154,7 +155,7 @@ class TestimonialRoutingTest : BaseRoutingTest() {
     fun `when deleting testimonial successful, we return Ok response`() = withBaseTestApplication(
         AuthenticationInstrumentation()
     ) {
-        coEvery { testimonialController.deleteTestimonialById(any()) } returns Unit
+        coEvery { testimonialController.deleteById(any()) } returns Unit
 
         val response = doCall(HttpMethod.Delete, "/testimonials/a63a20c4-14dd-4e11-9e87-5ab361a51f65")
 
@@ -166,7 +167,7 @@ class TestimonialRoutingTest : BaseRoutingTest() {
         AuthenticationInstrumentation()
     ) {
         val exception = ErrorFailedDelete
-        coEvery { testimonialController.deleteTestimonialById(any()) } throws exception
+        coEvery { testimonialController.deleteById(any()) } throws exception
 
         val response = doCall(HttpMethod.Delete, "/testimonials/a63a20c4-14dd-4e11-9e87-5ab361a51f65")
 

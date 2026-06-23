@@ -2,6 +2,7 @@
 <SmellBaseline>
   <ManuallySuppressedIssues/>
   <CurrentIssues>
+    <ID>LongMethod:TestimonialController.kt$TestimonialControllerImpl$override suspend fun updateById(id: UUID, updateTestimonial: UpdateTestimonial, imageFile: Parts.File?): TestimonialDto</ID>
     <ID>LongParameterList:BaseRoutingTest.kt$BaseRoutingTest$( method: HttpMethod, uri: String, body: String? = null, authorized: Boolean = true, multipartCall: Boolean = false, clientType: String? = "web" )</ID>
     <ID>MagicNumber:AuthClientTrust.kt$443</ID>
     <ID>MagicNumber:AuthClientTrust.kt$80</ID>
@@ -13,5 +14,10 @@
     <ID>ReturnCount:AuthValidator.kt$private fun JWTCredential.validateCredentialsAndGetUUID(): UUID?</ID>
     <ID>ReturnCount:AuthValidator.kt$suspend fun JWTCredential.validateUser(userDao: IUserDao): User?</ID>
     <ID>ReturnCount:AuthValidator.kt$suspend fun JWTCredential.validateUserIsAdmin(userDao: IUserDao): User?</ID>
+    <ID>ReturnCount:FileValidationUtils.kt$FileValidationUtils$fun getValidationErrorMessage(contentType: String?, fileName: String?, fileBytes: ByteArray): String</ID>
+    <ID>ReturnCount:FileValidationUtils.kt$FileValidationUtils$fun isValidImageFile(contentType: String?, fileName: String?, fileBytes: ByteArray): Boolean</ID>
+    <ID>ReturnCount:FileValidationUtils.kt$FileValidationUtils$private fun isValidSVG(fileBytes: ByteArray): Boolean</ID>
+    <ID>ReturnCount:FileValidationUtils.kt$FileValidationUtils$private fun isValidWebP(fileBytes: ByteArray): Boolean</ID>
+    <ID>TooGenericExceptionCaught:TestimonialController.kt$TestimonialControllerImpl$e: Exception</ID>
   </CurrentIssues>
 </SmellBaseline>

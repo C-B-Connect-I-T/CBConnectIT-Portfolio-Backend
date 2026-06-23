@@ -5,6 +5,7 @@ import com.cbconnectit.data.database.dao.CompanyDaoImpl
 import com.cbconnectit.data.database.dao.ExperienceDaoImpl
 import com.cbconnectit.data.database.dao.JobPositionDaoImpl
 import com.cbconnectit.data.database.dao.LinkDaoImpl
+import com.cbconnectit.data.database.dao.MediaFileDaoImpl
 import com.cbconnectit.data.database.dao.ProjectDaoImpl
 import com.cbconnectit.data.database.dao.ServiceDaoImpl
 import com.cbconnectit.data.database.dao.TagDaoImpl
@@ -14,6 +15,7 @@ import com.cbconnectit.domain.interfaces.ICompanyDao
 import com.cbconnectit.domain.interfaces.IExperienceDao
 import com.cbconnectit.domain.interfaces.IJobPositionDao
 import com.cbconnectit.domain.interfaces.ILinkDao
+import com.cbconnectit.domain.interfaces.IMediaFileDao
 import com.cbconnectit.domain.interfaces.IProjectDao
 import com.cbconnectit.domain.interfaces.IServiceDao
 import com.cbconnectit.domain.interfaces.ITagDao
@@ -33,6 +35,8 @@ import com.cbconnectit.modules.jobPositions.JobPositionController
 import com.cbconnectit.modules.jobPositions.JobPositionControllerImpl
 import com.cbconnectit.modules.links.LinkController
 import com.cbconnectit.modules.links.LinkControllerImpl
+import com.cbconnectit.modules.mediafile.MediaFileController
+import com.cbconnectit.modules.mediafile.MediaFileControllerImpl
 import com.cbconnectit.modules.projects.ProjectController
 import com.cbconnectit.modules.projects.ProjectControllerImpl
 import com.cbconnectit.modules.services.ServiceController
@@ -98,6 +102,7 @@ fun controllerModule() = module {
     singleOf(::CompanyControllerImpl) { bind<CompanyController>() }
     singleOf(::TestimonialControllerImpl) { bind<TestimonialController>() }
     singleOf(::ExperienceControllerImpl) { bind<ExperienceController>() }
+    singleOf(::MediaFileControllerImpl) { bind<MediaFileController>() }
 }
 
 fun daoModule() = module {
@@ -110,4 +115,5 @@ fun daoModule() = module {
     singleOf(::CompanyDaoImpl) { bind<ICompanyDao>() }
     singleOf(::ExperienceDaoImpl) { bind<IExperienceDao>() }
     singleOf(::TestimonialDaoImpl) { bind<ITestimonialDao>() }
+    singleOf(::MediaFileDaoImpl) { bind<IMediaFileDao>() }
 }

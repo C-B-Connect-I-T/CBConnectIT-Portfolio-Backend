@@ -5,16 +5,16 @@ import kotlinx.serialization.Serializable
 import java.util.*
 
 @Serializable
-data class InsertNewTestimonial(
-    @SerialName("image_url")
-    val imageUrl: String,
+data class InsertTestimonial(
     val review: String,
     @SerialName("full_name")
     val fullName: String,
     @SerialName("company_id")
     val companyId: String,
     @SerialName("job_position_id")
-    val jobPositionId: String
+    val jobPositionId: String,
+    @SerialName("avatar_alt_text")
+    val avatarAltText: String? = null
 ) {
     val companyUuid: UUID get() = UUID.fromString(companyId)
     val jobPositionUuid: UUID get() = UUID.fromString(jobPositionId)
@@ -23,15 +23,16 @@ data class InsertNewTestimonial(
 
 @Serializable
 data class UpdateTestimonial(
-    @SerialName("image_url")
-    val imageUrl: String,
     val review: String,
     @SerialName("full_name")
     val fullName: String,
     @SerialName("company_id")
     val companyId: String,
     @SerialName("job_position_id")
-    val jobPositionId: String
+    val jobPositionId: String,
+    @SerialName("avatar_alt_text")
+    val avatarAltText: String? = null,
+    val deleteImage: Boolean = false
 ) {
     val companyUuid: UUID get() = UUID.fromString(companyId)
     val jobPositionUuid: UUID get() = UUID.fromString(jobPositionId)

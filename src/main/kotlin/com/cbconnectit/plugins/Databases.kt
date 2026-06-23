@@ -278,7 +278,6 @@ private fun seedDatabase() {
     listOf(
 //        Testimonial(
 //            id = UUID.fromString("00000000-0000-0000-0000-000000000001"),
-//            imageUrl = "https://raw.githubusercontent.com/ShaHar91/Portfolio/master/public/avatar1.png",
 //            fullName = "Shrek",
 //            company = Company(id = UUID.fromString("00000000-0000-0000-0000-000000000002")),
 //            jobPosition = JobPosition(id = UUID.fromString("00000000-0000-0000-0000-000000000001")),
@@ -286,7 +285,6 @@ private fun seedDatabase() {
 //        ),
 //        Testimonial(
 //            id = UUID.fromString("00000000-0000-0000-0000-000000000002"),
-//            imageUrl = "https://raw.githubusercontent.com/ShaHar91/Portfolio/master/public/avatar2.png",
 //            fullName = "Shrek",
 //            company = Company(id = UUID.fromString("00000000-0000-0000-0000-000000000003")),
 //            jobPosition = JobPosition(id = UUID.fromString("00000000-0000-0000-0000-000000000005")),
@@ -294,7 +292,6 @@ private fun seedDatabase() {
 //        ),
         Testimonial(
             id = UUID.fromString("00000000-0000-0000-0000-000000000003"),
-            imageUrl = "https://media.licdn.com/dms/image/C4D03AQGTz_zYBK8Q0Q/profile-displayphoto-shrink_800_800/0/1612779900432?e=1719446400&v=beta&t=nMj75OJzYRd-9YX77dGE2hI6viBVF_nCa4kgD63kVAo",
             fullName = "Els Schuurmans",
             company = null,
             jobPosition = JobPosition(id = UUID.fromString("00000000-0000-0000-0000-000000000002")),
@@ -303,7 +300,6 @@ private fun seedDatabase() {
     ).forEach { testimonial ->
         TestimonialsTable.insertIgnore {
             it[id] = testimonial.id
-            it[imageUrl] = testimonial.imageUrl
             it[fullName] = testimonial.fullName
             it[companyId] = testimonial.company?.id
             it[jobPositionId] = testimonial.jobPosition.id
