@@ -9,7 +9,7 @@ import com.cbconnectit.domain.models.mediafile.OwnerType
 import org.jetbrains.exposed.sql.SortOrder
 import org.jetbrains.exposed.sql.and
 import org.jetbrains.exposed.sql.deleteWhere
-import org.jetbrains.exposed.sql.insert
+import org.jetbrains.exposed.sql.insertAndGetId
 import org.jetbrains.exposed.sql.javatime.CurrentDateTime
 import org.jetbrains.exposed.sql.selectAll
 import org.jetbrains.exposed.sql.update
@@ -17,8 +17,7 @@ import java.util.*
 
 class MediaFileDaoImpl : IMediaFileDao {
     override fun create(mediaFile: MediaFile): UUID {
-        MediaFilesTable.insert {
-            it[id] = mediaFile.id
+        return MediaFilesTable.insertAndGetId {
             it[url] = mediaFile.url
             it[ownerId] = mediaFile.ownerId
             it[ownerType] = mediaFile.ownerType
@@ -29,8 +28,7 @@ class MediaFileDaoImpl : IMediaFileDao {
             it[mimeType] = mediaFile.mimeType
             it[width] = mediaFile.width
             it[height] = mediaFile.height
-        }
-        return mediaFile.id
+        }.value
     }
 
     override fun readById(id: UUID): MediaFile? =

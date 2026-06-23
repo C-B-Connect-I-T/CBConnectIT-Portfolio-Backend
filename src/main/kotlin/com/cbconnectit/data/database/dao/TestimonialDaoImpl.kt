@@ -46,8 +46,8 @@ class TestimonialDaoImpl : ITestimonialDao {
 
         return resultRows
             .map { result ->
-                val id = result[TestimonialsTable.companyId]?.value
-                val companyLinks = links[id].orEmpty()
+                val companyId = result[TestimonialsTable.companyId]?.value
+                val companyLinks = companyId?.let { links[it] }.orEmpty()
                 val testimonial = result.toTestimonial()
                 testimonial.copy(company = testimonial.company?.copy(links = companyLinks))
             }

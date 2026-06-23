@@ -84,8 +84,6 @@ abstract class BaseRoutingTest {
     }
 
     private fun AuthenticationConfig.jwtTest(authenticationTest: AuthenticationInstrumentation) = jwt(authenticationTest.name) {
-        validate { User() }
-
         verifier(JWT.require(Algorithm.HMAC256("secret")).build())
 
         validate { _ ->
