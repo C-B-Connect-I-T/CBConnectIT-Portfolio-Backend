@@ -17,7 +17,6 @@ data class Testimonial(
     val review: String = "",
     val company: Company? = null,
     val jobPosition: JobPosition = JobPosition(),
-    val altText: String = "",
     val avatarImage: MediaFile? = null,
     val createdAt: LocalDateTime = LocalDateTime.now(),
     val updatedAt: LocalDateTime = LocalDateTime.now()
@@ -29,7 +28,6 @@ fun Testimonial.toDto(): TestimonialDto = TestimonialDto(
     review = this.review,
     company = this.company?.toDto(),
     jobPosition = this.jobPosition.toDto(),
-    avatarAltText = this.altText,
     avatarImage = this.avatarImage?.toCompactDto(),
     createdAt = this.createdAt.toDatabaseString(),
     updatedAt = this.updatedAt.toDatabaseString()

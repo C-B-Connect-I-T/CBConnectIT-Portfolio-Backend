@@ -130,6 +130,7 @@ abstract class BaseRoutingTest {
     }
 
     private val bearerToken = JWT.create().sign(Algorithm.HMAC256("secret"))
+    protected fun buildBearerToken(): String = bearerToken
 
     protected suspend fun ApplicationTestBuilder.doCall(
         method: HttpMethod,

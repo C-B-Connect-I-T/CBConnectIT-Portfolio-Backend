@@ -7,21 +7,19 @@ import java.util.*
 
 object ServiceInstrumentation {
 
-    fun givenAnInvalidInsertService() = InsertNewService("  ", imageUrl = "https://www.google.be/image", description = " ", tagId = "00000000-0000-0000-0000-000000000001")
-    fun givenAnInvalidUpdateService() = UpdateService("  ", imageUrl = "https://www.google.be/image", description = "  ", tagId = "00000000-0000-0000-0000-000000000001")
-    fun givenAValidInsertService() = InsertNewService("New service", imageUrl = "https://www.google.be/image", description = "New description", tagId = "00000000-0000-0000-0000-000000000001")
+    fun givenAnInvalidInsertService() = InsertNewService("  ", description = " ", tagId = "00000000-0000-0000-0000-000000000001")
+    fun givenAnInvalidUpdateService() = UpdateService("  ", description = "  ", tagId = "00000000-0000-0000-0000-000000000001")
+    fun givenAValidInsertService() = InsertNewService("New service", description = "New description", tagId = "00000000-0000-0000-0000-000000000001")
     fun givenAValidInsertServiceWithParent() = InsertNewService(
         "Sub service",
-        imageUrl = "https://www.google.be/image",
         description = "Sub description",
         tagId = "00000000-0000-0000-0000-000000000001",
         parentServiceId = "00000000-0000-0000-0000-000000000001"
     )
 
-    fun givenAValidUpdateService() = UpdateService("Updated service", imageUrl = "https://www.google.be/image", description = "Updated description", tagId = "00000000-0000-0000-0000-000000000001")
+    fun givenAValidUpdateService() = UpdateService("Updated service", description = "Updated description", tagId = "00000000-0000-0000-0000-000000000001")
     fun givenAValidUpdateServiceWithParent() = UpdateService(
         "Sub service",
-        imageUrl = "https://www.google.be/image",
         description = "sub description",
         tagId = "00000000-0000-0000-0000-000000000001",
         parentServiceId = "00000000-0000-0000-0000-000000000001"

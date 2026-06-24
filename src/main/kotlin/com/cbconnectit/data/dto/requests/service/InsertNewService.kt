@@ -7,10 +7,10 @@ import java.util.*
 @Serializable
 data class InsertNewService(
     val title: String,
-    @SerialName("image_url")
-    val imageUrl: String,
-    @SerialName("banner_image_url")
-    val bannerImageUrl: String? = null,
+    @SerialName("image_alt_text")
+    val imageAltText: String? = null,
+    @SerialName("banner_image_alt_text")
+    val bannerImageAltText: String? = null,
     @SerialName("short_description")
     val shortDescription: String? = null,
     val description: String,
@@ -25,16 +25,16 @@ data class InsertNewService(
 ) {
     val parentServiceUuid get() = parentServiceId?.let { UUID.fromString(it) }
     val tagUuid: UUID? get() = tagId?.let { id -> UUID.fromString(id) }
-    val isValid get() = title.isNotBlank() && description.isNotBlank() && imageUrl.isNotBlank() // && (tagId == null || tagId.isNotBlank())
+    val isValid get() = title.isNotBlank() && description.isNotBlank()
 }
 
 @Serializable
 data class UpdateService(
     val title: String,
-    @SerialName("image_url")
-    val imageUrl: String,
-    @SerialName("banner_image_url")
-    val bannerImageUrl: String? = null,
+    @SerialName("image_alt_text")
+    val imageAltText: String? = null,
+    @SerialName("banner_image_alt_text")
+    val bannerImageAltText: String? = null,
     @SerialName("short_description")
     val shortDescription: String? = null,
     val description: String,
@@ -49,5 +49,5 @@ data class UpdateService(
 ) {
     val parentServiceUuid get() = parentServiceId?.let { UUID.fromString(it) }
     val tagUuid: UUID? get() = tagId?.let { id -> UUID.fromString(id) }
-    val isValid get() = title.isNotBlank() && description.isNotBlank() && imageUrl.isNotBlank() // && (tagId == null || tagId.isNotBlank())
+    val isValid get() = title.isNotBlank() && description.isNotBlank()
 }

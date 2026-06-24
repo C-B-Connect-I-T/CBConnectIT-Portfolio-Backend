@@ -1,6 +1,7 @@
 package com.cbconnectit.data.dto.requests.service
 
 import com.cbconnectit.data.dto.requests.tag.TagDto
+import com.cbconnectit.data.dto.responses.mediafile.CompactMediaFileDto
 import com.cbconnectit.domain.models.interfaces.DateAble
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
@@ -8,10 +9,9 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class ServiceDto(
     val id: String = "",
-    @SerialName("image_url")
-    val imageUrl: String = "",
-    @SerialName("banner_image_url")
-    val bannerImageUrl: String? = null,
+    val image: CompactMediaFileDto? = null,
+    @SerialName("banner_image")
+    val bannerImage: CompactMediaFileDto? = null,
     val title: String = "",
     @SerialName("short_description")
     val shortDescription: String? = null,

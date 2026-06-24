@@ -10,9 +10,12 @@ import com.cbconnectit.modules.services.ServiceController
 import com.cbconnectit.modules.services.serviceRouting
 import com.cbconnectit.plugins.statuspages.ErrorDuplicateEntity
 import com.cbconnectit.plugins.statuspages.ErrorFailedDelete
+import com.cbconnectit.plugins.statuspages.ErrorMissingRequiredMedia
 import com.cbconnectit.plugins.statuspages.ErrorNotFound
 import com.cbconnectit.plugins.statuspages.ErrorResponse
 import com.cbconnectit.plugins.statuspages.toErrorResponse
+import io.ktor.client.request.*
+import io.ktor.client.request.forms.*
 import io.ktor.http.*
 import io.ktor.server.routing.*
 import io.mockk.coEvery
@@ -33,10 +36,11 @@ class ServiceRoutingTest : BaseRoutingTest() {
     fun setup() {
         koinModules = module {
             single { serviceController }
+            single { json }
         }
         moduleList = {
             routing {
-                serviceRouting(serviceController)
+                serviceRouting(json, serviceController)
             }
         }
     }
@@ -90,17 +94,86 @@ class ServiceRoutingTest : BaseRoutingTest() {
 
     // <editor-fold desc="Create new service">
     @Test
-    fun `when creating service with successful insertion, we return response service body`() = withBaseTestApplication(
+    fun `when creating service with multipart and successful insertion, we return response service body`() = withBaseTestApplication(
         AuthenticationInstrumentation()
     ) {
         val serviceResponse = givenAService().toDto()
-        coEvery { serviceController.postService(any()) } returns serviceResponse
+        coEvery { serviceController.postService(any(), any(), any()) } returns serviceResponse
 
-        val body = toJsonBody(givenAValidInsertService())
-        val response = doCall(HttpMethod.Post, "/services", body)
+        val response = client.post("/services") {
+            header(HttpHeaders.Authorization, "Bearer ${buildBearerToken()}")
+            header("X-Client-Type", "web")
+            setBody(
+                MultiPartFormDataContent(
+                    formData {
+                        append("payload", toJsonBody(givenAValidInsertService()))
+                        append("image", ByteArray(100), Headers.build {
+                            append(HttpHeaders.ContentType, "image/jpeg")
+                            append(HttpHeaders.ContentDisposition, "filename=\"image.jpg\"")
+                        })
+                        append("bannerImage", ByteArray(100), Headers.build {
+                            append(HttpHeaders.ContentType, "image/jpeg")
+                            append(HttpHeaders.ContentDisposition, "filename=\"banner.jpg\"")
+                        })
+                    }
+                )
+            )
+        }
 
         assertThat(response.status).isEqualTo(HttpStatusCode.Created)
         assertThat(response.parseBody<ServiceDto>()).isEqualTo(serviceResponse)
+    }
+
+    @Test
+    fun `when creating service and controller throws missing required media, we return 400 error`() = withBaseTestApplication(
+        AuthenticationInstrumentation()
+    ) {
+        val exception = ErrorMissingRequiredMedia
+        coEvery { serviceController.postService(any(), any(), any()) } throws exception
+
+        val response = client.post("/services") {
+            header(HttpHeaders.Authorization, "Bearer ${buildBearerToken()}")
+            header("X-Client-Type", "web")
+            setBody(
+                MultiPartFormDataContent(
+                    formData {
+                        append("payload", toJsonBody(givenAValidInsertService()))
+                        append("image", ByteArray(100), Headers.build {
+                            append(HttpHeaders.ContentType, "image/jpeg")
+                            append(HttpHeaders.ContentDisposition, "filename=\"image.jpg\"")
+                        })
+                        append("bannerImage", ByteArray(100), Headers.build {
+                            append(HttpHeaders.ContentType, "image/jpeg")
+                            append(HttpHeaders.ContentDisposition, "filename=\"banner.jpg\"")
+                        })
+                    }
+                )
+            )
+        }
+
+        assertThat(response.status).isEqualTo(exception.statusCode)
+        assertThat(response.parseBody<ErrorResponse>()).isEqualTo(exception.toErrorResponse())
+    }
+
+    @Test
+    fun `when creating service without image files in multipart, we return missing required media error`() = withBaseTestApplication(
+        AuthenticationInstrumentation()
+    ) {
+        // No image/bannerImage parts — routing throws ErrorMissingRequiredMedia
+        val response = client.post("/services") {
+            header(HttpHeaders.Authorization, "Bearer ${buildBearerToken()}")
+            header("X-Client-Type", "web")
+            setBody(
+                MultiPartFormDataContent(
+                    formData {
+                        append("payload", toJsonBody(givenAValidInsertService()))
+                        // intentionally omitted image and bannerImage
+                    }
+                )
+            )
+        }
+
+        assertThat(response.status).isEqualTo(HttpStatusCode.BadRequest)
     }
 
     @Test
@@ -108,10 +181,27 @@ class ServiceRoutingTest : BaseRoutingTest() {
         AuthenticationInstrumentation()
     ) {
         val exception = ErrorDuplicateEntity
-        coEvery { serviceController.postService(any()) } throws exception
+        coEvery { serviceController.postService(any(), any(), any()) } throws exception
 
-        val body = toJsonBody(givenAValidInsertService())
-        val response = doCall(HttpMethod.Post, "/services", body)
+        val response = client.post("/services") {
+            header(HttpHeaders.Authorization, "Bearer ${buildBearerToken()}")
+            header("X-Client-Type", "web")
+            setBody(
+                MultiPartFormDataContent(
+                    formData {
+                        append("payload", toJsonBody(givenAValidInsertService()))
+                        append("image", ByteArray(100), Headers.build {
+                            append(HttpHeaders.ContentType, "image/jpeg")
+                            append(HttpHeaders.ContentDisposition, "filename=\"image.jpg\"")
+                        })
+                        append("bannerImage", ByteArray(100), Headers.build {
+                            append(HttpHeaders.ContentType, "image/jpeg")
+                            append(HttpHeaders.ContentDisposition, "filename=\"banner.jpg\"")
+                        })
+                    }
+                )
+            )
+        }
 
         assertThat(response.status).isEqualTo(exception.statusCode)
         assertThat(response.parseBody<ErrorResponse>()).isEqualTo(exception.toErrorResponse())
@@ -120,11 +210,11 @@ class ServiceRoutingTest : BaseRoutingTest() {
 
     // <editor-fold desc="Update service">
     @Test
-    fun `when updating service with successful insertion, we return response service body`() = withBaseTestApplication(
+    fun `when updating service with successful update via JSON, we return response service body`() = withBaseTestApplication(
         AuthenticationInstrumentation()
     ) {
         val serviceResponse = givenAService().toDto()
-        coEvery { serviceController.updateServiceById(any(), any()) } returns serviceResponse
+        coEvery { serviceController.updateServiceById(any(), any(), any(), any()) } returns serviceResponse
 
         val body = toJsonBody(givenAValidUpdateService())
         val response = doCall(HttpMethod.Put, "/services/a63a20c4-14dd-4e11-9e87-5ab361a51f65", body)
@@ -138,7 +228,7 @@ class ServiceRoutingTest : BaseRoutingTest() {
         AuthenticationInstrumentation()
     ) {
         val exception = ErrorNotFound
-        coEvery { serviceController.updateServiceById(any(), any()) } throws exception
+        coEvery { serviceController.updateServiceById(any(), any(), any(), any()) } throws exception
 
         val body = toJsonBody(givenAValidUpdateService())
         val response = doCall(HttpMethod.Put, "/services/a63a20c4-14dd-4e11-9e87-5ab361a51f65", body)

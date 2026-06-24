@@ -15,7 +15,7 @@ CREATE TABLE MediaFiles (
     height            INT          NULL,
     created_at        DATETIME     NOT NULL DEFAULT (datetime('now')),
     updated_at        DATETIME     NOT NULL DEFAULT (datetime('now')),
-    CONSTRAINT MediaFiles_owner_unique UNIQUE (owner_id, owner_type)
+    CONSTRAINT MediaFiles_owner_unique UNIQUE (owner_id, owner_type, media_type)
 );
 
 CREATE INDEX idx_MediaFiles_owner_id ON MediaFiles(owner_id);
@@ -27,6 +27,13 @@ CREATE INDEX idx_MediaFiles_owner_type ON MediaFiles(owner_type);
 ALTER TABLE Testimonials DROP COLUMN image_url;
 
 -- =============================================
--- Add media file reference to Testimonials table
+-- Remove image_url and banner_image_url column from Services table
 -- =============================================
-ALTER TABLE Testimonials ADD COLUMN avatar_alt_text VARCHAR(255) NOT NULL DEFAULT '';
+ALTER TABLE Services DROP COLUMN image_url;
+ALTER TABLE Services DROP COLUMN banner_image_url;
+
+-- =============================================
+-- Remove image_url and banner_image_url column from Projects table
+-- =============================================
+ALTER TABLE Projects DROP COLUMN image_url;
+ALTER TABLE Projects DROP COLUMN banner_image_url;

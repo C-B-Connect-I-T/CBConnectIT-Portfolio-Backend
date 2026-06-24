@@ -2,15 +2,20 @@ package com.cbconnectit.data.database.dao
 
 import com.cbconnectit.data.database.tables.LinksProjectsPivotTable
 import com.cbconnectit.data.database.tables.LinksTable
+import com.cbconnectit.data.database.tables.MediaFilesTable
 import com.cbconnectit.data.database.tables.ProjectsTable
 import com.cbconnectit.data.database.tables.TagsProjectsPivotTable
 import com.cbconnectit.data.database.tables.TagsTable
 import com.cbconnectit.data.database.tables.toLink
+import com.cbconnectit.data.database.tables.toMediaFile
 import com.cbconnectit.data.database.tables.toProject
 import com.cbconnectit.data.database.tables.toTag
 import com.cbconnectit.data.dto.requests.project.InsertNewProject
 import com.cbconnectit.data.dto.requests.project.UpdateProject
 import com.cbconnectit.domain.interfaces.IProjectDao
+import com.cbconnectit.domain.models.mediafile.MediaFile
+import com.cbconnectit.domain.models.mediafile.MediaType
+import com.cbconnectit.domain.models.mediafile.OwnerType
 import com.cbconnectit.domain.models.project.Project
 import org.jetbrains.exposed.sql.SortOrder
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
@@ -29,35 +34,30 @@ class ProjectDaoImpl : IProjectDao {
         val results = ProjectsTable
             .selectAll()
             .where { ProjectsTable.id eq id }
-            // TODO: not needed if we select by id?
-//            .orderBy(ProjectsTable.createdAt to SortOrder.DESC)
             .toList()
-            .firstOrNull()
-
-        if (results == null) return null
-
-        val projectIds = results[ProjectsTable.id].value
+            .firstOrNull() ?: return null
 
         val tags = TagsProjectsPivotTable.innerJoin(TagsTable)
             .selectAll()
-            .where { TagsProjectsPivotTable.projectId eq projectIds }
+            .where { TagsProjectsPivotTable.projectId eq id }
             .groupBy { it[TagsProjectsPivotTable.projectId].value }
 
         val links = LinksProjectsPivotTable.innerJoin(LinksTable)
             .selectAll()
-            .where { LinksProjectsPivotTable.projectId eq projectIds }
+            .where { LinksProjectsPivotTable.projectId eq id }
             .groupBy { it[LinksProjectsPivotTable.projectId].value }
+
+        val mediaFiles = fetchMediaForProjects(listOf(id))
 
         return results.toProject().copy(
             tags = tags[id]?.map { it.toTag() } ?: emptyList(),
-            links = links[id]?.map { it.toLink() } ?: emptyList()
+            links = links[id]?.map { it.toLink() } ?: emptyList(),
+            image = mediaFiles[id]?.firstOrNull { it.mediaType == MediaType.IMAGE },
+            bannerImage = mediaFiles[id]?.firstOrNull { it.mediaType == MediaType.BANNER }
         )
     }
 
     override fun getProjects(): List<Project> {
-        // Don't join all tables at once to avoid row multiplication
-        // e.g. if a project has 3 tags and 2 links, joining all tables would produce 6 rows for that project
-        // instead, fetch projects first, then fetch tags and links separately and map them back to projects
         val results = ProjectsTable
             .selectAll()
             .orderBy(ProjectsTable.updatedAt to SortOrder.DESC)
@@ -65,7 +65,6 @@ class ProjectDaoImpl : IProjectDao {
 
         val projectIds = results.map { it[ProjectsTable.id].value }
 
-        // Fetch tags and links in bulk to avoid N+1 query problem
         val tags = TagsProjectsPivotTable.innerJoin(TagsTable)
             .selectAll()
             .where { TagsProjectsPivotTable.projectId inList projectIds }
@@ -76,15 +75,31 @@ class ProjectDaoImpl : IProjectDao {
             .where { LinksProjectsPivotTable.projectId inList projectIds }
             .groupBy { it[LinksProjectsPivotTable.projectId].value }
 
+        val mediaFiles = fetchMediaForProjects(projectIds)
+
         return results
             .distinctBy { it[ProjectsTable.id].value }
             .map { row ->
                 val id = row[ProjectsTable.id].value
                 row.toProject().copy(
                     tags = tags[id]?.map { it.toTag() } ?: emptyList(),
-                    links = links[id]?.map { it.toLink() } ?: emptyList()
+                    links = links[id]?.map { it.toLink() } ?: emptyList(),
+                    image = mediaFiles[id]?.firstOrNull { it.mediaType == MediaType.IMAGE },
+                    bannerImage = mediaFiles[id]?.firstOrNull { it.mediaType == MediaType.BANNER }
                 )
             }
+    }
+
+    private fun fetchMediaForProjects(projectIds: List<UUID>): Map<UUID, List<MediaFile>> {
+        if (projectIds.isEmpty()) return emptyMap()
+        return MediaFilesTable
+            .selectAll()
+            .where {
+                (MediaFilesTable.ownerId inList projectIds) and
+                        (MediaFilesTable.ownerType eq OwnerType.PROJECT)
+            }
+            .map { it.toMediaFile() }
+            .groupBy { it.ownerId }
     }
 
     override fun insertProject(insertNewProject: InsertNewProject): Project? {
@@ -92,8 +107,6 @@ class ProjectDaoImpl : IProjectDao {
             body[title] = insertNewProject.title
             body[shortDescription] = insertNewProject.shortDescription
             body[description] = insertNewProject.description
-            insertNewProject.bannerImageUrl?.let { body[bannerImageUrl] = it }
-            insertNewProject.imageUrl?.let { body[imageUrl] = it }
         }.value
 
         insertNewProject.tags?.forEach { tagId ->
@@ -118,9 +131,6 @@ class ProjectDaoImpl : IProjectDao {
             body[title] = updateProject.title
             body[shortDescription] = updateProject.shortDescription
             body[description] = updateProject.description
-            updateProject.bannerImageUrl?.let { body[bannerImageUrl] = it }
-            updateProject.imageUrl?.let { body[imageUrl] = it }
-
             body[updatedAt] = LocalDateTime.now()
         }
 

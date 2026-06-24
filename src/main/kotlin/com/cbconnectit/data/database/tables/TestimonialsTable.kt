@@ -11,7 +11,6 @@ import org.jetbrains.exposed.sql.javatime.datetime
 object TestimonialsTable : UUIDTable() {
     val fullName = varchar("full_name", normalTextSize)
     val jobPositionId = reference("job_position_id", JobPositionsTable, ReferenceOption.CASCADE)
-    val avatarAltText = varchar("avatar_alt_text", normalTextSize).default("")
     val review = text("review")
     val companyId = optReference("company_id", CompaniesTable, ReferenceOption.CASCADE)
     val createdAt = datetime("created_at").defaultExpression(CurrentDateTime)
@@ -24,7 +23,6 @@ fun ResultRow.toTestimonial() = Testimonial(
     review = this[TestimonialsTable.review],
     jobPosition = this.toJobPosition(),
     company = this[TestimonialsTable.companyId]?.value?.let { this.toCompany() },
-    altText = this[TestimonialsTable.avatarAltText],
     avatarImage = this.getOrNull(MediaFilesTable.id)?.let {
         this.toMediaFile()
     },

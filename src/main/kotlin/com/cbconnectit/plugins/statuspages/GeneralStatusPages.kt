@@ -29,6 +29,7 @@ object ErrorMissingParameters : ApiException("missing_parameters", "Missing para
 object ErrorNotFound : ApiException("not_found", "The resource could not be found", HttpStatusCode.NotFound)
 object ErrorUnauthorized : ApiException("unauthorized", "The user is not authorized to perform this action", HttpStatusCode.Forbidden)
 object ErrorInvalidFileType : ApiException("invalid_file_type", "Invalid file type. Only images are allowed.", HttpStatusCode.BadRequest)
+object ErrorMissingRequiredMedia : ApiException("missing_required_media", "Both image and bannerImage are required.", HttpStatusCode.BadRequest)
 
 data class ErrorUnknownServiceIdsForCreate(private val ids: List<UUID>) : ApiException("unknown_ids_for_create", "Can't create service with unknown parent service ${ids.joinToString(", ")}", HttpStatusCode.BadRequest)
 
