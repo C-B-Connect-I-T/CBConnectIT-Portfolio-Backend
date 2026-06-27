@@ -28,6 +28,14 @@ _Avoid_: bannerImageUrl
 An explicit maintenance action that removes a Service's Banner Image and its associated Alt Text.
 _Avoid_: implicit banner deletion
 
+**Project Media Pair**:
+A Project always has both an Image and a Banner Image; neither is optional in normal lifecycle operations.
+_Avoid_: optional project banner, image-only project
+
+**Service Optional Banner**:
+A Service always has an Image, while its Banner Image is optional and may be explicitly removed.
+_Avoid_: mandatory service banner
+
 **Alt Text**:
 Human-readable description of an image for accessibility and assistive technologies.
 _Avoid_: caption
