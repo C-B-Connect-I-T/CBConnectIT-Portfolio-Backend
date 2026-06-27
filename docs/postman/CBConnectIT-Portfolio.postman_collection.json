@@ -362,8 +362,7 @@
                 "projects",
                 "{{projectId}}"
               ]
-            },
-            "description": "Creates a Project with mandatory `image` and `bannerImage` multipart files. Projects must always keep both media types."
+            }
           }
         },
         {
@@ -413,7 +412,8 @@
                 "v1",
                 "projects"
               ]
-            }
+            },
+            "description": "Creates a Project with mandatory `image` and `bannerImage` multipart files. Projects must always keep both media types."
           }
         },
         {
