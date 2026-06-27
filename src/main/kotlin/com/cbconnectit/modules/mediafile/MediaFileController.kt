@@ -55,8 +55,8 @@ class MediaFileControllerImpl(
         @Suppress("TooGenericExceptionCaught")
         return try {
             val oldFileUrl = dbTransactionalQuery {
-                // Check for existing media file
-                val existingFile = mediaFileDao.readByOwnerId(ownerId, request.ownerType)
+                // Replace only the existing file for the same owner + media type
+                val existingFile = mediaFileDao.readByOwnerIdAndMediaType(ownerId, request.ownerType, request.mediaType)
                 val oldUrl = existingFile?.url
 
                 if (existingFile != null) {

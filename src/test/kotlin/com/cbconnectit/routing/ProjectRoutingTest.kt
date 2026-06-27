@@ -10,7 +10,6 @@ import com.cbconnectit.modules.projects.ProjectController
 import com.cbconnectit.modules.projects.projectRouting
 import com.cbconnectit.plugins.statuspages.ErrorDuplicateEntity
 import com.cbconnectit.plugins.statuspages.ErrorFailedDelete
-import com.cbconnectit.plugins.statuspages.ErrorMissingRequiredMedia
 import com.cbconnectit.plugins.statuspages.ErrorNotFound
 import com.cbconnectit.plugins.statuspages.ErrorResponse
 import com.cbconnectit.plugins.statuspages.toErrorResponse
