@@ -13,6 +13,8 @@ import com.cbconnectit.plugins.statuspages.ErrorFailedDelete
 import com.cbconnectit.plugins.statuspages.ErrorNotFound
 import com.cbconnectit.plugins.statuspages.ErrorResponse
 import com.cbconnectit.plugins.statuspages.toErrorResponse
+import io.ktor.client.request.*
+import io.ktor.client.request.forms.*
 import io.ktor.http.*
 import io.ktor.server.routing.*
 import io.mockk.coEvery
@@ -33,10 +35,11 @@ class ProjectRoutingTest : BaseRoutingTest() {
     fun setup() {
         koinModules = module {
             single { projectController }
+            single { json }
         }
         moduleList = {
             routing {
-                projectRouting(projectController)
+                projectRouting(json, projectController)
             }
         }
     }
@@ -90,17 +93,53 @@ class ProjectRoutingTest : BaseRoutingTest() {
 
     // <editor-fold desc="Create new project">
     @Test
-    fun `when creating project with successful insertion, we return response project body`() = withBaseTestApplication(
+    fun `when creating project with multipart and successful insertion, we return response project body`() = withBaseTestApplication(
         AuthenticationInstrumentation()
     ) {
         val projectResponse = givenAProject().toDto()
-        coEvery { projectController.postProject(any()) } returns projectResponse
+        coEvery { projectController.postProject(any(), any(), any()) } returns projectResponse
 
-        val body = toJsonBody(givenAValidInsertProject())
-        val response = doCall(HttpMethod.Post, "/projects", body)
+        val response = client.post("/projects") {
+            header(HttpHeaders.Authorization, "Bearer ${buildBearerToken()}")
+            header("X-Client-Type", "web")
+            setBody(
+                MultiPartFormDataContent(
+                    formData {
+                        append("payload", toJsonBody(givenAValidInsertProject()))
+                        append("image", ByteArray(100), Headers.build {
+                            append(HttpHeaders.ContentType, "image/jpeg")
+                            append(HttpHeaders.ContentDisposition, "filename=\"image.jpg\"")
+                        })
+                        append("bannerImage", ByteArray(100), Headers.build {
+                            append(HttpHeaders.ContentType, "image/jpeg")
+                            append(HttpHeaders.ContentDisposition, "filename=\"banner.jpg\"")
+                        })
+                    }
+                )
+            )
+        }
 
         assertThat(response.status).isEqualTo(HttpStatusCode.Created)
         assertThat(response.parseBody<ProjectDto>()).isEqualTo(projectResponse)
+    }
+
+    @Test
+    fun `when creating project without image files in multipart, we return missing required media error`() = withBaseTestApplication(
+        AuthenticationInstrumentation()
+    ) {
+        val response = client.post("/projects") {
+            header(HttpHeaders.Authorization, "Bearer ${buildBearerToken()}")
+            header("X-Client-Type", "web")
+            setBody(
+                MultiPartFormDataContent(
+                    formData {
+                        append("payload", toJsonBody(givenAValidInsertProject()))
+                    }
+                )
+            )
+        }
+
+        assertThat(response.status).isEqualTo(HttpStatusCode.BadRequest)
     }
 
     @Test
@@ -108,10 +147,27 @@ class ProjectRoutingTest : BaseRoutingTest() {
         AuthenticationInstrumentation()
     ) {
         val exception = ErrorDuplicateEntity
-        coEvery { projectController.postProject(any()) } throws exception
+        coEvery { projectController.postProject(any(), any(), any()) } throws exception
 
-        val body = toJsonBody(givenAValidInsertProject())
-        val response = doCall(HttpMethod.Post, "/projects", body)
+        val response = client.post("/projects") {
+            header(HttpHeaders.Authorization, "Bearer ${buildBearerToken()}")
+            header("X-Client-Type", "web")
+            setBody(
+                MultiPartFormDataContent(
+                    formData {
+                        append("payload", toJsonBody(givenAValidInsertProject()))
+                        append("image", ByteArray(100), Headers.build {
+                            append(HttpHeaders.ContentType, "image/jpeg")
+                            append(HttpHeaders.ContentDisposition, "filename=\"image.jpg\"")
+                        })
+                        append("bannerImage", ByteArray(100), Headers.build {
+                            append(HttpHeaders.ContentType, "image/jpeg")
+                            append(HttpHeaders.ContentDisposition, "filename=\"banner.jpg\"")
+                        })
+                    }
+                )
+            )
+        }
 
         assertThat(response.status).isEqualTo(exception.statusCode)
         assertThat(response.parseBody<ErrorResponse>()).isEqualTo(exception.toErrorResponse())
@@ -120,11 +176,11 @@ class ProjectRoutingTest : BaseRoutingTest() {
 
     // <editor-fold desc="Update project">
     @Test
-    fun `when updating project with successful insertion, we return response project body`() = withBaseTestApplication(
+    fun `when updating project with successful update via JSON, we return response project body`() = withBaseTestApplication(
         AuthenticationInstrumentation()
     ) {
         val projectResponse = givenAProject().toDto()
-        coEvery { projectController.updateProjectById(any(), any()) } returns projectResponse
+        coEvery { projectController.updateProjectById(any(), any(), any(), any()) } returns projectResponse
 
         val body = toJsonBody(givenAValidUpdateProject())
         val response = doCall(HttpMethod.Put, "/projects/a63a20c4-14dd-4e11-9e87-5ab361a51f65", body)
@@ -138,7 +194,7 @@ class ProjectRoutingTest : BaseRoutingTest() {
         AuthenticationInstrumentation()
     ) {
         val exception = ErrorNotFound
-        coEvery { projectController.updateProjectById(any(), any()) } throws exception
+        coEvery { projectController.updateProjectById(any(), any(), any(), any()) } throws exception
 
         val body = toJsonBody(givenAValidUpdateProject())
         val response = doCall(HttpMethod.Put, "/projects/a63a20c4-14dd-4e11-9e87-5ab361a51f65", body)

@@ -1,0 +1,540 @@
+{
+  "info": {
+    "name": "CBConnectIT Portfolio API",
+    "_postman_id": "cbconnectit-portfolio-api",
+    "description": "API collection for CBConnectIT Portfolio Backend.\n\nSet the `baseUrl` variable to your server (e.g. `http://localhost:8080`) and populate `accessToken` after logging in.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:8080",
+      "type": "string"
+    },
+    {
+      "key": "accessToken",
+      "value": "",
+      "type": "string",
+      "description": "JWT bearer token \u2014 paste after /auth/login"
+    },
+    {
+      "key": "serviceId",
+      "value": "00000000-0000-0000-0000-000000000001",
+      "type": "string"
+    },
+    {
+      "key": "projectId",
+      "value": "00000000-0000-0000-0000-000000000001",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "Auth",
+      "item": [
+        {
+          "name": "Login",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const json = pm.response.json();",
+                  "if (json.access_token) {",
+                  "    pm.collectionVariables.set('accessToken', json.access_token);",
+                  "    console.log('accessToken saved');",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "X-Client-Type",
+                "value": "web"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"admin@example.com\",\n  \"password\": \"your-password-here\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/oauth/token",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "oauth",
+                "token"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Services",
+      "item": [
+        {
+          "name": "Get all services",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/services",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "services"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get service by id",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/services/{{serviceId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "services",
+                "{{serviceId}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get service overview (admin)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              },
+              {
+                "key": "X-Client-Type",
+                "value": "web"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/services/overview",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "services",
+                "overview"
+              ]
+            },
+            "description": "Returns a flat list of all services (no depth) for the admin dashboard. Each item includes id, title, parent_service (compact), tag, and updated_at. Requires admin authentication."
+          }
+        },
+        {
+          "name": "Create service (multipart \u2014 mandatory image, optional bannerImage)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              },
+              {
+                "key": "X-Client-Type",
+                "value": "web"
+              }
+            ],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "payload",
+                  "value": "{\n  \"title\": \"Mobile development\",\n  \"description\": \"Native Android development expertise.\",\n  \"short_description\": \"Android apps, built right.\",\n  \"image_alt_text\": \"Mobile service icon\",\n  \"banner_image_alt_text\": \"Mobile development banner\",\n  \"banner_description\": \"Deep dive into the mobile world.\",\n  \"extra_info\": null,\n  \"parent_service_id\": null,\n  \"tag_id\": null\n}",
+                  "type": "text",
+                  "description": "JSON payload (serialized InsertNewService)"
+                },
+                {
+                  "key": "image",
+                  "type": "file",
+                  "src": [],
+                  "description": "IMAGE type \u2014 square icon/thumbnail (required)"
+                },
+                {
+                  "key": "bannerImage",
+                  "type": "file",
+                  "src": [],
+                  "description": "BANNER type \u2014 wide hero image (optional)"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/services",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "services"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Update service \u2014 replace both images (multipart)",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              },
+              {
+                "key": "X-Client-Type",
+                "value": "web"
+              }
+            ],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "payload",
+                  "value": "{\n  \"title\": \"Mobile development (updated)\",\n  \"description\": \"Updated description.\",\n  \"short_description\": \"Short updated.\",\n  \"image_alt_text\": \"New icon alt text\",\n  \"banner_image_alt_text\": \"New banner alt text\"\n}",
+                  "type": "text"
+                },
+                {
+                  "key": "image",
+                  "type": "file",
+                  "src": [],
+                  "description": "New IMAGE file \u2014 replaces existing (optional)"
+                },
+                {
+                  "key": "bannerImage",
+                  "type": "file",
+                  "src": [],
+                  "description": "New BANNER file \u2014 replaces existing (optional)"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/services/{{serviceId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "services",
+                "{{serviceId}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Update service \u2014 metadata only, no new images (JSON)",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              },
+              {
+                "key": "X-Client-Type",
+                "value": "web"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Mobile development (metadata only)\",\n  \"description\": \"Only text fields updated \u2014 images unchanged.\",\n  \"short_description\": \"Still the same icon, new words.\",\n  \"image_alt_text\": \"Updated alt text without re-uploading\",\n  \"banner_image_alt_text\": \"Updated banner alt without re-uploading\",\n  \"remove_banner_image\": false\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/services/{{serviceId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "services",
+                "{{serviceId}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Delete service",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              },
+              {
+                "key": "X-Client-Type",
+                "value": "web"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/services/{{serviceId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "services",
+                "{{serviceId}}"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Projects",
+      "item": [
+        {
+          "name": "Get all projects",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/projects",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "projects"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get project by id",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/projects/{{projectId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "projects",
+                "{{projectId}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Create project (multipart \u2014 mandatory image + bannerImage)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              },
+              {
+                "key": "X-Client-Type",
+                "value": "web"
+              }
+            ],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "payload",
+                  "value": "{\n  \"title\": \"Android Core\",\n  \"short_description\": \"A core library to streamline new project setup.\",\n  \"description\": \"Full project description here.\",\n  \"image_alt_text\": \"Android Core project thumbnail\",\n  \"banner_image_alt_text\": \"Android Core banner\",\n  \"tags\": [],\n  \"links\": []\n}",
+                  "type": "text",
+                  "description": "JSON payload (serialized InsertNewProject)"
+                },
+                {
+                  "key": "image",
+                  "type": "file",
+                  "src": [],
+                  "description": "IMAGE type \u2014 project thumbnail (required)"
+                },
+                {
+                  "key": "bannerImage",
+                  "type": "file",
+                  "src": [],
+                  "description": "BANNER type \u2014 wide hero image (required)"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/projects",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "projects"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Update project \u2014 replace both images (multipart)",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              },
+              {
+                "key": "X-Client-Type",
+                "value": "web"
+              }
+            ],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "payload",
+                  "value": "{\n  \"title\": \"Android Core (updated)\",\n  \"short_description\": \"Updated short description.\",\n  \"description\": \"Updated full description.\",\n  \"image_alt_text\": \"New thumbnail alt\",\n  \"banner_image_alt_text\": \"New banner alt\",\n  \"tags\": [],\n  \"links\": []\n}",
+                  "type": "text"
+                },
+                {
+                  "key": "image",
+                  "type": "file",
+                  "src": [],
+                  "description": "New IMAGE file \u2014 replaces existing (optional)"
+                },
+                {
+                  "key": "bannerImage",
+                  "type": "file",
+                  "src": [],
+                  "description": "New BANNER file \u2014 replaces existing (optional)"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/projects/{{projectId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "projects",
+                "{{projectId}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Update project \u2014 metadata only, no new images (JSON)",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              },
+              {
+                "key": "X-Client-Type",
+                "value": "web"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Android Core (text only update)\",\n  \"short_description\": \"Images untouched, only text changed.\",\n  \"description\": \"No files uploaded \u2014 existing image and bannerImage are kept.\",\n  \"image_alt_text\": \"Updated alt without re-upload\",\n  \"banner_image_alt_text\": \"Updated banner alt without re-upload\",\n  \"tags\": [],\n  \"links\": []\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/projects/{{projectId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "projects",
+                "{{projectId}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Delete project",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              },
+              {
+                "key": "X-Client-Type",
+                "value": "web"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/projects/{{projectId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "projects",
+                "{{projectId}}"
+              ]
+            }
+          }
+        }
+      ]
+    }
+  ]
+}

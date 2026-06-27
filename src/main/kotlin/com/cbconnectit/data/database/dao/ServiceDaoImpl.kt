@@ -1,13 +1,25 @@
 package com.cbconnectit.data.database.dao
 
+import com.cbconnectit.data.database.tables.MediaFilesTable
 import com.cbconnectit.data.database.tables.ServicesTable
 import com.cbconnectit.data.database.tables.TagsTable
+import com.cbconnectit.data.database.tables.toMediaFile
 import com.cbconnectit.data.database.tables.toService
+import com.cbconnectit.data.database.tables.toTag
 import com.cbconnectit.data.dto.requests.service.InsertNewService
 import com.cbconnectit.data.dto.requests.service.UpdateService
 import com.cbconnectit.domain.interfaces.IServiceDao
+import com.cbconnectit.domain.models.mediafile.MediaFile
+import com.cbconnectit.domain.models.mediafile.MediaType
+import com.cbconnectit.domain.models.mediafile.OwnerType
+import com.cbconnectit.domain.models.service.CompactService
 import com.cbconnectit.domain.models.service.Service
+import com.cbconnectit.domain.models.service.ServiceAdminItem
+import com.cbconnectit.domain.models.service.groupedAndSorted
+import org.jetbrains.exposed.sql.JoinType
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
+import org.jetbrains.exposed.sql.alias
+import org.jetbrains.exposed.sql.and
 import org.jetbrains.exposed.sql.deleteWhere
 import org.jetbrains.exposed.sql.insertAndGetId
 import org.jetbrains.exposed.sql.selectAll
@@ -24,6 +36,33 @@ class ServiceDaoImpl : IServiceDao {
     override fun getServices(): List<Service> =
         fetchServicesRecursive(null)
 
+    override fun getServicesOverview(): List<ServiceAdminItem> {
+        val parentAlias = ServicesTable.alias("parent_services")
+        val parentIdCol = parentAlias[ServicesTable.id]
+        val parentTitleCol = parentAlias[ServicesTable.title]
+
+        val items = transaction {
+            (ServicesTable leftJoin TagsTable)
+                .join(parentAlias, JoinType.LEFT, ServicesTable.parentServiceId, parentIdCol)
+                .selectAll()
+                .map { row ->
+                    ServiceAdminItem(
+                        id = row[ServicesTable.id].value,
+                        title = row[ServicesTable.title],
+                        parentService = row[ServicesTable.parentServiceId]?.value?.let { parentId ->
+                            CompactService(
+                                id = parentId,
+                                title = row[parentTitleCol]
+                            )
+                        },
+                        tag = row[ServicesTable.tagId]?.value?.let { row.toTag() },
+                        updatedAt = row[ServicesTable.updatedAt]
+                    )
+                }
+        }
+        return items.groupedAndSorted()
+    }
+
     private fun fetchServicesWithSubServices(id: UUID): Service? {
         var service: Service? = null
 
@@ -35,7 +74,7 @@ class ServiceDaoImpl : IServiceDao {
             service = service?.copy(subServices = subServices)
         }
 
-        return service
+        return service?.let { withMedia(listOf(it)).first() }
     }
 
     private fun fetchServicesRecursive(parentId: UUID? = null): List<Service> {
@@ -51,14 +90,34 @@ class ServiceDaoImpl : IServiceDao {
             }
         }
 
-        return subService
+        return withMedia(subService)
+    }
+
+    private fun withMedia(services: List<Service>): List<Service> {
+        if (services.isEmpty()) return services
+        val ids = services.map { it.id }
+
+        val mediaByOwner: Map<UUID, List<MediaFile>> = MediaFilesTable
+            .selectAll()
+            .where {
+                (MediaFilesTable.ownerId inList ids) and
+                        (MediaFilesTable.ownerType eq OwnerType.SERVICE)
+            }
+            .map { it.toMediaFile() }
+            .groupBy { it.ownerId }
+
+        return services.map { service ->
+            val files = mediaByOwner[service.id] ?: emptyList()
+            service.copy(
+                image = files.firstOrNull { it.mediaType == MediaType.IMAGE },
+                bannerImage = files.firstOrNull { it.mediaType == MediaType.BANNER }
+            )
+        }
     }
 
     override fun insertService(insertNewService: InsertNewService): Service? {
         val id = ServicesTable.insertAndGetId {
             it[title] = insertNewService.title
-            it[imageUrl] = insertNewService.imageUrl
-            it[bannerImageUrl] = insertNewService.bannerImageUrl
             it[description] = insertNewService.description
             it[bannerDescription] = insertNewService.bannerDescription
             it[shortDescription] = insertNewService.shortDescription
@@ -73,8 +132,6 @@ class ServiceDaoImpl : IServiceDao {
     override fun updateService(id: UUID, updateService: UpdateService): Service? {
         ServicesTable.update({ ServicesTable.id eq id }) {
             it[title] = updateService.title
-            it[imageUrl] = updateService.imageUrl
-            it[bannerImageUrl] = updateService.bannerImageUrl
             it[description] = updateService.description
             it[bannerDescription] = updateService.bannerDescription
             it[shortDescription] = updateService.shortDescription

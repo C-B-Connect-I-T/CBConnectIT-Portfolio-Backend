@@ -55,8 +55,6 @@ internal class ProjectDaoImplTest : BaseDaoTest() {
                 it[title] = data.title
                 it[description] = data.description
                 it[shortDescription] = data.shortDescription
-                it[imageUrl] = data.imageUrl
-                it[bannerImageUrl] = data.bannerImageUrl
                 it[createdAt] = data.createdAt
                 it[updatedAt] = data.updatedAt
             }

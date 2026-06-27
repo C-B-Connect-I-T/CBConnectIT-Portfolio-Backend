@@ -1,6 +1,8 @@
 package com.cbconnectit.domain.models.service
 
 import com.cbconnectit.data.dto.requests.service.ServiceDto
+import com.cbconnectit.domain.models.mediafile.MediaFile
+import com.cbconnectit.domain.models.mediafile.toCompactDto
 import com.cbconnectit.domain.models.tag.Tag
 import com.cbconnectit.domain.models.tag.toDto
 import com.cbconnectit.utils.toDatabaseString
@@ -9,8 +11,8 @@ import java.util.*
 
 data class Service(
     val id: UUID = UUID.randomUUID(),
-    val imageUrl: String = "",
-    val bannerImageUrl: String? = null,
+    val image: MediaFile? = null,
+    val bannerImage: MediaFile? = null,
     val title: String = "",
     val shortDescription: String? = null,
     val description: String = "",
@@ -24,8 +26,8 @@ data class Service(
 
 fun Service.toDto(): ServiceDto = ServiceDto(
     id = this.id.toString(),
-    imageUrl = this.imageUrl,
-    bannerImageUrl = this.bannerImageUrl,
+    image = this.image?.toCompactDto(),
+    bannerImage = this.bannerImage?.toCompactDto(),
     title = this.title,
     shortDescription = this.shortDescription,
     description = this.description,

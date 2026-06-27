@@ -6,14 +6,14 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class InsertNewProject(
-    @SerialName("banner_image_url")
-    val bannerImageUrl: String? = null,
-    @SerialName("image_url")
-    val imageUrl: String? = null,
     val title: String,
     @SerialName("short_description")
     val shortDescription: String,
     val description: String,
+    @SerialName("image_alt_text")
+    val imageAltText: String? = null,
+    @SerialName("banner_image_alt_text")
+    val bannerImageAltText: String? = null,
     val tags: List<String>? = null,
     val links: List<String>? = null
 ) {
@@ -21,21 +21,19 @@ data class InsertNewProject(
         get() = title.isNotBlank() &&
                 shortDescription.isNotBlank() &&
                 description.isNotBlank() &&
-                (bannerImageUrl == null || bannerImageUrl.isValidUrl) &&
-                (imageUrl == null || imageUrl.isValidUrl) &&
                 (links == null || links.all { it.isNotBlank() && it.isValidUrl })
 }
 
 @Serializable
 data class UpdateProject(
-    @SerialName("banner_image_url")
-    val bannerImageUrl: String? = null,
-    @SerialName("image_url")
-    val imageUrl: String? = null,
     val title: String,
     @SerialName("short_description")
     val shortDescription: String,
     val description: String,
+    @SerialName("image_alt_text")
+    val imageAltText: String? = null,
+    @SerialName("banner_image_alt_text")
+    val bannerImageAltText: String? = null,
     val tags: List<String>? = null,
     val links: List<String>? = null
 ) {
@@ -43,7 +41,5 @@ data class UpdateProject(
         get() = title.isNotBlank() &&
                 shortDescription.isNotBlank() &&
                 description.isNotBlank() &&
-                (bannerImageUrl == null || bannerImageUrl.isValidUrl) &&
-                (imageUrl == null || imageUrl.isValidUrl) &&
                 (links == null || links.all { it.isNotBlank() && it.isValidUrl })
 }

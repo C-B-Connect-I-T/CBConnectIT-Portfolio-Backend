@@ -25,8 +25,8 @@ object MediaFilesTable : UUIDTable() {
     val updatedAt = datetime("updated_at").defaultExpression(CurrentDateTime)
 
     init {
-        // Unique constraint: one media file per owner
-        uniqueIndex(ownerId, ownerType)
+        // Unique constraint: one media file per owner per media type (allows IMAGE + BANNER for same owner)
+        uniqueIndex(ownerId, ownerType, mediaType)
     }
 }
 

@@ -74,7 +74,7 @@ class MediaFileControllerTest : BaseControllerTest() {
     fun `when dao throws unexpected exception, it propagates`() = runTest {
         val insertRequest = MediaFileInstrumentation.givenAValidInsertMediaFile()
 
-        coEvery { mediaFileDao.readByOwnerId(any(), any()) } returns null
+        coEvery { mediaFileDao.readByOwnerIdAndMediaType(any(), any(), any()) } returns null
         coEvery { storageService.storeFromBytes(any(), any(), any()) } returns mockStorageResult
         coEvery { mediaFileDao.create(any()) } throws RuntimeException("DB exploded")
 
@@ -89,7 +89,7 @@ class MediaFileControllerTest : BaseControllerTest() {
         val insertRequest = MediaFileInstrumentation.givenAValidInsertMediaFile()
         val createdMediaFile = MediaFileInstrumentation.givenAMediaFile()
 
-        coEvery { mediaFileDao.readByOwnerId(any(), any()) } returns null
+        coEvery { mediaFileDao.readByOwnerIdAndMediaType(any(), any(), any()) } returns null
         coEvery { storageService.storeFromBytes(any(), any(), any()) } returns mockStorageResult
         coEvery { mediaFileDao.create(any()) } returns createdMediaFile.id
 
@@ -101,7 +101,13 @@ class MediaFileControllerTest : BaseControllerTest() {
         assertThat(result.ownerId).isEqualTo(insertRequest.ownerId)
         assertThat(result.ownerType).isEqualTo(insertRequest.ownerType)
 
-        coVerify { mediaFileDao.readByOwnerId(UUID.fromString(insertRequest.ownerId), insertRequest.ownerType) }
+        coVerify {
+            mediaFileDao.readByOwnerIdAndMediaType(
+                UUID.fromString(insertRequest.ownerId),
+                insertRequest.ownerType,
+                insertRequest.mediaType
+            )
+        }
         coVerify { storageService.storeFromBytes(any(), "test.jpg", "image/jpeg") }
         coVerify { mediaFileDao.create(any()) }
     }
@@ -112,7 +118,7 @@ class MediaFileControllerTest : BaseControllerTest() {
         val existingMediaFile = MediaFileInstrumentation.givenAMediaFile()
         val createdMediaFile = MediaFileInstrumentation.givenAMediaFile()
 
-        coEvery { mediaFileDao.readByOwnerId(any(), any()) } returns existingMediaFile
+        coEvery { mediaFileDao.readByOwnerIdAndMediaType(any(), any(), any()) } returns existingMediaFile
         coEvery { storageService.delete(any()) } returns true
         coEvery { mediaFileDao.delete(any()) } returns true
         coEvery { storageService.storeFromBytes(any(), any(), any()) } returns mockStorageResult
@@ -120,7 +126,13 @@ class MediaFileControllerTest : BaseControllerTest() {
 
         controller.create(insertRequest, mockFile)
 
-        coVerify { mediaFileDao.readByOwnerId(UUID.fromString(insertRequest.ownerId), insertRequest.ownerType) }
+        coVerify {
+            mediaFileDao.readByOwnerIdAndMediaType(
+                UUID.fromString(insertRequest.ownerId),
+                insertRequest.ownerType,
+                insertRequest.mediaType
+            )
+        }
         coVerify { storageService.delete(existingMediaFile.url) }
         coVerify { mediaFileDao.delete(existingMediaFile.id) }
     }

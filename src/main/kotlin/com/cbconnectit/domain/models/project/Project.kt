@@ -3,6 +3,8 @@ package com.cbconnectit.domain.models.project
 import com.cbconnectit.data.dto.requests.project.ProjectDto
 import com.cbconnectit.domain.models.link.Link
 import com.cbconnectit.domain.models.link.toDto
+import com.cbconnectit.domain.models.mediafile.MediaFile
+import com.cbconnectit.domain.models.mediafile.toCompactDto
 import com.cbconnectit.domain.models.tag.Tag
 import com.cbconnectit.domain.models.tag.toDto
 import com.cbconnectit.utils.toDatabaseString
@@ -11,8 +13,8 @@ import java.util.*
 
 data class Project(
     val id: UUID = UUID.randomUUID(),
-    val bannerImageUrl: String? = null,
-    val imageUrl: String? = null,
+    val image: MediaFile? = null,
+    val bannerImage: MediaFile? = null,
     val title: String = "",
     val shortDescription: String = "",
     val description: String = "",
@@ -24,8 +26,8 @@ data class Project(
 
 fun Project.toDto() = ProjectDto(
     id = this.id.toString(),
-    bannerImageUrl = bannerImageUrl,
-    imageUrl = imageUrl,
+    image = this.image?.toCompactDto(),
+    bannerImage = this.bannerImage?.toCompactDto(),
     title = title,
     shortDescription = shortDescription,
     description = description,

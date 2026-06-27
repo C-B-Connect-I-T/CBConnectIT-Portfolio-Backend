@@ -72,7 +72,6 @@ class TestimonialDaoImpl : ITestimonialDao {
             it[TestimonialsTable.id] = EntityID(id, TestimonialsTable)
             it[fullName] = insertTestimonial.fullName
             it[review] = insertTestimonial.review
-            it[avatarAltText] = insertTestimonial.avatarAltText ?: ""
             it[jobPositionId] = UUID.fromString(insertTestimonial.jobPositionId)
             it[companyId] = UUID.fromString(insertTestimonial.companyId)
         }.value
@@ -83,7 +82,6 @@ class TestimonialDaoImpl : ITestimonialDao {
             it[review] = updateTestimonial.review
             it[jobPositionId] = UUID.fromString(updateTestimonial.jobPositionId)
             it[companyId] = UUID.fromString(updateTestimonial.companyId)
-            updateTestimonial.avatarAltText?.let { value -> it[avatarAltText] = value }
 
             it[updatedAt] = LocalDateTime.now()
         } > 0

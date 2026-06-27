@@ -5,6 +5,7 @@ import com.cbconnectit.data.database.tables.toMediaFile
 import com.cbconnectit.data.database.tables.toMediaFiles
 import com.cbconnectit.domain.interfaces.IMediaFileDao
 import com.cbconnectit.domain.models.mediafile.MediaFile
+import com.cbconnectit.domain.models.mediafile.MediaType
 import com.cbconnectit.domain.models.mediafile.OwnerType
 import org.jetbrains.exposed.sql.SortOrder
 import org.jetbrains.exposed.sql.and
@@ -43,6 +44,16 @@ class MediaFileDaoImpl : IMediaFileDao {
             .where {
                 (MediaFilesTable.ownerId eq ownerId) and
                         (MediaFilesTable.ownerType eq ownerType)
+            }
+            .toMediaFile()
+
+    override fun readByOwnerIdAndMediaType(ownerId: UUID, ownerType: OwnerType, mediaType: MediaType): MediaFile? =
+        MediaFilesTable
+            .selectAll()
+            .where {
+                (MediaFilesTable.ownerId eq ownerId) and
+                        (MediaFilesTable.ownerType eq ownerType) and
+                        (MediaFilesTable.mediaType eq mediaType)
             }
             .toMediaFile()
 

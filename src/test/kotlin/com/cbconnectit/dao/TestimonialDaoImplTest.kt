@@ -57,7 +57,6 @@ internal class TestimonialDaoImplTest : BaseDaoTest() {
                 it[review] = testimonials[index].review
                 it[companyId] = compId
                 it[jobPositionId] = jobPosId
-                it[avatarAltText] = ""
                 it[fullName] = ""
                 it[createdAt] = testimonials[index].createdAt
                 it[updatedAt] = testimonials[index].updatedAt
@@ -70,7 +69,6 @@ internal class TestimonialDaoImplTest : BaseDaoTest() {
             it[review] = "Fifth Testimonial"
             it[companyId] = null
             it[jobPositionId] = UUID.fromString("00000000-0000-0000-0000-000000000001")
-            it[avatarAltText] = ""
             it[fullName] = ""
             it[createdAt] = testimonials[0].createdAt
             it[updatedAt] = testimonials[0].updatedAt

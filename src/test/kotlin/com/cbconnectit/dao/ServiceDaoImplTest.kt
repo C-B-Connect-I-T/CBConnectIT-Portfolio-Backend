@@ -45,7 +45,6 @@ internal class ServiceDaoImplTest : BaseDaoTest() {
             ServicesTable.insert {
                 it[id] = serviceId
                 it[title] = service.title
-                it[imageUrl] = service.imageUrl ?: "https://www.google.be/image"
                 it[description] = service.description
                 it[tagId] = UUID.fromString("00000000-0000-0000-0000-000000000001")
                 it[parentServiceId] = parentId
