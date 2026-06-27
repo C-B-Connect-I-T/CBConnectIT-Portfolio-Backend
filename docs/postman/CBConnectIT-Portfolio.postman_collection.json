@@ -412,7 +412,8 @@
                 "v1",
                 "projects"
               ]
-            }
+            },
+            "description": "Creates a Project with mandatory `image` and `bannerImage` multipart files. Projects must always keep both media types."
           }
         },
         {
@@ -462,7 +463,8 @@
                 "projects",
                 "{{projectId}}"
               ]
-            }
+            },
+            "description": "Updates Project metadata and optionally replaces media files. Project banner removal is not supported; a Project must retain both `image` and `bannerImage`."
           }
         },
         {
@@ -503,7 +505,8 @@
                 "projects",
                 "{{projectId}}"
               ]
-            }
+            },
+            "description": "Updates Project metadata without uploading files. Existing media is preserved, and Project still requires both `image` and `bannerImage`."
           }
         },
         {

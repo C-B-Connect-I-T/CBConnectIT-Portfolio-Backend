@@ -226,6 +226,45 @@ class ProjectControllerTest : BaseControllerTest() {
     }
 
     @Test
+    fun `when replacing project banner image successfully, we delete old banner storage url`() {
+        val projectId = UUID.randomUUID()
+        val createdProject = givenAProject(id = projectId)
+        val existingImage = MediaFileInstrumentation.givenAMediaFile(
+            id = "00000000-0000-0000-0000-000000000101",
+            ownerType = OwnerType.PROJECT
+        ).copy(url = "https://example.com/images/existing-image.jpg", mediaType = MediaType.IMAGE)
+        val existingBanner = MediaFileInstrumentation.givenAMediaFile(
+            id = "00000000-0000-0000-0000-000000000102",
+            ownerType = OwnerType.PROJECT
+        ).copy(url = "https://example.com/images/old-banner.jpg", mediaType = MediaType.BANNER)
+        val newBannerStorage = StorageResult("https://example.com/images/new-banner.jpg", 1024L, "image/jpeg", "new-banner.jpg")
+
+        coEvery { tagDao.getListOfExistingTagIds(any()) } returns listOf(UUID.fromString("00000000-0000-0000-0000-000000000001"))
+        coEvery { linkDao.getOrInsertLinkByUrl(any(), any()) } returns UUID.randomUUID()
+        coEvery { projectDao.getProjectById(projectId) } returns createdProject
+        coEvery { projectDao.updateProject(projectId, any()) } returns createdProject
+        coEvery { storageService.storeFromBytes(any(), any(), any()) } returns newBannerStorage
+        coEvery { storageService.delete(existingBanner.url) } returns true
+        coEvery { mediaFileDao.readByOwnerIdAndMediaType(projectId, OwnerType.PROJECT, MediaType.IMAGE) } returns existingImage
+        coEvery {
+            mediaFileDao.readByOwnerIdAndMediaType(projectId, OwnerType.PROJECT, MediaType.BANNER)
+        } returnsMany listOf(existingBanner, existingBanner)
+        coEvery { mediaFileDao.delete(existingBanner.id) } returns true
+        coEvery { mediaFileDao.create(any()) } returns UUID.randomUUID()
+
+        runBlocking {
+            controller.updateProjectById(
+                projectId = projectId,
+                updateProject = givenAValidUpdateProject(),
+                imageFile = null,
+                bannerImageFile = mockBannerFile
+            )
+        }
+
+        coVerify(exactly = 1) { storageService.delete(existingBanner.url) }
+    }
+
+    @Test
     fun `when updating specific project but tagId does not exist, we throw exception`() {
         val createdProject = givenAProject()
         val mediaFile = MediaFileInstrumentation.givenAMediaFile(ownerType = OwnerType.PROJECT)

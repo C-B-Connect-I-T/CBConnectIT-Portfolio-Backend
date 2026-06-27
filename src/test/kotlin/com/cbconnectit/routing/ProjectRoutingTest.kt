@@ -143,6 +143,29 @@ class ProjectRoutingTest : BaseRoutingTest() {
     }
 
     @Test
+    fun `when creating project without banner image in multipart, we return missing required media error`() = withBaseTestApplication(
+        AuthenticationInstrumentation()
+    ) {
+        val response = client.post("/projects") {
+            header(HttpHeaders.Authorization, "Bearer ${buildBearerToken()}")
+            header("X-Client-Type", "web")
+            setBody(
+                MultiPartFormDataContent(
+                    formData {
+                        append("payload", toJsonBody(givenAValidInsertProject()))
+                        append("image", ByteArray(100), Headers.build {
+                            append(HttpHeaders.ContentType, "image/jpeg")
+                            append(HttpHeaders.ContentDisposition, "filename=\"image.jpg\"")
+                        })
+                    }
+                )
+            )
+        }
+
+        assertThat(response.status).isEqualTo(HttpStatusCode.BadRequest)
+    }
+
+    @Test
     fun `when creating project already created, we return 409 error`() = withBaseTestApplication(
         AuthenticationInstrumentation()
     ) {
