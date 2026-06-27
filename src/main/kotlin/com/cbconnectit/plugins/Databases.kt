@@ -61,7 +61,7 @@ fun Application.configureDatabase() {
 
     transaction {
         adminSeeder.seed()
-        seedDatabase()
+//        seedDatabase()
     }
 }
 

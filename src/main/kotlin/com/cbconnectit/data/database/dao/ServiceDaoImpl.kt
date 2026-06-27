@@ -5,14 +5,20 @@ import com.cbconnectit.data.database.tables.ServicesTable
 import com.cbconnectit.data.database.tables.TagsTable
 import com.cbconnectit.data.database.tables.toMediaFile
 import com.cbconnectit.data.database.tables.toService
+import com.cbconnectit.data.database.tables.toTag
 import com.cbconnectit.data.dto.requests.service.InsertNewService
 import com.cbconnectit.data.dto.requests.service.UpdateService
 import com.cbconnectit.domain.interfaces.IServiceDao
 import com.cbconnectit.domain.models.mediafile.MediaFile
 import com.cbconnectit.domain.models.mediafile.MediaType
 import com.cbconnectit.domain.models.mediafile.OwnerType
+import com.cbconnectit.domain.models.service.CompactService
 import com.cbconnectit.domain.models.service.Service
+import com.cbconnectit.domain.models.service.ServiceAdminItem
+import com.cbconnectit.domain.models.service.groupedAndSorted
+import org.jetbrains.exposed.sql.JoinType
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
+import org.jetbrains.exposed.sql.alias
 import org.jetbrains.exposed.sql.and
 import org.jetbrains.exposed.sql.deleteWhere
 import org.jetbrains.exposed.sql.insertAndGetId
@@ -29,6 +35,33 @@ class ServiceDaoImpl : IServiceDao {
 
     override fun getServices(): List<Service> =
         fetchServicesRecursive(null)
+
+    override fun getServicesOverview(): List<ServiceAdminItem> {
+        val parentAlias = ServicesTable.alias("parent_services")
+        val parentIdCol = parentAlias[ServicesTable.id]
+        val parentTitleCol = parentAlias[ServicesTable.title]
+
+        val items = transaction {
+            (ServicesTable leftJoin TagsTable)
+                .join(parentAlias, JoinType.LEFT, ServicesTable.parentServiceId, parentIdCol)
+                .selectAll()
+                .map { row ->
+                    ServiceAdminItem(
+                        id = row[ServicesTable.id].value,
+                        title = row[ServicesTable.title],
+                        parentService = row[ServicesTable.parentServiceId]?.value?.let { parentId ->
+                            CompactService(
+                                id = parentId,
+                                title = row[parentTitleCol]
+                            )
+                        },
+                        tag = row[ServicesTable.tagId]?.value?.let { row.toTag() },
+                        updatedAt = row[ServicesTable.updatedAt]
+                    )
+                }
+        }
+        return items.groupedAndSorted()
+    }
 
     private fun fetchServicesWithSubServices(id: UUID): Service? {
         var service: Service? = null

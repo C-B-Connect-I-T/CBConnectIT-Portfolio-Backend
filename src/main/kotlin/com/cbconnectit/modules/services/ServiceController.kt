@@ -1,6 +1,7 @@
 package com.cbconnectit.modules.services
 
 import com.cbconnectit.data.dto.requests.service.InsertNewService
+import com.cbconnectit.data.dto.requests.service.ServiceAdminDto
 import com.cbconnectit.data.dto.requests.service.ServiceDto
 import com.cbconnectit.data.dto.requests.service.UpdateService
 import com.cbconnectit.domain.interfaces.IMediaFileDao
@@ -39,6 +40,10 @@ class ServiceControllerImpl(
         serviceDao.getServices().map { it.toDto() }
     }
 
+    override suspend fun getServicesOverview(): List<ServiceAdminDto> = dbTransactionalQuery {
+        serviceDao.getServicesOverview().map { it.toDto() }
+    }
+
     override suspend fun getServiceById(serviceId: UUID): ServiceDto = dbTransactionalQuery {
         serviceDao.getServiceById(serviceId)?.toDto() ?: throw ErrorNotFound
     }
@@ -46,21 +51,23 @@ class ServiceControllerImpl(
     override suspend fun postService(
         insertNewService: InsertNewService,
         imageFile: Parts.File,
-        bannerImageFile: Parts.File
+        bannerImageFile: Parts.File?
     ): ServiceDto {
         if (!insertNewService.isValid) throw ErrorInvalidParameters
 
         if (!FileValidationUtils.isValidImageFile(imageFile.contentType, imageFile.fileName, imageFile.data)) {
             throw ErrorInvalidFileType
         }
-        if (!FileValidationUtils.isValidImageFile(bannerImageFile.contentType, bannerImageFile.fileName, bannerImageFile.data)) {
-            throw ErrorInvalidFileType
+        bannerImageFile?.let {
+            if (!FileValidationUtils.isValidImageFile(it.contentType, it.fileName, it.data)) throw ErrorInvalidFileType
         }
 
         // Phase 1: Store files to external storage (outside transaction)
         val imageStorageResult = storageService.storeFromBytes(imageFile.data, imageFile.fileName, imageFile.contentType)
         val bannerStorageResult = try {
-            storageService.storeFromBytes(bannerImageFile.data, bannerImageFile.fileName, bannerImageFile.contentType)
+            bannerImageFile?.let { file ->
+                storageService.storeFromBytes(file.data, file.fileName, file.contentType)
+            }
         } catch (e: Exception) {
             storageService.delete(imageStorageResult.url)
             throw e
@@ -92,23 +99,25 @@ class ServiceControllerImpl(
                         altText = insertNewService.imageAltText ?: ""
                     )
                 )
-                mediaFileDao.create(
-                    MediaFile(
-                        storageResult = bannerStorageResult,
-                        imageFile = bannerImageFile,
-                        ownerId = serviceId,
-                        ownerType = OwnerType.SERVICE,
-                        mediaType = MediaType.BANNER,
-                        altText = insertNewService.bannerImageAltText ?: ""
+                bannerStorageResult?.let { storageResult ->
+                    mediaFileDao.create(
+                        MediaFile(
+                            storageResult = storageResult,
+                            imageFile = bannerImageFile,
+                            ownerId = serviceId,
+                            ownerType = OwnerType.SERVICE,
+                            mediaType = MediaType.BANNER,
+                            altText = insertNewService.bannerImageAltText ?: ""
+                        )
                     )
-                )
+                }
 
                 serviceDao.getServiceById(serviceId)?.toDto() ?: throw ErrorFailedCreate
             }
         } catch (e: Exception) {
             // Phase 3: Cleanup if DB failed
             storageService.delete(imageStorageResult.url)
-            storageService.delete(bannerStorageResult.url)
+            bannerStorageResult?.let { storageService.delete(it.url) }
             throw e
         }
     }
@@ -120,6 +129,7 @@ class ServiceControllerImpl(
         bannerImageFile: Parts.File?
     ): ServiceDto {
         if (!updateService.isValid) throw ErrorInvalidParameters
+        val shouldRemoveBanner = updateService.removeBannerImage && bannerImageFile == null
 
         imageFile?.let {
             if (!FileValidationUtils.isValidImageFile(it.contentType, it.fileName, it.data)) throw ErrorInvalidFileType
@@ -132,13 +142,14 @@ class ServiceControllerImpl(
         val oldUrls = dbTransactionalQuery {
             serviceDao.getServiceById(serviceId) ?: throw ErrorNotFound
             val oldImage = if (imageFile != null) mediaFileDao.readByOwnerIdAndMediaType(serviceId, OwnerType.SERVICE, MediaType.IMAGE)?.url else null
-            val oldBanner = if (bannerImageFile != null) mediaFileDao.readByOwnerIdAndMediaType(serviceId, OwnerType.SERVICE, MediaType.BANNER)?.url else null
+            val oldBanner = if (bannerImageFile != null || shouldRemoveBanner) {
+                mediaFileDao.readByOwnerIdAndMediaType(serviceId, OwnerType.SERVICE, MediaType.BANNER)?.url
+            } else {
+                null
+            }
 
             // Enforce: after update, image must still exist
             if (imageFile == null && mediaFileDao.readByOwnerIdAndMediaType(serviceId, OwnerType.SERVICE, MediaType.IMAGE) == null) {
-                throw ErrorMissingRequiredMedia
-            }
-            if (bannerImageFile == null && mediaFileDao.readByOwnerIdAndMediaType(serviceId, OwnerType.SERVICE, MediaType.BANNER) == null) {
                 throw ErrorMissingRequiredMedia
             }
 
@@ -190,13 +201,13 @@ class ServiceControllerImpl(
                         ?.let { mediaFileDao.update(it.id, altText) }
                 }
 
-                // Replace banner if new file provided
-                bannerStorageResult?.let { result ->
+                // Replace banner if new file provided, otherwise remove when explicitly requested
+                if (bannerStorageResult != null) {
                     val existing = mediaFileDao.readByOwnerIdAndMediaType(serviceId, OwnerType.SERVICE, MediaType.BANNER)
                     existing?.let { mediaFileDao.delete(it.id) }
                     mediaFileDao.create(
                         MediaFile(
-                            storageResult = result,
+                            storageResult = bannerStorageResult,
                             imageFile = bannerImageFile,
                             ownerId = serviceId,
                             ownerType = OwnerType.SERVICE,
@@ -204,9 +215,14 @@ class ServiceControllerImpl(
                             altText = updateService.bannerImageAltText ?: ""
                         )
                     )
-                } ?: updateService.bannerImageAltText?.let { altText ->
+                } else if (shouldRemoveBanner) {
                     mediaFileDao.readByOwnerIdAndMediaType(serviceId, OwnerType.SERVICE, MediaType.BANNER)
-                        ?.let { mediaFileDao.update(it.id, altText) }
+                        ?.let { mediaFileDao.delete(it.id) }
+                } else {
+                    updateService.bannerImageAltText?.let { altText ->
+                        mediaFileDao.readByOwnerIdAndMediaType(serviceId, OwnerType.SERVICE, MediaType.BANNER)
+                            ?.let { mediaFileDao.update(it.id, altText) }
+                    }
                 }
 
                 serviceDao.updateService(serviceId, updateService)?.toDto() ?: throw ErrorFailedUpdate
@@ -244,11 +260,12 @@ class ServiceControllerImpl(
 
 interface ServiceController {
     suspend fun getServices(): List<ServiceDto>
+    suspend fun getServicesOverview(): List<ServiceAdminDto>
     suspend fun getServiceById(serviceId: UUID): ServiceDto
     suspend fun postService(
         insertNewService: InsertNewService,
         imageFile: Parts.File,
-        bannerImageFile: Parts.File
+        bannerImageFile: Parts.File?
     ): ServiceDto
 
     suspend fun updateServiceById(

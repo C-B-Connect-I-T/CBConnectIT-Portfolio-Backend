@@ -5,6 +5,7 @@ import com.cbconnectit.data.dto.requests.service.UpdateService
 import com.cbconnectit.plugins.statuspages.ErrorInvalidParameters
 import com.cbconnectit.plugins.statuspages.ErrorMissingRequiredMedia
 import com.cbconnectit.utils.ParamConstants
+import com.cbconnectit.utils.ParamConstants.ADMIN_AUTHENTICATE_KEY
 import com.cbconnectit.utils.Parts
 import com.cbconnectit.utils.getFile
 import com.cbconnectit.utils.getPayload
@@ -33,10 +34,17 @@ fun Route.serviceRouting(json: Json, serviceController: ServiceController) {
             call.respond(service)
         }
 
+        authenticate(ADMIN_AUTHENTICATE_KEY) {
+            get("overview") {
+                val services = serviceController.getServicesOverview()
+                call.respond(services)
+            }
+        }
+
         authenticate {
             post {
                 val (imageFile, bannerImageFile, insertNewService) = getServiceMediaAndPayload<InsertNewService>(json)
-                if (imageFile == null || bannerImageFile == null) throw ErrorMissingRequiredMedia
+                if (imageFile == null) throw ErrorMissingRequiredMedia
 
                 val service = serviceController.postService(insertNewService, imageFile, bannerImageFile)
                 call.respond(HttpStatusCode.Created, service)

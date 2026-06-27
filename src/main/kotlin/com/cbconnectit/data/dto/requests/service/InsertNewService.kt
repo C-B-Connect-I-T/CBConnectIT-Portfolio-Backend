@@ -45,7 +45,9 @@ data class UpdateService(
     @SerialName("parent_service_id")
     val parentServiceId: String? = null,
     @SerialName("tag_id")
-    val tagId: String? = null
+    val tagId: String? = null,
+    @SerialName("remove_banner_image")
+    val removeBannerImage: Boolean = false
 ) {
     val parentServiceUuid get() = parentServiceId?.let { UUID.fromString(it) }
     val tagUuid: UUID? get() = tagId?.let { id -> UUID.fromString(id) }

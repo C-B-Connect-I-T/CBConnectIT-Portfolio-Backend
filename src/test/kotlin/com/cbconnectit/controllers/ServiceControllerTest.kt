@@ -171,6 +171,25 @@ class ServiceControllerTest : BaseControllerTest() {
     }
 
     @Test
+    fun `when creating service without banner image, we still return valid serviceDto`() {
+        val postService = givenAValidInsertService()
+        val createdService = givenAService()
+
+        coEvery { tagDao.getListOfExistingTagIds(any()) } returns listOf(UUID.fromString("00000000-0000-0000-0000-000000000001"))
+        coEvery { serviceDao.insertService(any()) } returns createdService
+        coEvery { serviceDao.getServiceById(any()) } returns createdService
+        coEvery { mediaFileDao.create(any()) } returns UUID.randomUUID()
+        coEvery { storageService.storeFromBytes(any(), any(), any()) } returns mockStorageResult
+
+        runBlocking {
+            val responseService = controller.postService(postService, mockImageFile, null)
+            assertThat(responseService.title).isEqualTo(createdService.title)
+        }
+
+        coVerify(exactly = 1) { storageService.storeFromBytes(any(), any(), any()) }
+    }
+
+    @Test
     fun `when creating service with correct information but tagId does not exist, we throw exception`() {
         val postService = givenAValidInsertService()
 
@@ -272,18 +291,45 @@ class ServiceControllerTest : BaseControllerTest() {
     }
 
     @Test
-    fun `when updating service where BANNER is missing, we throw exception`() {
+    fun `when updating service where BANNER is missing, we still return valid serviceDto`() {
         val updateService = givenAValidUpdateService()
         val createdService = givenAService()
         val imageFile = MediaFileInstrumentation.givenAMediaFile(ownerType = OwnerType.SERVICE)
 
         coEvery { serviceDao.getServiceById(any()) } returns createdService
+        coEvery { tagDao.getListOfExistingTagIds(any()) } returns listOf(UUID.fromString("00000000-0000-0000-0000-000000000001"))
+        coEvery { serviceDao.updateService(any(), any()) } returns createdService
         coEvery { mediaFileDao.readByOwnerIdAndMediaType(any(), OwnerType.SERVICE, MediaType.IMAGE) } returns imageFile
         coEvery { mediaFileDao.readByOwnerIdAndMediaType(any(), OwnerType.SERVICE, MediaType.BANNER) } returns null
 
-        assertThrows<ErrorMissingRequiredMedia> {
-            runBlocking { controller.updateServiceById(UUID.randomUUID(), updateService) }
+        runBlocking {
+            val responseService = controller.updateServiceById(UUID.randomUUID(), updateService)
+
+            assertThat(responseService.title).isEqualTo(createdService.title)
         }
+    }
+
+    @Test
+    fun `when updating service with remove banner flag, existing banner is removed`() {
+        val updateService = givenAValidUpdateService().copy(removeBannerImage = true)
+        val createdService = givenAService()
+        val imageFile = MediaFileInstrumentation.givenAMediaFile(ownerType = OwnerType.SERVICE)
+        val bannerFile = MediaFileInstrumentation.givenAMediaFile(ownerType = OwnerType.SERVICE)
+
+        coEvery { tagDao.getListOfExistingTagIds(any()) } returns listOf(UUID.fromString("00000000-0000-0000-0000-000000000001"))
+        coEvery { serviceDao.getServiceById(any()) } returns createdService
+        coEvery { serviceDao.updateService(any(), any()) } returns createdService
+        coEvery { mediaFileDao.readByOwnerIdAndMediaType(any(), OwnerType.SERVICE, MediaType.IMAGE) } returns imageFile
+        coEvery { mediaFileDao.readByOwnerIdAndMediaType(any(), OwnerType.SERVICE, MediaType.BANNER) } returns bannerFile
+        coEvery { mediaFileDao.delete(any()) } returns true
+        coEvery { storageService.delete(any()) } returns true
+
+        runBlocking {
+            val responseService = controller.updateServiceById(UUID.randomUUID(), updateService)
+            assertThat(responseService.title).isEqualTo(createdService.title)
+        }
+
+        verify(atLeast = 1) { mediaFileDao.delete(bannerFile.id) }
     }
 
     @Test

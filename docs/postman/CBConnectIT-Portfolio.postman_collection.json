@@ -15,7 +15,7 @@
       "key": "accessToken",
       "value": "",
       "type": "string",
-      "description": "JWT bearer token — paste after /auth/login"
+      "description": "JWT bearer token \u2014 paste after /auth/login"
     },
     {
       "key": "serviceId",
@@ -52,15 +52,35 @@
           "request": {
             "method": "POST",
             "header": [
-              { "key": "Content-Type", "value": "application/json" },
-              { "key": "X-Client-Type", "value": "web" }
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "X-Client-Type",
+                "value": "web"
+              }
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"username\": \"admin\",\n  \"password\": \"password\"\n}",
-              "options": { "raw": { "language": "json" } }
+              "raw": "{\n  \"username\": \"admin@example.com\",\n  \"password\": \"your-password-here\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
             },
-            "url": { "raw": "{{baseUrl}}/auth/login", "host": ["{{baseUrl}}"], "path": ["auth", "login"] }
+            "url": {
+              "raw": "{{baseUrl}}/api/oauth/token",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "oauth",
+                "token"
+              ]
+            }
           }
         }
       ]
@@ -73,7 +93,17 @@
           "request": {
             "method": "GET",
             "header": [],
-            "url": { "raw": "{{baseUrl}}/services", "host": ["{{baseUrl}}"], "path": ["services"] }
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/services",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "services"
+              ]
+            }
           }
         },
         {
@@ -82,19 +112,61 @@
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{baseUrl}}/services/{{serviceId}}",
-              "host": ["{{baseUrl}}"],
-              "path": ["services", "{{serviceId}}"]
+              "raw": "{{baseUrl}}/api/v1/services/{{serviceId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "services",
+                "{{serviceId}}"
+              ]
             }
           }
         },
         {
-          "name": "Create service (multipart — mandatory image + bannerImage)",
+          "name": "Get service overview (admin)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              },
+              {
+                "key": "X-Client-Type",
+                "value": "web"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/services/overview",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "services",
+                "overview"
+              ]
+            },
+            "description": "Returns a flat list of all services (no depth) for the admin dashboard. Each item includes id, title, parent_service (compact), tag, and updated_at. Requires admin authentication."
+          }
+        },
+        {
+          "name": "Create service (multipart \u2014 mandatory image, optional bannerImage)",
           "request": {
             "method": "POST",
             "header": [
-              { "key": "Authorization", "value": "Bearer {{accessToken}}" },
-              { "key": "X-Client-Type", "value": "web" }
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              },
+              {
+                "key": "X-Client-Type",
+                "value": "web"
+              }
             ],
             "body": {
               "mode": "formdata",
@@ -109,26 +181,42 @@
                   "key": "image",
                   "type": "file",
                   "src": [],
-                  "description": "IMAGE type — square icon/thumbnail (required)"
+                  "description": "IMAGE type \u2014 square icon/thumbnail (required)"
                 },
                 {
                   "key": "bannerImage",
                   "type": "file",
                   "src": [],
-                  "description": "BANNER type — wide hero image (required)"
+                  "description": "BANNER type \u2014 wide hero image (optional)"
                 }
               ]
             },
-            "url": { "raw": "{{baseUrl}}/services", "host": ["{{baseUrl}}"], "path": ["services"] }
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/services",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "services"
+              ]
+            }
           }
         },
         {
-          "name": "Update service — replace both images (multipart)",
+          "name": "Update service \u2014 replace both images (multipart)",
           "request": {
             "method": "PUT",
             "header": [
-              { "key": "Authorization", "value": "Bearer {{accessToken}}" },
-              { "key": "X-Client-Type", "value": "web" }
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              },
+              {
+                "key": "X-Client-Type",
+                "value": "web"
+              }
             ],
             "body": {
               "mode": "formdata",
@@ -142,41 +230,68 @@
                   "key": "image",
                   "type": "file",
                   "src": [],
-                  "description": "New IMAGE file — replaces existing (optional)"
+                  "description": "New IMAGE file \u2014 replaces existing (optional)"
                 },
                 {
                   "key": "bannerImage",
                   "type": "file",
                   "src": [],
-                  "description": "New BANNER file — replaces existing (optional)"
+                  "description": "New BANNER file \u2014 replaces existing (optional)"
                 }
               ]
             },
             "url": {
-              "raw": "{{baseUrl}}/services/{{serviceId}}",
-              "host": ["{{baseUrl}}"],
-              "path": ["services", "{{serviceId}}"]
+              "raw": "{{baseUrl}}/api/v1/services/{{serviceId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "services",
+                "{{serviceId}}"
+              ]
             }
           }
         },
         {
-          "name": "Update service — metadata only, no new images (JSON)",
+          "name": "Update service \u2014 metadata only, no new images (JSON)",
           "request": {
             "method": "PUT",
             "header": [
-              { "key": "Authorization", "value": "Bearer {{accessToken}}" },
-              { "key": "X-Client-Type", "value": "web" },
-              { "key": "Content-Type", "value": "application/json" }
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              },
+              {
+                "key": "X-Client-Type",
+                "value": "web"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"title\": \"Mobile development (metadata only)\",\n  \"description\": \"Only text fields updated — images unchanged.\",\n  \"short_description\": \"Still the same icon, new words.\",\n  \"image_alt_text\": \"Updated alt text without re-uploading\",\n  \"banner_image_alt_text\": \"Updated banner alt without re-uploading\"\n}",
-              "options": { "raw": { "language": "json" } }
+              "raw": "{\n  \"title\": \"Mobile development (metadata only)\",\n  \"description\": \"Only text fields updated \u2014 images unchanged.\",\n  \"short_description\": \"Still the same icon, new words.\",\n  \"image_alt_text\": \"Updated alt text without re-uploading\",\n  \"banner_image_alt_text\": \"Updated banner alt without re-uploading\",\n  \"remove_banner_image\": false\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
             },
             "url": {
-              "raw": "{{baseUrl}}/services/{{serviceId}}",
-              "host": ["{{baseUrl}}"],
-              "path": ["services", "{{serviceId}}"]
+              "raw": "{{baseUrl}}/api/v1/services/{{serviceId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "services",
+                "{{serviceId}}"
+              ]
             }
           }
         },
@@ -185,13 +300,26 @@
           "request": {
             "method": "DELETE",
             "header": [
-              { "key": "Authorization", "value": "Bearer {{accessToken}}" },
-              { "key": "X-Client-Type", "value": "web" }
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              },
+              {
+                "key": "X-Client-Type",
+                "value": "web"
+              }
             ],
             "url": {
-              "raw": "{{baseUrl}}/services/{{serviceId}}",
-              "host": ["{{baseUrl}}"],
-              "path": ["services", "{{serviceId}}"]
+              "raw": "{{baseUrl}}/api/v1/services/{{serviceId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "services",
+                "{{serviceId}}"
+              ]
             }
           }
         }
@@ -205,7 +333,17 @@
           "request": {
             "method": "GET",
             "header": [],
-            "url": { "raw": "{{baseUrl}}/projects", "host": ["{{baseUrl}}"], "path": ["projects"] }
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/projects",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "projects"
+              ]
+            }
           }
         },
         {
@@ -214,19 +352,32 @@
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{baseUrl}}/projects/{{projectId}}",
-              "host": ["{{baseUrl}}"],
-              "path": ["projects", "{{projectId}}"]
+              "raw": "{{baseUrl}}/api/v1/projects/{{projectId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "projects",
+                "{{projectId}}"
+              ]
             }
           }
         },
         {
-          "name": "Create project (multipart — mandatory image + bannerImage)",
+          "name": "Create project (multipart \u2014 mandatory image + bannerImage)",
           "request": {
             "method": "POST",
             "header": [
-              { "key": "Authorization", "value": "Bearer {{accessToken}}" },
-              { "key": "X-Client-Type", "value": "web" }
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              },
+              {
+                "key": "X-Client-Type",
+                "value": "web"
+              }
             ],
             "body": {
               "mode": "formdata",
@@ -241,26 +392,42 @@
                   "key": "image",
                   "type": "file",
                   "src": [],
-                  "description": "IMAGE type — project thumbnail (required)"
+                  "description": "IMAGE type \u2014 project thumbnail (required)"
                 },
                 {
                   "key": "bannerImage",
                   "type": "file",
                   "src": [],
-                  "description": "BANNER type — wide hero image (required)"
+                  "description": "BANNER type \u2014 wide hero image (required)"
                 }
               ]
             },
-            "url": { "raw": "{{baseUrl}}/projects", "host": ["{{baseUrl}}"], "path": ["projects"] }
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/projects",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "projects"
+              ]
+            }
           }
         },
         {
-          "name": "Update project — replace both images (multipart)",
+          "name": "Update project \u2014 replace both images (multipart)",
           "request": {
             "method": "PUT",
             "header": [
-              { "key": "Authorization", "value": "Bearer {{accessToken}}" },
-              { "key": "X-Client-Type", "value": "web" }
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              },
+              {
+                "key": "X-Client-Type",
+                "value": "web"
+              }
             ],
             "body": {
               "mode": "formdata",
@@ -274,41 +441,68 @@
                   "key": "image",
                   "type": "file",
                   "src": [],
-                  "description": "New IMAGE file — replaces existing (optional)"
+                  "description": "New IMAGE file \u2014 replaces existing (optional)"
                 },
                 {
                   "key": "bannerImage",
                   "type": "file",
                   "src": [],
-                  "description": "New BANNER file — replaces existing (optional)"
+                  "description": "New BANNER file \u2014 replaces existing (optional)"
                 }
               ]
             },
             "url": {
-              "raw": "{{baseUrl}}/projects/{{projectId}}",
-              "host": ["{{baseUrl}}"],
-              "path": ["projects", "{{projectId}}"]
+              "raw": "{{baseUrl}}/api/v1/projects/{{projectId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "projects",
+                "{{projectId}}"
+              ]
             }
           }
         },
         {
-          "name": "Update project — metadata only, no new images (JSON)",
+          "name": "Update project \u2014 metadata only, no new images (JSON)",
           "request": {
             "method": "PUT",
             "header": [
-              { "key": "Authorization", "value": "Bearer {{accessToken}}" },
-              { "key": "X-Client-Type", "value": "web" },
-              { "key": "Content-Type", "value": "application/json" }
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              },
+              {
+                "key": "X-Client-Type",
+                "value": "web"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"title\": \"Android Core (text only update)\",\n  \"short_description\": \"Images untouched, only text changed.\",\n  \"description\": \"No files uploaded — existing image and bannerImage are kept.\",\n  \"image_alt_text\": \"Updated alt without re-upload\",\n  \"banner_image_alt_text\": \"Updated banner alt without re-upload\",\n  \"tags\": [],\n  \"links\": []\n}",
-              "options": { "raw": { "language": "json" } }
+              "raw": "{\n  \"title\": \"Android Core (text only update)\",\n  \"short_description\": \"Images untouched, only text changed.\",\n  \"description\": \"No files uploaded \u2014 existing image and bannerImage are kept.\",\n  \"image_alt_text\": \"Updated alt without re-upload\",\n  \"banner_image_alt_text\": \"Updated banner alt without re-upload\",\n  \"tags\": [],\n  \"links\": []\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
             },
             "url": {
-              "raw": "{{baseUrl}}/projects/{{projectId}}",
-              "host": ["{{baseUrl}}"],
-              "path": ["projects", "{{projectId}}"]
+              "raw": "{{baseUrl}}/api/v1/projects/{{projectId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "projects",
+                "{{projectId}}"
+              ]
             }
           }
         },
@@ -317,13 +511,26 @@
           "request": {
             "method": "DELETE",
             "header": [
-              { "key": "Authorization", "value": "Bearer {{accessToken}}" },
-              { "key": "X-Client-Type", "value": "web" }
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              },
+              {
+                "key": "X-Client-Type",
+                "value": "web"
+              }
             ],
             "url": {
-              "raw": "{{baseUrl}}/projects/{{projectId}}",
-              "host": ["{{baseUrl}}"],
-              "path": ["projects", "{{projectId}}"]
+              "raw": "{{baseUrl}}/api/v1/projects/{{projectId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "projects",
+                "{{projectId}}"
+              ]
             }
           }
         }
